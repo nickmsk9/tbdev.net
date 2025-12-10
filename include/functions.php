@@ -1178,9 +1178,17 @@ function get_user_icons($arr, $big = false) {
 }
 
 function parked() {
-	   global $CURUSER;
-	   if ($CURUSER['parked'] == 'yes')
-		  stderr($tracker_lang['error'], '��� ������� �����������.');
+    global $CURUSER, $tracker_lang;
+    
+    // Проверяем, что $CURUSER существует и является массивом
+    if (!isset($CURUSER) || !is_array($CURUSER)) {
+        return; // Выходим, если пользователь не авторизован
+    }
+    
+    // Проверяем, существует ли ключ 'parked' в массиве
+    if (isset($CURUSER['parked']) && $CURUSER['parked'] == 'yes') {
+        stderr($tracker_lang['error'] ?? 'Ошибка', 'Ваш аккаунт приостановлен.');
+    }
 }
 
 function magnet(bool $html, string $info_hash, string $name, int $size, array $announces = []): string

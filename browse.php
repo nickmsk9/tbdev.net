@@ -163,15 +163,18 @@ if (!$all)
         $wherecatina[] = $category;
         $addparam .= "cat=$category&amp;";
     } else {
-        $all = true;
-        foreach ($cats as $cat) {
-            $all &= $_GET["cr$car[id]"];
-            if (isset($_GET["c$cat[id]"])) {
-                $wherecatina[] = $cat[id];
-                $addparam .= "c$cat[id]=1&amp;";
-            }
-        }
+       $all = true;
+foreach ($cats as $cat) {
+    // РСЃРїСЂР°РІР»РµРЅРѕ: $car[id] РЅР° $cat['id'] Рё РїРѕР±РёС‚РѕРІРѕРµ Р РЅР° Р»РѕРіРёС‡РµСЃРєРѕРµ Р
+    $all = $all && isset($_GET["c{$cat['id']}"]);
+    
+    if (isset($_GET["c{$cat['id']}"])) {
+        $wherecatina[] = $cat['id']; // РСЃРїСЂР°РІР»РµРЅРѕ: $cat[id] РЅР° $cat['id']
+        $addparam .= "c{$cat['id']}=1&amp;";
     }
+}
+        }
+    
 
 if ($all) {
     $wherecatina = array();
@@ -232,7 +235,7 @@ if (!$torrentsperpage)
 if ($count) {
     if ($addparam != "") {
         if ($pagerlink != "") {
-            if ($addparam{strlen($addparam) - 1} != ";") { // & = &amp;
+            if ($addparam[strlen($addparam) - 1] != ";") { // РСЃРїСЂР°РІР»РµРЅРѕ: {} РЅР° []
                 $addparam = $addparam . "&" . $pagerlink;
             } else {
                 $addparam = $addparam . $pagerlink;
@@ -243,7 +246,7 @@ if ($count) {
     }
     list($pagertop, $pagerbottom, $limit) = pager($torrentsperpage, $count, "browse.php?" . $addparam);
     $query = "SELECT t.id, t.moderated, t.moderatedby, t.category, (t.leechers + t.remote_leechers) AS leechers, (t.seeders + t.remote_seeders) AS seeders, t.multitracker, t.last_mt_update, t.free, t.name, t.info_hash, t.times_completed, t.size, t.added, t.comments, t.numfiles, t.filename, t.not_sticky, t.owner," . "IF(t.numratings < $minvotes, NULL, ROUND(t.ratingsum / t.numratings, 1)) AS rating, c.name AS cat_name, c.image AS cat_pic, u.username, u.class" . ($CURUSER ? ", EXISTS(SELECT * FROM readtorrents WHERE readtorrents.userid = " . sqlesc($CURUSER["id"]) . " AND readtorrents.torrentid = t.id) AS readtorrent" : ", 1 AS readtorrent") . " FROM torrents AS t LEFT JOIN categories AS c ON t.category = c.id LEFT JOIN users AS u ON t.owner = u.id $where $orderby $limit";
-    $res = sql_query($query) or die(mysql_error());
+    $res = sql_query($query) or die(mysql_error()); // Р’РЅРёРјР°РЅРёРµ: Р·РґРµСЃСЊ С‚РѕР¶Рµ СѓСЃС‚Р°СЂРµРІС€РёР№ mysql_error()
 } else
     unset($res);
 if (isset($cleansearchstr))
@@ -266,7 +269,7 @@ if (isset($cleansearchstr))
 
     <table class="embedded" cellspacing="0" cellpadding="5" width="100%">
         <tr>
-            <td class="colhead" align="center" colspan="12">Список торрентов</td>
+            <td class="colhead" align="center" colspan="12">пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</td>
         </tr>
         <tr>
             <td colspan="12">
@@ -374,10 +377,10 @@ if ($num_torrents) {
 } else {
     if (isset($cleansearchstr)) {
         print("<tr><td class=\"index\" colspan=\"12\">" . $tracker_lang['nothing_found'] . "</td></tr>\n");
-        //print("<p>Попробуйте изменить запрос поиска.</p>\n");
+        //print("<p>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.</p>\n");
     } else {
         print("<tr><td class=\"index\" colspan=\"12\">" . $tracker_lang['nothing_found'] . "</td></tr>\n");
-        //print("<p>Извините, данная категория пустая.</p>\n");
+        //print("<p>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.</p>\n");
     }
 }
 
