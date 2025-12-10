@@ -177,15 +177,45 @@ function local_user() {
 	return $_SERVER["SERVER_ADDR"] == $_SERVER["REMOTE_ADDR"];
 }
 
-function sql_query($query) {
-	global $queries, $query_stat, $querytime;
+function sql_query(string $query) 
+{
+	global $queries, $query_stat, $querytime, $mysql_link;
+	
 	$queries++;
-	$query_start_time = timer(); // Start time
-	$result = mysql_query($query);
-	$query_end_time = timer(); // End time
+	$query_start_time = microtime(true); // Используем microtime для точности
+	$result = mysqli_query($mysql_link, $query);
+	$query_end_time = microtime(true);
 	$query_time = ($query_end_time - $query_start_time);
-	$querytime = $querytime + $query_time;
-	$query_stat[] = array("seconds" => $query_time, "query" => $query);
+	$querytime += $query_time;
+	
+	if (defined('DEBUG_MODE') && DEBUG_MODE) {
+		$query_stat[] = [
+			"seconds" => round($query_time, 6),
+			"query" => $query,
+			"error" => mysqli_error($mysql_link)
+		];
+	} else {
+		$query_stat[] = [
+			"seconds" => round($query_time, 6),
+			"query" => $query
+		];
+	}
+	
+	if (!$result) {
+		// Логирование ошибок SQL
+		$error = mysqli_error($mysql_link);
+		$errno = mysqli_errno($mysql_link);
+		
+		// Выводим ошибку только в режиме отладки
+		if (defined('DEBUG_MODE') && DEBUG_MODE) {
+			die("SQL Error [$errno]: $error<br>Query: $query");
+		} else {
+			// В продакшене логируем, но не показываем
+			error_log("SQL Error [$errno]: $error - Query: $query");
+			return false;
+		}
+	}
+	
 	return $result;
 }
 
@@ -231,93 +261,161 @@ function dbconn(bool $autoclean = false, bool $lightmode = false): void
     });
 }
 
-function userlogin($lightmode = false) {
+function userlogin(bool $lightmode = false): void
+{
 	global $SITE_ONLINE, $default_language, $tracker_lang, $use_lang, $use_ipbans, $_COOKIE_SALT;
+	global $mysql_link; // Добавляем глобальное соединение с БД
+	
+	// Сбрасываем текущего пользователя
 	unset($GLOBALS["CURUSER"]);
 
-	if ($_COOKIE_SALT == 'default' && $_SERVER['SERVER_ADDR'] != '127.0.0.1' && $_SERVER['SERVER_ADDR'] != $_SERVER['REMOTE_ADDR'])
-		die('������ ������������! �������� �������� ���������� $_COOKIE_SALT � ����� include/config.local.php �� ���������');
+	// Проверка безопасности: нельзя использовать дефолтную соль на продакшене
+	if ($_COOKIE_SALT == 'default' && 
+		$_SERVER['SERVER_ADDR'] != '127.0.0.1' && 
+		$_SERVER['SERVER_ADDR'] != $_SERVER['REMOTE_ADDR']) {
+		die('Ошибка безопасности! Пожалуйста, измените значение $_COOKIE_SALT в файле include/config.local.php на уникальное.');
+	}
 
-	if (empty($_COOKIE_SALT) || !isset($_COOKIE_SALT))
-		die('����� � ����� <a href="http://www.php.net">PHP</a>... ������� ���� �������� ��������, � �� ������� ����������!');
+	// Проверка наличия соли для кук
+	if (empty($_COOKIE_SALT) || !isset($_COOKIE_SALT)) {
+		die('Ошибка в настройках <a href="http://www.php.net">PHP</a>... Пожалуйста, убедитесь что все настройки корректны!');
+	}
 
+	// Получаем IP пользователя
 	$ip = getip();
 	$nip = ip2long($ip);
 
+	// Проверка бана по IP
 	if ($use_ipbans && !$lightmode) {
 		$res = sql_query("SELECT * FROM bans WHERE $nip >= first AND $nip <= last") or sqlerr(__FILE__, __LINE__);
-		if (mysql_num_rows($res) > 0) {
-			$comment = mysql_fetch_assoc($res);
-			$comment = $comment["comment"];
+		if (mysqli_num_rows($res) > 0) {
+			$ban_info = mysqli_fetch_assoc($res);
+			$comment = $ban_info["comment"] ?? 'Без комментария';
+			
 			header("HTTP/1.0 403 Forbidden");
-			print("<html><body><h1>403 Forbidden</h1>Unauthorized IP address.</body></html>\n");
+			print("<html><body><h1>403 Запрещено</h1>Ваш IP адрес заблокирован.<br>Причина: " . htmlspecialchars($comment) . "</body></html>\n");
 			die;
 		}
 	}
 
-	$c_uid = $_COOKIE[COOKIE_UID];
-	$c_pass = $_COOKIE[COOKIE_PASSHASH];
+	// Получаем данные из кук
+	$c_uid = $_COOKIE[COOKIE_UID] ?? null;
+	$c_pass = $_COOKIE[COOKIE_PASSHASH] ?? null;
 
+	// Если сайт выключен или нет кук - создаем сессию гостя
 	if (!$SITE_ONLINE || empty($c_uid) || empty($c_pass)) {
-		if ($use_lang)
+		if ($use_lang) {
 			include_once('languages/lang_' . $default_language . '/lang_main.php');
+		}
 		user_session();
 		return;
 	}
+
+	// Проверяем корректность ID из куки
 	$id = intval($c_uid);
 	if (!$id || strlen($c_pass) != 32) {
-		die("Cokie ID invalid or cookie pass hash problem.");
-		/*if ($use_lang)
+		// Невалидные куки - создаем сессию гостя
+		if ($use_lang) {
 			include_once('languages/lang_' . $default_language . '/lang_main.php');
+		}
 		user_session();
-		return;*/
+		return;
 	}
-	$res = sql_query("SELECT * FROM users WHERE id = $id");// or die(mysql_error());
-	$row = mysql_fetch_array($res);
+
+	// Ищем пользователя в базе данных
+	$res = sql_query("SELECT * FROM users WHERE id = $id");
+	if (!$res) {
+		// Ошибка запроса - создаем сессию гостя
+		if ($use_lang) {
+			include_once('languages/lang_' . $default_language . '/lang_main.php');
+		}
+		user_session();
+		return;
+	}
+	
+	$row = mysqli_fetch_assoc($res);
 	if (!$row) {
-		if ($use_lang)
+		// Пользователь не найден - создаем сессию гостя
+		if ($use_lang) {
 			include_once('languages/lang_' . $default_language . '/lang_main.php');
+		}
 		user_session();
 		return;
 	}
 
-	$subnet = explode('.', getip());
+	// Проверяем хэш пароля с учетом подсети
+	$subnet = explode('.', $ip);
 	$subnet[2] = $subnet[3] = 0;
-	$subnet = implode('.', $subnet); // 255.255.0.0
-	if ($c_pass !== md5($row["passhash"] . COOKIE_SALT . $subnet)) {
-		if ($use_lang)
+	$subnet = implode('.', $subnet); // Формат: 255.255.0.0
+	
+	$expected_hash = md5($row["passhash"] . COOKIE_SALT . $subnet);
+	if ($c_pass !== $expected_hash) {
+		// Неверный хэш - создаем сессию гостя
+		if ($use_lang) {
 			include_once('languages/lang_' . $default_language . '/lang_main.php');
+		}
 		user_session();
 		return;
 	}
 
-	$updateset = array();
+	// Обновляем информацию о пользователе
+	$updates = [];
 
 	if ($ip != $row['ip']) {
-		$updateset[] = 'ip = '. sqlesc($ip);
+		$updates[] = 'ip = ' . sqlesc($ip);
 		$row['ip'] = $ip;
 	}
-	$updateset[] = 'last_access = ' . sqlesc(get_date_time());
+	
+	$updates[] = 'last_access = ' . sqlesc(get_date_time());
 
-	if (count($updateset))
-		sql_query('UPDATE users SET '.implode(', ', $updateset).' WHERE id = ' . $row['id']) or sqlerr(__FILE__,__LINE__);
-
-	if ($row['override_class'] < $row['class'])
-		$row['class'] = $row['override_class']; // Override class and save in GLOBAL array below.
-
-	$GLOBALS["CURUSER"] = $row;
-	if ($use_lang)
-		include_once('languages/lang_' . $row['language'] . '/lang_main.php');
-
-	if ($row['enabled'] == 'no') {
-		$GLOBALS['use_blocks'] = 0;
-		list($reason, $disuntil) = mysql_fetch_row(sql_query('SELECT reason, disuntil FROM users_ban WHERE userid = '.$row['id']));
-		stderr($tracker_lang['error'], '�� �������� �� �������.' . ($disuntil != '0000-00-00 00:00:00' ? '<br />���� ������ ����: '.$disuntil : '<br />���� ������ ����: �������') . '<br />�������: '.$reason);
+	if (!empty($updates)) {
+		sql_query('UPDATE users SET ' . implode(', ', $updates) . ' WHERE id = ' . $row['id']) or sqlerr(__FILE__, __LINE__);
 	}
 
-	if (!$lightmode)
-		user_session();
+	// Проверяем временное повышение класса
+	if ($row['override_class'] < $row['class']) {
+		$row['class'] = $row['override_class'];
+	}
 
+	// Сохраняем пользователя в глобальной переменной
+	$GLOBALS["CURUSER"] = $row;
+	
+	// Подключаем языковой файл пользователя
+	if ($use_lang) {
+		include_once('languages/lang_' . $row['language'] . '/lang_main.php');
+	}
+
+	// Проверка блокировки пользователя
+	if ($row['enabled'] == 'no') {
+		$GLOBALS['use_blocks'] = 0;
+		
+		// Получаем информацию о бане
+		$ban_res = sql_query('SELECT reason, disuntil FROM users_ban WHERE userid = ' . $row['id']);
+		if ($ban_res && mysqli_num_rows($ban_res) > 0) {
+			$ban_info = mysqli_fetch_row($ban_res);
+			$reason = $ban_info[0] ?? 'Не указана';
+			$disuntil = $ban_info[1] ?? '0000-00-00 00:00:00';
+		} else {
+			$reason = 'Не указана';
+			$disuntil = '0000-00-00 00:00:00';
+		}
+		
+		// Формируем сообщение о блокировке
+		$message = 'Вы заблокированы.';
+		if ($disuntil != '0000-00-00 00:00:00') {
+			$message .= '<br />Дата разблокировки: ' . htmlspecialchars($disuntil);
+		} else {
+			$message .= '<br />Дата разблокировки: бессрочно';
+		}
+		$message .= '<br />Причина: ' . htmlspecialchars($reason);
+		
+		stderr($tracker_lang['error'] ?? 'Ошибка', $message);
+	}
+
+	// Создаем сессию пользователя (если не lightmode)
+	if (!$lightmode) {
+		user_session();
+	}
 }
 
 function get_server_load() {
@@ -693,16 +791,39 @@ function sent_mail($to,$fromname,$fromemail,$subject,$body,$multiple=false,$mult
 	return $result;
 }
 
-function sqlesc($value, $force = false) {
-    // Stripslashes
-    /*if (get_magic_quotes_gpc()) {
-        $value = stripslashes($value);
-    }*/
-    // Quote if not a number or a numeric string
-    if (!is_numeric($value) || $force) {
-        $value = "'" . mysql_real_escape_string($value) . "'";
+function sqlesc($value, bool $force = false): string 
+{
+    global $mysql_link;
+    
+    // Если значение null, возвращаем NULL без кавычек
+    if ($value === null) {
+        return 'NULL';
     }
-    return $value;
+    
+    // Если значение - булево, преобразуем в число
+    if (is_bool($value)) {
+        $value = (int)$value;
+    }
+    
+    // Проверяем, является ли значение числовым
+    $is_numeric = is_numeric($value) && !$force;
+    
+    // Для чисел не используем кавычки (если не принудительно)
+    if ($is_numeric) {
+        // Проверяем, что это действительно число, а не строка, начинающаяся с нуля
+        if (is_string($value) && $value[0] === '0' && strlen($value) > 1) {
+            // Строки, начинающиеся с нуля (например, '0123') обрабатываем как строки
+            $is_numeric = false;
+        } else {
+            return (string)$value;
+        }
+    }
+    
+    // Экранируем строку
+    $escaped = mysqli_real_escape_string($mysql_link, (string)$value);
+    
+    // Обрамляем кавычками
+    return "'" . $escaped . "'";
 }
 
 function sqlwildcardesc($x) {
@@ -1069,11 +1190,33 @@ define ('VERSION', '');
 define ('NUM_VERSION', '2.1.18');
 define ('TBVERSION', 'Powered by <a href="http://www.tbdev.net" target="_blank" style="cursor: help;" title="���������� OpenSource ����" class="copyright">TBDev</a> v'.NUM_VERSION.' <a href="http://bit-torrent.kiev.ua" target="_blank" style="cursor: help;" title="���� ������������ ������" class="copyright">Yuna Scatari Edition</a> '.VERSION.' Copyright &copy; 2001-'.date('Y'));
 
-function mysql_modified_rows () {
-	$info_str = mysql_info();
-	$a_rows = mysql_affected_rows();
-	preg_match("/Rows matched: ([0-9]*)/", $info_str, $r_matched);
-	return ($a_rows < 1)?($r_matched[1]?$r_matched[1]:0):$a_rows;
+function mysql_modified_rows(): int 
+{
+    global $mysql_link;
+    
+    // Получаем информацию о последнем запросе
+    $info_str = mysqli_info($mysql_link);
+    $affected_rows = mysqli_affected_rows($mysql_link);
+    
+    // Если нет информации или строка пуста
+    if (empty($info_str)) {
+        return $affected_rows > 0 ? $affected_rows : 0;
+    }
+    
+    // Ищем количество совпавших строк в информации
+    preg_match("/Rows matched: (\d+)/", $info_str, $matches);
+    
+    if (isset($matches[1])) {
+        $matched_rows = (int)$matches[1];
+        
+        // Возвращаем количество совпавших строк, если affected_rows меньше 1
+        if ($affected_rows < 1) {
+            return $matched_rows;
+        }
+    }
+    
+    // В остальных случаях возвращаем количество фактически измененных строк
+    return $affected_rows > 0 ? $affected_rows : 0;
 }
 
 ?>
