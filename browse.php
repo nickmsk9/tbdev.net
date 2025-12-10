@@ -148,14 +148,18 @@ if (isset($_GET['all']))
     $all = false;
 
 if (!$all)
-    if (!$_GET && $CURUSER["notifs"]) {
-        $all = True;
-        foreach ($cats as $cat) {
-            $all &= $cat[id];
-            if (strpos($CURUSER["notifs"], "[cat" . $cat[id] . "]") !== false) {
-                $wherecatina[] = $cat[id];
-                $addparam .= "c$cat[id]=1&amp;";
-            }
+   if (!isset($_GET) && isset($CURUSER["notifs"])) {
+    $all = true;
+    foreach ($cats as $cat) {
+        // Исправлено: добавлены кавычки для ключа массива и исправлена логическая операция
+        $cat_id = $cat['id'] ?? 0;
+        $all = $all && $cat_id;
+        
+        if (strpos($CURUSER["notifs"], "[cat" . $cat_id . "]") !== false) {
+            $wherecatina[] = $cat_id;
+            $addparam .= "c" . $cat_id . "=1&amp;";
+        }
+    
         }
     } elseif ($category) {
         if (!is_valid_id($category))
@@ -200,7 +204,7 @@ if ($where != "")
     $where = "WHERE $where";
 
 $res = sql_query("SELECT COUNT(*) FROM torrents AS t $where") or die(mysql_error());
-$row = mysql_fetch_array($res);
+$row = mysqli_fetch_array($res);
 $count = $row[0];
 $num_torrents = $count;
 
@@ -223,12 +227,16 @@ if (!$count && isset($cleansearchstr)) {
         if ($where != "")
             $where = "WHERE $where";
         $res = sql_query("SELECT COUNT(*) FROM torrents AS t $where");
-        $row = mysql_fetch_array($res);
+        $row = mysqli_fetch_array($res);
         $count = $row[0];
     }
 }
 
-$torrentsperpage = $CURUSER["torrentsperpage"];
+$torrentsperpage = 25; // значение по умолчанию
+
+if (isset($CURUSER) && is_array($CURUSER) && isset($CURUSER["torrentsperpage"])) {
+    $torrentsperpage = (int)$CURUSER["torrentsperpage"];
+}
 if (!$torrentsperpage)
     $torrentsperpage = 25;
 
