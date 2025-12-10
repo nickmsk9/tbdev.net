@@ -608,7 +608,7 @@ function autoclean() {
 	$docleanup = 0;
 
 	$res = sql_query("SELECT value_u FROM avps WHERE arg = 'lastcleantime'");
-	$row = mysql_fetch_array($res);
+	$row = mysqli_fetch_array($res);
 	if (!$row) {
 		sql_query("INSERT INTO avps (arg, value_u) VALUES ('lastcleantime',$now)");
 		return;
