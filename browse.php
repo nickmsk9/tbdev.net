@@ -277,7 +277,7 @@ if (isset($cleansearchstr))
 
     <table class="embedded" cellspacing="0" cellpadding="5" width="100%">
         <tr>
-            <td class="colhead" align="center" colspan="12">������ ���������</td>
+            <td class="colhead" align="center" colspan="12">Список раздач</td>
         </tr>
         <tr>
             <td colspan="12">
