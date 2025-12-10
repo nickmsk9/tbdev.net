@@ -54,13 +54,13 @@ begin_frame("ЧаВо сайта $SITENAME");
 end_frame();
 
 $res = sql_query("SELECT `id`, `question`, `flag` FROM `faq` WHERE `type`='categ' ORDER BY `order` ASC");
-while ($arr = mysql_fetch_array($res, MYSQL_BOTH)) {
+while ($arr = mysqli_fetch_assoc($res, MYSQL_BOTH)) {
 	$faq_categ[$arr[id]][title] = $arr[question];
 	$faq_categ[$arr[id]][flag] = $arr[flag];
 }
 
 $res = sql_query("SELECT `id`, `question`, `answer`, `flag`, `categ` FROM `faq` WHERE `type`='item' ORDER BY `order` ASC");
-while ($arr = mysql_fetch_array($res, MYSQL_BOTH)) {
+while ($arr = mysqli_fetch_assoc($res, MYSQL_BOTH)) {
 	$faq_categ[$arr[categ]][items][$arr[id]][question] = $arr[question];
 	$faq_categ[$arr[categ]][items][$arr[id]][answer] = $arr[answer];
 	$faq_categ[$arr[categ]][items][$arr[id]][flag] = $arr[flag];

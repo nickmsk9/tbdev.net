@@ -40,7 +40,7 @@ dbconn();
 loggedinorreturn();
 
 $res = sql_query("SELECT * FROM torrents WHERE id = $id");
-$row = mysql_fetch_array($res);
+$row = mysqli_fetch_assoc($res);
 if (!$row)
 	die();
 

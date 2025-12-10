@@ -43,7 +43,7 @@ if ($userid != $CURUSER["id"])
 	stderr($tracker_lang['error'], $tracker_lang['access_denied']);
 
 $res = sql_query("SELECT * FROM users WHERE id=$userid") or sqlerr(__FILE__, __LINE__);
-$user = mysql_fetch_array($res) or stderr($tracker_lang['error'], $tracker_lang['invalid_id']);
+$user = mysqli_fetch_assoc($res) or stderr($tracker_lang['error'], $tracker_lang['invalid_id']);
 
 // action: add -------------------------------------------------------------
 
@@ -125,7 +125,7 @@ $res = sql_query("SELECT f.friendid as id, u.username AS name, u.class, u.avatar
 if(mysql_num_rows($res) == 0)
 	$friends = "<em>".$tracker_lang['no_friends'].".</em>";
 else
-	while ($friend = mysql_fetch_array($res))
+	while ($friend = mysqli_fetch_assoc($res))
 	{
     $title = $friend["title"];
 		if (!$title)
@@ -169,7 +169,7 @@ else
 {
 	$i = 0;
 	$blocks = "<table width=100% cellspacing=0 cellpadding=0>";
-	while ($block = mysql_fetch_array($res))
+	while ($block = mysqli_fetch_assoc($res))
 	{
 		if ($i % 6 == 0)
 			$blocks .= "<tr>";

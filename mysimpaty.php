@@ -45,7 +45,7 @@ if (!is_valid_id($userid))
 stdhead("Мои респекты");
 
         $count_res = sql_query("SELECT COUNT(*) FROM simpaty WHERE touserid = $userid");
-		$count_row = mysql_fetch_array($count_res);
+		$count_row = mysqli_fetch_assoc($count_res);
 		$count = $count_row[0];
 
 if (!$count) {

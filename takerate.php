@@ -49,7 +49,7 @@ if ($rating <= 0 || $rating > 5)
 	bark("invalid rating");
 
 $res = sql_query("SELECT owner FROM torrents WHERE id = $id");
-$row = mysql_fetch_array($res);
+$row = mysqli_fetch_assoc($res);
 if (!$row)
 	bark("no such torrent");
 

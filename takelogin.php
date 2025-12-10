@@ -43,7 +43,7 @@ function is_password_correct($password, $secret, $hash) {
 }
 
 $res = sql_query("SELECT id, passhash, secret, enabled, status FROM users WHERE username = " . sqlesc($username));
-$row = mysql_fetch_array($res);
+$row = mysqli_fetch_assoc($res);
 
 if (!$row)
 	bark("Вы не зарегистрированы в системе.");

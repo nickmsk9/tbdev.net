@@ -35,7 +35,7 @@ if ($deny_signup && !$allow_invite_signup)
 if ($CURUSER)
 	stderr($tracker_lang['error'], sprintf($tracker_lang['signup_already_registered'], $SITENAME));
 
-list($users) = mysql_fetch_array(sql_query("SELECT COUNT(id) FROM users"));
+list($users) = mysqli_fetch_assoc(sql_query("SELECT COUNT(id) FROM users"));
 if ($users >= $maxusers)
 	stderr($tracker_lang['error'], sprintf($tracker_lang['signup_users_limit'], number_format($maxusers)));
 
@@ -87,7 +87,7 @@ stdhead($tracker_lang['signup_signup']);
 
 $countries = "<option value=\"0\">".$tracker_lang['signup_not_selected']."</option>\n";
 $ct_r = sql_query("SELECT id, name FROM countries ORDER BY name") or die;
-while ($ct_a = mysql_fetch_array($ct_r))
+while ($ct_a = mysqli_fetch_assoc($ct_r))
   $countries .= "<option value=\"$ct_a[id]\">$ct_a[name]</option>\n";
 
 ?>

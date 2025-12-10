@@ -83,7 +83,7 @@ if (!is_valid_id($id))
   bark($tracker_lang['invalid_id']);
 
 $r = @sql_query("SELECT * FROM users WHERE id=$id") or sqlerr(__FILE__, __LINE__);
-$user = mysql_fetch_array($r) or bark("Нет пользователя с таким ID $id.");
+$user = mysqli_fetch_assoc($r) or bark("Нет пользователя с таким ID $id.");
 if ($user["status"] == "pending") die;
 $r = sql_query("SELECT torrents.id, torrents.name, torrents.seeders, torrents.added, torrents.leechers, torrents.category, categories.name AS catname, categories.image AS catimage, categories.id AS catid FROM torrents LEFT JOIN categories ON torrents.category = categories.id WHERE owner=$id ORDER BY name") or sqlerr(__FILE__, __LINE__);
 if (mysql_num_rows($r) > 0) {
@@ -106,7 +106,7 @@ $it = sql_query("SELECT u.id, u.username, u.class, i.id AS invitedid, i.username
 if (mysql_num_rows($it) >= 1) {
 	$invitetree = "<table class=\"main\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\"><tr>".
 		"<td class=\"colhead\">Пользователь</td><td class=\"colhead\">Пригласил</td>";
-	while ($inviter = mysql_fetch_array($it))
+	while ($inviter = mysqli_fetch_assoc($it))
 		$invitetree .= "<tr><td><a href=\"userdetails.php?id=$inviter[id]\">".get_user_class_color($inviter["class"], $inviter["username"])."</a></td><td><a href=\"userdetails.php?id=$inviter[invitedid]\">".get_user_class_color($inviter["invitedclass"], $inviter["invitedname"])."</a></td></tr>";
 	$invitetree .= "</table>";
 }
@@ -133,7 +133,7 @@ $r = sql_query("SELECT snatched.torrent AS id, snatched.uploaded, snatched.seede
 if (mysql_num_rows($r) > 0) {
 $completed = "<table class=\"main\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n" .
   "<tr><td class=\"colhead\">Тип</td><td class=\"colhead\">Название</td><td class=\"colhead\">Раздающих</td><td class=\"colhead\">Качающих</td><td class=\"colhead\">Раздал</td><td class=\"colhead\">Скачал</td><td class=\"colhead\">Рейтинг</td><td class=\"colhead\">Начал / Закончил</td><td class=\"colhead\">Действие</td><td class=\"colhead\">Сидирует</td></tr>\n";
-while ($a = mysql_fetch_array($r)) {
+while ($a = mysqli_fetch_assoc($r)) {
 if ($a["downloaded"] > 0) {
       $ratio = number_format($a["uploaded"] / $a["downloaded"], 3);
       $ratio = "<font color=\"" . get_ratio_color($ratio) . "\">$ratio</font>";

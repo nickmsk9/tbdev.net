@@ -95,7 +95,7 @@ else
 	<td class=colhead><a href=\"" . $_SERVER['PHP_SELF'] . "?uporder=peers&amp;catorder=$catorder\" class=colheadlink>Пиров</a></td>\n
 	<td class=colhead>Завершено</td>\n
 	</tr>\n");
-	while ($uper = mysql_fetch_array($res))
+	while ($uper = mysqli_fetch_assoc($res))
 	{
 		print("<tr><td><a href=userdetails.php?id=".$uper['id']."><b>".$uper['name']."</b></a></td>\n");
 		print("<td " . ($uper['last']?(">".$uper['last']." (".get_elapsed_time(sql_timestamp_to_unix_timestamp($uper['last']))." назад)"):"align=center>---") . "</td>\n");
@@ -133,7 +133,7 @@ else
 	<td class=colhead>Завершено</td>
 	<td class=colhead><a href=\"" . $_SERVER['PHP_SELF'] . "?uporder=$uporder&amp;catorder=peers\" class=colheadlink>Пиров</a></td>
 	<td class=colhead>Завершено</td></tr>\n");
-	while ($cat = mysql_fetch_array($res))
+	while ($cat = mysqli_fetch_assoc($res))
 	{
 		print("<tr><td class=rowhead>" . $cat['name'] . "</b></a></td>");
 		print("<td " . ($cat['last']?(">".$cat['last']." (".get_elapsed_time(sql_timestamp_to_unix_timestamp($cat['last']))." назад)"):"align = center>---") ."</td>");

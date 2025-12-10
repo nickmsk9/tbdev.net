@@ -45,7 +45,7 @@ if (!$id)
 	die();
 
 $res = sql_query("SELECT name, owner, seeders FROM torrents WHERE id = $id");
-$row = mysql_fetch_array($res);
+$row = mysqli_fetch_assoc($res);
 if (!$row)
 	stderr($tracker_lang['error'],"Такого торрента не существует.");
 

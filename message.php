@@ -206,7 +206,7 @@ if ($action == "viewmessage") {
         {
                 // Display to
                 $res2 = sql_query("SELECT username FROM users WHERE id=" . sqlesc($message['receiver'])) or sqlerr(__FILE__,__LINE__);
-                $sender = mysql_fetch_array($res2);
+                $sender = mysqli_fetch_assoc($res2);
                 $sender = "<A href=\"userdetails.php?id=" . $message['receiver'] . "\">" . $sender[0] . "</A>";
                 $reply = "";
                 $from = "Кому";
@@ -222,7 +222,7 @@ if ($action == "viewmessage") {
                 else
                 {
                         $res2 = sql_query("SELECT username FROM users WHERE id=" . sqlesc($message['sender'])) or sqlerr(__FILE__,__LINE__);
-                        $sender = mysql_fetch_array($res2);
+                        $sender = mysqli_fetch_assoc($res2);
                         $sender = "<A href=\"userdetails.php?id=" . $message['sender'] . "\">" . $sender[0] . "</A>";
                         $reply = " [ <A href=\"message.php?action=sendmessage&amp;receiver=" . $message['sender'] . "&amp;replyto=" . $pm_id . "\">Ответить</A> ]";
                 }
@@ -520,7 +520,7 @@ if ($action == 'takemass_pm') {
                 if (mysql_num_rows($res) > 0)
                 {
                         $l = 0;
-                        while ($user = mysql_fetch_array($res))
+                        while ($user = mysqli_fetch_assoc($res))
                         {
                                 unset($new);
                                 $old = $user['modcomment'];
@@ -674,7 +674,7 @@ if ($action == "forward") {
                         $from2['username'] = "Системное";
                 }
                 else {
-                        $from2 = mysql_fetch_array($res);
+                        $from2 = mysqli_fetch_assoc($res);
                         $from_name = "<A href=\"userdetails.php?id=" . $from . "\">" . $from2['username'] . "</A>";
                 }
 
@@ -744,7 +744,7 @@ if ($action == "forward") {
                         stderr($tracker_lang['error'], "Пользователя, с таким именем не существует.");
                 }
 
-                $to = mysql_fetch_array($res);
+                $to = mysqli_fetch_assoc($res);
                 $to = $to[0];
 
                 // Get Orignal sender's username

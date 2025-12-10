@@ -142,7 +142,7 @@ if (!$id)
 	die();
 
 $res = sql_query("SELECT owner, filename, save_as, image1, image2, image3, image4, image5 FROM torrents WHERE id = $id");
-$row = mysql_fetch_array($res);
+$row = mysqli_fetch_assoc($res);
 if (!$row)
 	die();
 

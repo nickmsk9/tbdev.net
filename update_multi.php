@@ -98,7 +98,7 @@ $anns_r = sql_query('SELECT info_hash, url FROM torrents_scrape WHERE tid = '.$t
 $s_sum = $l_sum = $errors = $success = 0;
 $pids = $works = array();
 
-while ($ann = mysql_fetch_array($anns_r))
+while ($ann = mysqli_fetch_assoc($anns_r))
 	$works[] = $ann;
 
 if (function_exists('curl_multi_init')) {
@@ -155,13 +155,13 @@ if ($ajax !== 'yes') {
 
 	$announces_a = $announces_urls = array();
 	$announces_r = sql_query('SELECT url, seeders, leechers, last_update, state, error FROM torrents_scrape WHERE tid = '.$tid);
-	while ($announce = mysql_fetch_array($announces_r)) {
+	while ($announce = mysqli_fetch_assoc($announces_r)) {
 		$announces_a[] = $announce;
 		$announces_urls[] = $announce['url'];
 	}
 	unset($announce);
 
-	$row = mysql_fetch_array(sql_query('SELECT last_mt_update FROM torrents WHERE id = '.$tid));
+	$row = mysqli_fetch_assoc(sql_query('SELECT last_mt_update FROM torrents WHERE id = '.$tid));
 
 	if (count($announces_a)) {
 		foreach ($announces_a as $announce) {

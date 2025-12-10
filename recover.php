@@ -85,7 +85,7 @@ EOD;
 	if (!$id)
 		httperr();
 	$res = sql_query("SELECT username, email, passhash, editsecret FROM users WHERE id = $id");
-	$arr = mysql_fetch_array($res) or httperr();
+	$arr = mysqli_fetch_assoc($res) or httperr();
 	$email = $arr["email"];
 	$sec = $arr["editsecret"];
 	if (preg_match('/^ *$/s', $sec))

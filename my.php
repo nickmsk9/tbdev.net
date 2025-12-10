@@ -59,11 +59,11 @@ if (isset($_GET["edited"])) {
 /***********************
 
 $res = sql_query("SELECT COUNT(*) FROM ratings WHERE user=" . $CURUSER["id"]);
-$row = mysql_fetch_array($res);
+$row = mysqli_fetch_assoc($res);
 tr("Ratings submitted", $row[0]);
 
 $res = sql_query("SELECT COUNT(*) FROM comments WHERE user=" . $CURUSER["id"]);
-$row = mysql_fetch_array($res);
+$row = mysqli_fetch_assoc($res);
 tr("Written comments", $row[0]);
 
 ****************/
@@ -72,7 +72,7 @@ $themes = theme_selector($CURUSER["theme"]);
 
 $countries = "<option value=0>---- ".$tracker_lang['my_unset']." ----</option>\n";
 $ct_r = sql_query("SELECT id, name FROM countries ORDER BY name ASC") or sqlerr(__FILE__,__LINE__);
-while ($ct_a = mysql_fetch_array($ct_r))
+while ($ct_a = mysqli_fetch_assoc($ct_r))
   $countries .= "<option value=$ct_a[id]" . ($CURUSER["country"] == $ct_a['id'] ? " selected" : "") . ">$ct_a[name]</option>\n";
 
 $dir = opendir('languages');

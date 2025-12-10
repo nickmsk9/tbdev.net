@@ -580,7 +580,7 @@ function get_row_count($table, $suffix = "") {
 	if ($suffix)
 		$suffix = " $suffix";
 	($r = sql_query("SELECT COUNT(*) FROM $table$suffix")) or die(mysql_error());
-	($a = mysql_fetch_row($r)) or die(mysql_error());
+	($a = mysqli_fetch_row($r)) or die(mysql_error());
 	return $a[0];
 }
 

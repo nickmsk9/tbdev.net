@@ -38,7 +38,7 @@ if (!$id)
 dbconn();
 
 $res = sql_query("SELECT editsecret FROM users WHERE id = $id");
-$row = mysql_fetch_array($res);
+$row = mysqli_fetch_assoc($res);
 
 if (!$row)
 	httperr();

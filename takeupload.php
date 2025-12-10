@@ -115,7 +115,7 @@ list($dname, $plen, $pieces, $totallen) = array($info['name'], $info['piece leng
 	bark("Неверный Announce URL! Должен быть ".$announce_urls[0]);*/
 
 $ret = sql_query("SHOW TABLE STATUS LIKE 'torrents'");
-$row = mysql_fetch_array($ret);
+$row = mysqli_fetch_assoc($ret);
 $next_id = $row['Auto_increment'];
 
 if (strlen($pieces) % 20 != 0)
@@ -242,7 +242,7 @@ if (!($_FILES['image'.$x]['name'] == "")) {
 
 	// Calculate what the next torrent id will be
 	/*$ret = sql_query("SHOW TABLE STATUS LIKE 'torrents'");
-	$row = mysql_fetch_array($ret);
+	$row = mysqli_fetch_assoc($ret);
 	$next_id = $row['Auto_increment'];*/
 
 	// By what filename should the tracker associate the image with?

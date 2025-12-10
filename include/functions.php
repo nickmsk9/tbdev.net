@@ -984,7 +984,7 @@ function loggedinorreturn($nowarn = false) {
 
 function deletetorrent($id) {
 	global $torrent_dir;
-	$images = mysql_fetch_array(sql_query('SELECT image1, image2, image3, image4, image5 FROM torrents WHERE id = '.$id));
+	$images = mysqli_fetch_assoc(sql_query('SELECT image1, image2, image3, image4, image5 FROM torrents WHERE id = '.$id));
 	if ($images) { for ($x=1; $x <= 5; $x++) {
 			if ($images['image' . $x] != '' && file_exists('torrents/images/' . $images['image' . $x]))
 				unlink('torrents/images/' . $images['image' . $x]);
@@ -1114,7 +1114,7 @@ function downloaderdata($res) {
 function genrelist() {
 	$ret = array();
 	$res = sql_query('SELECT id, name FROM categories ORDER BY sort ASC');
-	while ($row = mysql_fetch_array($res))
+	while ($row = mysqli_fetch_assoc($res))
 		$ret[] = $row;
 	return $ret;
 }

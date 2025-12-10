@@ -242,7 +242,7 @@ echo "<tr><td class=colhead align=left>Пользователь</td><td class=colhead>Рейтин
 
 
 $result = sql_query ("SELECT * FROM users WHERE uploaded / downloaded <= 0.20 AND enabled = 'yes' ORDER BY downloaded DESC ");
-if ($row = mysql_fetch_array($result)) {
+if ($row = mysqli_fetch_assoc($result)) {
 do {
 if ($row["uploaded"] == "0") { $ratio = "inf"; }
 elseif ($row["downloaded"] == "0") { $ratio = "inf"; }
@@ -250,7 +250,7 @@ $ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
 echo "<tr><td><a href=userdetails.php?id=".$row["id"]."><b>".$row["username"]."</b></a></td><td><strong>".$ratio."</strong></td><td>".$row["ip"]."</td><td>".$row["added"]."</td><td>".$row["last_access"]."</td><td>".mksize($row["downloaded"])."</td><td>".mksize($row["uploaded"])."</td></tr>";
 
 
-} while($row = mysql_fetch_array($result));
+} while($row = mysqli_fetch_assoc($result));
 } else {print "<tr><td colspan=7>Извините, записей не обнаружено!</td></tr>";}
 echo "</table>";
 end_frame(); }?>
@@ -262,7 +262,7 @@ echo '<table width="100%" border="0" align="center" cellpadding="2" cellspacing=
 echo "<tr><td class=colhead align=left>Пользователь</td><td class=colhead>Рейтинг</td><td class=colhead>IP</td><td class=colhead>Зарегистрирован</td><td class=colhead>Последний&nbsp;раз&nbsp;был&nbsp;на&nbsp;трекере</td><td class=colhead>Скачал</td><td class=colhead>Раздал</td></tr>";
 
 $result = sql_query ("SELECT * FROM users WHERE enabled = 'yes' AND status = 'confirmed' ORDER BY added DESC limit 100");
-if ($row = mysql_fetch_array($result)) {
+if ($row = mysqli_fetch_assoc($result)) {
 do {
 if ($row["uploaded"] == "0") { $ratio = "inf"; }
 elseif ($row["downloaded"] == "0") { $ratio = "inf"; }
@@ -273,7 +273,7 @@ $ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
 echo "<tr><td><a href=userdetails.php?id=".$row["id"]."><b>".$row["username"]."</b></a></td><td><strong>".$ratio."</strong></td><td>".$row["ip"]."</td><td>".$row["added"]."</td><td>".$row["last_access"]."</td><td>".mksize($row["downloaded"])."</td><td>".mksize($row["uploaded"])."</td></tr>";
 
 
-} while($row = mysql_fetch_array($result));
+} while($row = mysqli_fetch_assoc($result));
 } else {print "<tr><td>Sorry, no records were found!</td></tr>";}
 echo "</table>";
 end_frame(); }?>
@@ -285,7 +285,7 @@ begin_frame("Забаненые пользователи");
 echo '<table width="100%" border="0" align="center" cellpadding="2" cellspacing="0">';
 echo "<tr><td class=colhead align=left>Пользователь</td><td class=colhead>Рейтинг</td><td class=colhead>IP</td><td class=colhead>Зарегистрирован</td><td class=colhead>Последний раз был</td><td class=colhead>Скачал</td><td class=colhead>Раздал</td></tr>";
 $result = sql_query ("SELECT * FROM users WHERE enabled = 'no' ORDER BY last_access DESC ");
-if ($row = mysql_fetch_array($result)) {
+if ($row = mysqli_fetch_assoc($result)) {
 do {
 if ($row["uploaded"] == "0") { $ratio = "inf"; }
 elseif ($row["downloaded"] == "0") { $ratio = "inf"; }
@@ -296,7 +296,7 @@ $ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
 echo "<tr><td><a href=userdetails.php?id=".$row["id"]."><b>".$row["username"]."</b></a></td><td><strong>".$ratio."</strong></td><td>".$row["ip"]."</td><td>".$row["added"]."</td><td>".$row["last_access"]."</td><td>".mksize($row["downloaded"])."</td><td>".mksize($row["uploaded"])."</td></tr>";
 
 
-} while($row = mysql_fetch_array($result));
+} while($row = mysqli_fetch_assoc($result));
 } else {print "<tr><td colspan=7>Извините, записей не обнаружено!</td></tr>";}
 echo "</table>";
 end_frame(); } }

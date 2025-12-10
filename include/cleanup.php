@@ -39,7 +39,7 @@ function docleanup() {
 	do {
 		$res = sql_query("SELECT id FROM torrents") or sqlerr(__FILE__,__LINE__);
 		$ar = array();
-		while ($row = mysql_fetch_array($res)) {
+		while ($row = mysqli_fetch_assoc($res)) {
 			$id = $row[0];
 			$ar[$id] = 1;
 		}
@@ -79,7 +79,7 @@ function docleanup() {
 
 		$res = sql_query("SELECT torrent FROM peers GROUP BY torrent") or sqlerr(__FILE__,__LINE__);
 		$delids = array();
-		while ($row = mysql_fetch_array($res)) {
+		while ($row = mysqli_fetch_assoc($res)) {
 			$id = $row[0];
 			if (isset($ar[$id]) && $ar[$id])
 				continue;
@@ -90,7 +90,7 @@ function docleanup() {
 
 		$res = sql_query("SELECT torrent FROM files GROUP BY torrent") or sqlerr(__FILE__,__LINE__);
 		$delids = array();
-		while ($row = mysql_fetch_array($res)) {
+		while ($row = mysqli_fetch_assoc($res)) {
 			$id = $row[0];
 			if ($ar[$id])
 				continue;
@@ -168,7 +168,7 @@ function docleanup() {
        $maxclass = UC_POWER_USER;
        $res = sql_query("SELECT id FROM users WHERE parked='yes' AND status='confirmed' AND class <= $maxclass AND last_access < $dt");
        if (mysql_num_rows($res) > 0) {
-       	while ($arr = mysql_fetch_array($res)) {
+       	while ($arr = mysqli_fetch_assoc($res)) {
 			sql_query("DELETE FROM users WHERE id = ".sqlesc($arr["id"])) or sqlerr(__FILE__,__LINE__);
 			sql_query("DELETE FROM messages WHERE receiver = ".sqlesc($arr["id"])) or sqlerr(__FILE__,__LINE__);
 			sql_query("DELETE FROM friends WHERE userid = ".sqlesc($arr["id"])) or sqlerr(__FILE__,__LINE__);
@@ -188,7 +188,7 @@ function docleanup() {
 	$deadtime = TIMENOW - $signup_timeout;
 	$res = sql_query("SELECT id FROM users WHERE status = 'pending' AND added < FROM_UNIXTIME($deadtime) AND last_login < FROM_UNIXTIME($deadtime) AND last_access < FROM_UNIXTIME($deadtime)") or sqlerr(__FILE__,__LINE__);
 	if (mysql_num_rows($res) > 0) {
-		while ($arr = mysql_fetch_array($res)) {
+		while ($arr = mysqli_fetch_assoc($res)) {
 			sql_query("DELETE FROM users WHERE id = ".sqlesc($arr["id"]));
 		}
 	}

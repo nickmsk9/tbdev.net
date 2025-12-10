@@ -36,7 +36,7 @@ stdhead("Мои торренты");
 
 $where = "WHERE owner = " . $CURUSER["id"] . " AND banned != 'yes'";
 $res = sql_query("SELECT COUNT(*) FROM torrents $where");
-$row = mysql_fetch_array($res);
+$row = mysqli_fetch_assoc($res);
 $count = $row[0];
 
 if (!$count) {

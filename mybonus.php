@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		die();
 	}
 	$res = sql_query("SELECT * FROM bonus WHERE id = $id") or sqlerr(__FILE__,__LINE__);
-	$arr = mysql_fetch_array($res);
+	$arr = mysqli_fetch_assoc($res);
 	$points = $arr["points"];
 	$type = $arr["type"];
 	if ($CURUSER["bonus"] < $points) {

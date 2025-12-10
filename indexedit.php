@@ -41,7 +41,7 @@ if ($action == 'edit') {
 	$res = sql_query("SELECT * FROM indexreleases WHERE id = ".sqlesc($id)) or sqlerr(__FILE__,__LINE__);
 	if (mysql_num_rows($res) != 1)
 		stderr($tracker_lang["error"], $tracker_lang["invalid_id"]);
-	$release = mysql_fetch_array($res);
+	$release = mysqli_fetch_assoc($res);
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$var_list = "name:poster:torrentid:cat:top:center:bottom";
 		$int_list = "torrentid:cat";

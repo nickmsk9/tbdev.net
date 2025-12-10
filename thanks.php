@@ -43,7 +43,7 @@ $ajax = (string) $_POST["ajax"];
 if ($ajax == "yes") {
 	sql_query("INSERT INTO thanks (torrentid, userid) VALUES ($torrentid, $userid)");// or sqlerr(__FILE__,__LINE__);
 	$count_sql = sql_query("SELECT COUNT(*) FROM thanks WHERE torrentid = $torrentid");
-	$count_row = mysql_fetch_array($count_sql);
+	$count_row = mysqli_fetch_assoc($count_sql);
 	$count = $count_row[0];
 
 	if ($count == 0) {

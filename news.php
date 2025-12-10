@@ -91,7 +91,7 @@ if ($action == 'edit')
 	if (mysql_num_rows($res) != 1)
 	  stderr($tracker_lang['error'], "Новость не найдено.");
 
-	$arr = mysql_fetch_array($res);
+	$arr = mysqli_fetch_assoc($res);
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST')
     {
@@ -155,7 +155,7 @@ if (mysql_num_rows($query) > 0)
  	begin_main_frame();
 	begin_frame();
 
-	while ($result = mysql_fetch_array($query))
+	while ($result = mysqli_fetch_assoc($query))
 	{
 	    $newsid = $result["id"];
 		$body = $result["body"];

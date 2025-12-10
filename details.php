@@ -190,7 +190,7 @@ if (!isset($id) || !$id)
 	die();
 
 $res = sql_query("SELECT td.descr_hash, td.descr_parsed, t.multitracker, t.last_mt_update, t.keywords, t.description, t.free, t.seeders, t.banned, t.leechers, t.info_hash, t.filename, UNIX_TIMESTAMP() - UNIX_TIMESTAMP(t.last_action) AS lastseed, t.numratings, t.name, IF(t.numratings < $minvotes, NULL, ROUND(t.ratingsum / t.numratings, 1)) AS rating, t.owner, t.save_as, t.descr, t.visible, t.size, t.added, t.views, t.hits, t.times_completed, t.id, t.type, t.numfiles, t.image1, t.image2, t.image3, t.image4, t.image5, c.name AS cat_name, u.username FROM torrents AS t LEFT JOIN categories AS c ON t.category = c.id LEFT JOIN users AS u ON t.owner = u.id LEFT JOIN torrents_descr AS td ON td.tid = $id WHERE t.id = $id") or sqlerr(__FILE__, __LINE__);
-$row = mysql_fetch_array($res);
+$row = mysqli_fetch_assoc($res);
 
 $keywords = $row['keywords'];
 $description = $row['description'];
@@ -233,7 +233,7 @@ if (!isset($_GET["page"])) {
 	if ($row['multitracker'] == 'yes') {
 		$announces_a = $announces_urls = array();
 		$announces_r = sql_query('SELECT url, seeders, leechers, last_update, state, error FROM torrents_scrape WHERE tid = '.$id);
-		while ($announce = mysql_fetch_array($announces_r)) {
+		while ($announce = mysqli_fetch_assoc($announces_r)) {
 			$announces_a[] = $announce;
 			$announces_urls[] = $announce['url'];
 		}
@@ -354,7 +354,7 @@ if (!isset($_GET["page"])) {
 						 1 => $tracker_lang['vote_1'],);
 		if (!$owned || $moderator) {
 			$xres = sql_query("SELECT rating, added FROM ratings WHERE torrent = $id AND user = " . $CURUSER["id"]);
-			$xrow = mysql_fetch_array($xres);
+			$xrow = mysqli_fetch_assoc($xres);
 			if ($xrow)
 				$s .= "({$tracker_lang['you_have_voted_for_this_torrent']} \"{$xrow["rating"]} - {$ratings[$xrow["rating"]]}\")"; else {
 				$s .= "<form method=\"post\" action=\"takerate.php\" name=\"ajaxrating\"><input type=\"hidden\" id=\"ratingtid\" name=\"id\" value=\"$id\" />\n";
@@ -437,7 +437,7 @@ $rating_selector = <<<SELECTOR
 </div>
 SELECTOR;
 
-		$is_voted = mysql_fetch_array(sql_query('SELECT rating FROM ratings WHERE torrent = ' . $id . ' AND user = ' . $CURUSER['id']));
+		$is_voted = mysqli_fetch_assoc(sql_query('SELECT rating FROM ratings WHERE torrent = ' . $id . ' AND user = ' . $CURUSER['id']));
 		if (mysql_error())
 			sqlerr();
 		if ($is_voted) {
@@ -472,7 +472,7 @@ if ($row["type"] == "multi") {
 
 		$subres = sql_query("SELECT * FROM files WHERE torrent = $id ORDER BY id");
 		$s.="<tr><td class=colhead>{$tracker_lang['path']}</td><td class=colhead align=right>{$tracker_lang['size']}</td></tr>\n";
-		while ($subrow = mysql_fetch_array($subres)) {
+		while ($subrow = mysqli_fetch_assoc($subres)) {
 			$s .= "<tr><td>".iconv('utf-8', $subrow["filename"])."</td><td align=\"right\">" . mksize($subrow["size"]) . "</td></tr>\n";
 		}
 
@@ -487,7 +487,7 @@ if (!isset($_GET["dllist"])) {
 	$downloaders = array();
 	$seeders = array();
 	$subres = sql_query("SELECT seeder, finishedat, downloadoffset, uploadoffset, peers.ip, port, peers.uploaded, peers.downloaded, to_go, UNIX_TIMESTAMP(started) AS st, connectable, agent, peer_id, UNIX_TIMESTAMP(last_action) AS la, UNIX_TIMESTAMP(prev_action) AS pa, userid, users.username, users.class FROM peers INNER JOIN users ON peers.userid = users.id WHERE torrent = $id") or sqlerr(__FILE__, __LINE__);
-	while ($subrow = mysql_fetch_array($subres)) {
+	while ($subrow = mysqli_fetch_assoc($subres)) {
 		if ($subrow["seeder"] == "yes")
 			$seeders[] = $subrow;
 		else
@@ -592,7 +592,7 @@ tr($tracker_lang['torrent_info'], "<a href=\"torrent_info.php?id={$id}\">{$track
 
 $torrentid = (int) $_GET["id"];
 /*$count_sql = sql_query("SELECT COUNT(*) FROM thanks WHERE torrentid = $torrentid");
-$count_row = mysql_fetch_array($count_sql);
+$count_row = mysqli_fetch_assoc($count_sql);
 $count = $count_row[0];*/
 
 $thanked_sql = sql_query("SELECT thanks.userid, users.username, users.class FROM thanks INNER JOIN users ON thanks.userid = users.id WHERE thanks.torrentid = $torrentid");
@@ -666,7 +666,7 @@ function update_multi() {
 	print("<p><a name=\"startcomments\"></a></p>\n");
 
 	$subres = sql_query("SELECT COUNT(*) FROM comments WHERE torrent = $id");
-	$subrow = mysql_fetch_array($subres);
+	$subrow = mysqli_fetch_assoc($subres);
 	$count = $subrow[0];
 
 	$limited = 10;
@@ -703,7 +703,7 @@ if (!$count) {
 	"u.username, u.title, u.class, u.donor, u.downloaded, u.uploaded, u.gender, u.last_access, e.username AS editedbyname FROM comments AS c LEFT JOIN users AS u ON c.user = u.id LEFT JOIN users AS e ON c.editedby = e.id LEFT JOIN comments_parsed AS cp ON cp.cid = c.id WHERE torrent = " .
 	"$id ORDER BY c.id $limit") or sqlerr(__FILE__, __LINE__);
 	$allrows = array();
-	while ($subrow = mysql_fetch_array($subres))
+	while ($subrow = mysqli_fetch_assoc($subres))
 	    $allrows[] = $subrow;
 
 
