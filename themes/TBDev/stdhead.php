@@ -426,10 +426,19 @@ if ($CURUSER) {
 	}
 }
 
-if (COOKIE_SALT == 'default') {
-    print("<p><table border=0 cellspacing=0 cellpadding=10 bgcolor=orange><tr><td style='padding: 10px; background: orange'>\n");
-    print("<b><font color=white>�������������, ������ COOKIE_SALT � include/init.php ������, ��� ��������� ������ � ����!</font></b>");
-    print("</td></tr></table></p>\n");
+// Проверяем, определена ли константа COOKIE_SALT
+if (!defined('COOKIE_SALT')) {
+    // Если не определена, создаем с дефолтным значением для отображения ошибки
+    define('COOKIE_SALT', 'default');
+}
+
+if (COOKIE_SALT === 'default') {
+    echo "<p><table border='0' cellspacing='0' cellpadding='10' style='background: orange; margin: 10px auto;'>
+        <tr><td style='padding: 10px; background: orange; color: white; text-align: center;'>
+            <b>ВНИМАНИЕ БЕЗОПАСНОСТИ!</b><br>
+            Пожалуйста, измените значение COOKIE_SALT в файле include/init.php на уникальное,<br>
+            чтобы защитить сайт от взлома через куки!
+        </td></tr></table></p>\n";
 }
 
 if ($CURUSER['override_class'] != 255 && $CURUSER) { // Second condition needed so that this box isn't displayed for non members/logged out members.
