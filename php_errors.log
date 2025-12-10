@@ -115,3 +115,46 @@ Stack trace:
 #4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
 #5 {main}
   thrown in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 22
+[10-Dec-2025 12:43:52 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 22
+[10-Dec-2025 12:43:52 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-server_load.php:10
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(18): include()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(244): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-server_load.php on line 10
+[10-Dec-2025 12:44:44 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-server_load.php:10
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(18): include()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(244): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-server_load.php on line 10
+[10-Dec-2025 12:44:44 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_assoc() in C:\OSPanel\domains\tbdev.net\include\cleanup.php:114
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(662): docleanup()
+#1 [internal function]: autoclean()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 114
+[10-Dec-2025 12:44:49 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-server_load.php:10
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(18): include()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(244): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-server_load.php on line 10
+[10-Dec-2025 12:44:49 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-server_load.php:10
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(18): include()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(244): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-server_load.php on line 10
