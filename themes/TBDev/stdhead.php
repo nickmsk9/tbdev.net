@@ -441,10 +441,13 @@ if (COOKIE_SALT === 'default') {
         </td></tr></table></p>\n";
 }
 
-if ($CURUSER['override_class'] != 255 && $CURUSER) { // Second condition needed so that this box isn't displayed for non members/logged out members.
-	print("<p><table border=0 cellspacing=0 cellpadding=10 bgcolor=green><tr><td style='padding: 10px; background: green'>\n");
-	print("<b><a href=\"$DEFAULTBASEURL/restoreclass.php\"><font color=white>{$tracker_lang['lower_class']}</font></a></b>");
-	print("</td></tr></table></p>\n");
+// Проверяем сначала существование $CURUSER, затем доступ к элементу массива
+if (isset($CURUSER) && is_array($CURUSER) && isset($CURUSER['override_class'])) {
+    if ($CURUSER['override_class'] != 255) {
+        print("<p><table border='0' cellspacing='0' cellpadding='10' style='background: green; margin: 10px auto;'><tr><td style='padding: 10px; background: green; text-align: center;'>\n");
+        print("<b><a href=\"{$DEFAULTBASEURL}restoreclass.php\" style='color: white;'>{$tracker_lang['lower_class']}</a></b>");
+        print("</td></tr></table></p>\n");
+    }
 }
 
 show_blocks('c');
