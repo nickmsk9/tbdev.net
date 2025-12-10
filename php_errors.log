@@ -214,3 +214,15 @@ Stack trace:
 #4 C:\OSPanel\domains\tbdev.net\index.php(72): stdfoot()
 #5 {main}
   thrown in C:\OSPanel\domains\tbdev.net\blocks\block-online.php on line 32
+[10-Dec-2025 13:06:13 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_assoc() in C:\OSPanel\domains\tbdev.net\include\cleanup.php:114
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(660): docleanup()
+#1 [internal function]: autoclean()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 114
+[10-Dec-2025 16:12:40 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_assoc() in C:\OSPanel\domains\tbdev.net\include\cleanup.php:114
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(660): docleanup()
+#1 [internal function]: autoclean()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 114

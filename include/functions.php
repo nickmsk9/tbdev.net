@@ -858,7 +858,19 @@ function sqlesc($value, bool $force = false): string
 }
 
 function sqlwildcardesc($x) {
-	return str_replace(array("%","_"), array("\\%","\\_"), mysql_real_escape_string($x));
+    global $mysql_link; // или как называется ваше подключение к БД
+    
+    if (!isset($mysql_link)) {
+        return $x; // или выбросить исключение
+    }
+    
+    // Экранируем базовые опасные символы для SQL
+    $escaped = mysqli_real_escape_string($mysql_link, $x);
+    
+    // Экранируем специальные символы для оператора LIKE: % и _
+    $escaped = str_replace(array("%", "_"), array("\\%", "\\_"), $escaped);
+    
+    return $escaped;
 }
 
 function urlparse($m) {
