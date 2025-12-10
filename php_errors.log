@@ -1,0 +1,49 @@
+[10-Dec-2025 10:21:46 Europe/Moscow] PHP Deprecated:  Optional parameter $html declared before required parameter $size is implicitly treated as a required parameter in C:\OSPanel\domains\tbdev.net\include\functions.php on line 1014
+[10-Dec-2025 10:21:46 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function get_magic_quotes_gpc() in C:\OSPanel\domains\tbdev.net\include\core.php:66
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\bittorrent.php(131): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(36): require_once('C:\\OSPanel\\doma...')
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\core.php on line 66
+[10-Dec-2025 10:21:46 Europe/Moscow] PHP Deprecated:  Optional parameter $html declared before required parameter $size is implicitly treated as a required parameter in C:\OSPanel\domains\tbdev.net\include\functions.php on line 1014
+[10-Dec-2025 10:21:46 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function get_magic_quotes_gpc() in C:\OSPanel\domains\tbdev.net\include\core.php:66
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\bittorrent.php(131): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(36): require_once('C:\\OSPanel\\doma...')
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\core.php on line 66
+[10-Dec-2025 10:22:57 Europe/Moscow] PHP Deprecated:  Optional parameter $html declared before required parameter $size is implicitly treated as a required parameter in C:\OSPanel\domains\tbdev.net\include\functions.php on line 1014
+[10-Dec-2025 10:22:57 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function get_magic_quotes_gpc() in C:\OSPanel\domains\tbdev.net\include\core.php:66
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\bittorrent.php(131): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(36): require_once('C:\\OSPanel\\doma...')
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\core.php on line 66
+[10-Dec-2025 10:22:57 Europe/Moscow] PHP Deprecated:  Optional parameter $html declared before required parameter $size is implicitly treated as a required parameter in C:\OSPanel\domains\tbdev.net\include\functions.php on line 1014
+[10-Dec-2025 10:22:57 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function get_magic_quotes_gpc() in C:\OSPanel\domains\tbdev.net\include\core.php:66
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\bittorrent.php(131): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(36): require_once('C:\\OSPanel\\doma...')
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\core.php on line 66
+[10-Dec-2025 10:22:57 Europe/Moscow] PHP Deprecated:  Optional parameter $html declared before required parameter $size is implicitly treated as a required parameter in C:\OSPanel\domains\tbdev.net\include\functions.php on line 1014
+[10-Dec-2025 10:22:57 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function get_magic_quotes_gpc() in C:\OSPanel\domains\tbdev.net\include\core.php:66
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\bittorrent.php(131): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(36): require_once('C:\\OSPanel\\doma...')
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\core.php on line 66
+[10-Dec-2025 10:22:57 Europe/Moscow] PHP Deprecated:  Optional parameter $html declared before required parameter $size is implicitly treated as a required parameter in C:\OSPanel\domains\tbdev.net\include\functions.php on line 1014
+[10-Dec-2025 10:22:57 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function get_magic_quotes_gpc() in C:\OSPanel\domains\tbdev.net\include\core.php:66
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\bittorrent.php(131): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(36): require_once('C:\\OSPanel\\doma...')
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\core.php on line 66
+[10-Dec-2025 10:24:49 Europe/Moscow] PHP Deprecated:  Optional parameter $html declared before required parameter $size is implicitly treated as a required parameter in C:\OSPanel\domains\tbdev.net\include\functions.php on line 1010
+[10-Dec-2025 10:24:49 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function get_magic_quotes_gpc() in C:\OSPanel\domains\tbdev.net\include\core.php:66
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\bittorrent.php(131): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(36): require_once('C:\\OSPanel\\doma...')
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\core.php on line 66
