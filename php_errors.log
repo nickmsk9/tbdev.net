@@ -700,3 +700,159 @@ Stack trace:
 #4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
 #5 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\blocks.php on line 107
+[10-Dec-2025 11:06:15 Europe/Moscow] PHP Parse error:  syntax error, unexpected end of file, expecting "," or ";" in C:\OSPanel\domains\tbdev.net\include\blocks.php(112) : eval()'d code on line 10
+[10-Dec-2025 11:06:16 Europe/Moscow] PHP Parse error:  syntax error, unexpected end of file, expecting "," or ";" in C:\OSPanel\domains\tbdev.net\include\blocks.php(112) : eval()'d code on line 10
+[10-Dec-2025 11:06:31 Europe/Moscow] PHP Fatal error:  Uncaught Error: Object of class Language could not be converted to string in C:\OSPanel\domains\tbdev.net\include\blocks.php:115
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(115): str_replace()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(128): {closure}()
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(38): themesidebox()
+#3 C:\OSPanel\domains\tbdev.net\include\blocks.php(191): render_blocks()
+#4 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#5 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#6 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#7 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\blocks.php on line 115
+[10-Dec-2025 11:06:32 Europe/Moscow] PHP Fatal error:  Uncaught Error: Object of class Language could not be converted to string in C:\OSPanel\domains\tbdev.net\include\blocks.php:115
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(115): str_replace()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(128): {closure}()
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(38): themesidebox()
+#3 C:\OSPanel\domains\tbdev.net\include\blocks.php(191): render_blocks()
+#4 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#5 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#6 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#7 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\blocks.php on line 115
+[10-Dec-2025 11:06:32 Europe/Moscow] PHP Fatal error:  Uncaught Error: Object of class Language could not be converted to string in C:\OSPanel\domains\tbdev.net\include\blocks.php:115
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(115): str_replace()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(128): {closure}()
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(38): themesidebox()
+#3 C:\OSPanel\domains\tbdev.net\include\blocks.php(191): render_blocks()
+#4 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#5 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#6 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#7 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\blocks.php on line 115
+[10-Dec-2025 11:06:33 Europe/Moscow] PHP Fatal error:  Uncaught Error: Object of class Language could not be converted to string in C:\OSPanel\domains\tbdev.net\include\blocks.php:115
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(115): str_replace()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(128): {closure}()
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(38): themesidebox()
+#3 C:\OSPanel\domains\tbdev.net\include\blocks.php(191): render_blocks()
+#4 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#5 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#6 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#7 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\blocks.php on line 115
+[10-Dec-2025 11:08:02 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_row() in C:\OSPanel\domains\tbdev.net\include\functions_global.php:583
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\blocks\block-releases.php(9): get_row_count()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(191): render_blocks()
+#3 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#4 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#5 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#6 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 583
+[10-Dec-2025 11:08:03 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_row() in C:\OSPanel\domains\tbdev.net\include\functions_global.php:583
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\blocks\block-releases.php(9): get_row_count()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(191): render_blocks()
+#3 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#4 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#5 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#6 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 583
+[10-Dec-2025 11:08:04 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_row() in C:\OSPanel\domains\tbdev.net\include\functions_global.php:583
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\blocks\block-releases.php(9): get_row_count()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(191): render_blocks()
+#3 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#4 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#5 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#6 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 583
+[10-Dec-2025 11:08:04 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_row() in C:\OSPanel\domains\tbdev.net\include\functions_global.php:583
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\blocks\block-releases.php(9): get_row_count()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(191): render_blocks()
+#3 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#4 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#5 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#6 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 583
+[10-Dec-2025 11:09:14 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_row() in C:\OSPanel\domains\tbdev.net\include\functions_global.php:583
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\blocks\block-releases.php(9): get_row_count()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(191): render_blocks()
+#3 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#4 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#5 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#6 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 583
+[10-Dec-2025 11:09:54 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_row() in C:\OSPanel\domains\tbdev.net\include\functions_global.php:583
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\blocks\block-releases.php(9): get_row_count()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(191): render_blocks()
+#3 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#4 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#5 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#6 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 583
+[10-Dec-2025 11:10:01 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_row() in C:\OSPanel\domains\tbdev.net\include\functions_global.php:583
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\blocks\block-releases.php(9): get_row_count()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(191): render_blocks()
+#3 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#4 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#5 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#6 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 583
+[10-Dec-2025 11:10:09 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_row() in C:\OSPanel\domains\tbdev.net\include\functions_global.php:583
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\blocks\block-releases.php(9): get_row_count()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(232): render_blocks()
+#3 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#4 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#5 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#6 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 583
+[10-Dec-2025 11:10:09 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_row() in C:\OSPanel\domains\tbdev.net\include\functions_global.php:583
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\blocks\block-releases.php(9): get_row_count()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(232): render_blocks()
+#3 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#4 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#5 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#6 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 583
+[10-Dec-2025 11:10:10 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_row() in C:\OSPanel\domains\tbdev.net\include\functions_global.php:583
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\blocks\block-releases.php(9): get_row_count()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(232): render_blocks()
+#3 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#4 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#5 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#6 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 583
+[10-Dec-2025 11:10:10 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_row() in C:\OSPanel\domains\tbdev.net\include\functions_global.php:583
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\blocks\block-releases.php(9): get_row_count()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\include\blocks.php(232): render_blocks()
+#3 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#4 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#5 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#6 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 583
