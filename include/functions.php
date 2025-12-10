@@ -189,24 +189,46 @@ function sql_query($query) {
 	return $result;
 }
 
-function dbconn($autoclean = false, $lightmode = false) {
-	global $mysql_host, $mysql_user, $mysql_pass, $mysql_db, $mysql_charset;
-
-	if (!@mysql_connect($mysql_host, $mysql_user, $mysql_pass))
-		die("[" . mysql_errno() . "] dbconn: mysql_connect: " . mysql_error());
-
-	mysql_select_db($mysql_db)
-		or die("dbconn: mysql_select_db: " . mysql_error());
-
-	mysql_query("SET NAMES $mysql_charset");
-
-	userlogin($lightmode);
-
-	if (basename($_SERVER['SCRIPT_FILENAME']) == 'index.php')
-		register_shutdown_function("autoclean");
-
-	register_shutdown_function("mysql_close");
-
+function dbconn(bool $autoclean = false, bool $lightmode = false): void
+{
+    global $mysql_host, $mysql_user, $mysql_pass, $mysql_db, $mysql_charset;
+    
+    // Используем mysqli вместо устаревшего mysql
+    $mysqli = mysqli_init();
+    
+    if (!$mysqli) {
+        die("dbconn: Не удалось инициализировать MySQLi");
+    }
+    
+    // Устанавливаем кодировку подключения
+    if (!mysqli_options($mysqli, MYSQLI_SET_CHARSET_NAME, $mysql_charset)) {
+        die("dbconn: Не удалось установить кодировку");
+    }
+    
+    // Устанавливаем подключение
+    if (!mysqli_real_connect($mysqli, $mysql_host, $mysql_user, $mysql_pass, $mysql_db)) {
+        die("[" . mysqli_connect_errno() . "] dbconn: mysqli_connect: " . mysqli_connect_error());
+    }
+    
+    // Сохраняем соединение в глобальной переменной для обратной совместимости
+    global $mysql_link;
+    $mysql_link = $mysqli;
+    
+    // Устанавливаем кодировку
+    mysqli_set_charset($mysqli, $mysql_charset);
+    
+    userlogin($lightmode);
+    
+    if (basename($_SERVER['SCRIPT_FILENAME']) == 'index.php') {
+        register_shutdown_function("autoclean");
+    }
+    
+    // Функция закрытия соединения при завершении скрипта
+    register_shutdown_function(function() use ($mysqli) {
+        if ($mysqli) {
+            mysqli_close($mysqli);
+        }
+    });
 }
 
 function userlogin($lightmode = false) {
