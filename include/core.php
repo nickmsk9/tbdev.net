@@ -61,12 +61,6 @@ if (!isset($HTTP_POST_VARS) && isset($_POST)) {
     $HTTP_POST_FILES = $_FILES;    // Загруженные файлы
 }
 
-if (PHP_VERSION_ID < 80000 && function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
-    // Очищаем данные от автоматически добавленных слэшей
-    if (!empty($_GET))    { $_GET    = strip_magic_quotes($_GET);    }
-    if (!empty($_POST))   { $_POST   = strip_magic_quotes($_POST);   }
-    if (!empty($_COOKIE)) { $_COOKIE = strip_magic_quotes($_COOKIE); }
-}
 
 // ДОБАВЛЕНИЕ ESCAPED-СЛЭШЕЙ ДЛЯ БЕЗОПАСНОСТИ SQL-ЗАПРОСОВ
     // Обработка GET-параметров
