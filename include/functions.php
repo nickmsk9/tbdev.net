@@ -202,46 +202,47 @@ function local_user() {
 
 function sql_query(string $query) 
 {
-	global $queries, $query_stat, $querytime, $mysql_link;
-	
-	$queries++;
-	$query_start_time = microtime(true); // Используем microtime для точности
-	$result = mysqli_query($mysql_link, $query);
-	$query_end_time = microtime(true);
-	$query_time = ($query_end_time - $query_start_time);
-	$querytime += $query_time;
-	
-	if (defined('DEBUG_MODE') && DEBUG_MODE) {
-		$query_stat[] = [
-			"seconds" => round($query_time, 6),
-			"query" => $query,
-			"error" => mysqli_error($mysql_link)
-		];
-	} else {
-		$query_stat[] = [
-			"seconds" => round($query_time, 6),
-			"query" => $query
-		];
-	}
-	
-	if (!$result) {
-		// Логирование ошибок SQL
-		$error = mysqli_error($mysql_link);
-		$errno = mysqli_errno($mysql_link);
-		
-		// Выводим ошибку только в режиме отладки
-		if (defined('DEBUG_MODE') && DEBUG_MODE) {
-			die("SQL Error [$errno]: $error<br>Query: $query");
-		} else {
-			// В продакшене логируем, но не показываем
-			error_log("SQL Error [$errno]: $error - Query: $query");
-			return false;
-		}
-	}
-	
-	return $result;
+    global $queries, $query_stat, $querytime, $mysql_link;
+    
+    // Инициализация переменных если они не существуют
+    $queries = $queries ?? 0;
+    $query_stat = $query_stat ?? [];
+    $querytime = $querytime ?? 0;
+    
+    $queries++;
+    $query_start_time = microtime(true);
+    
+    // Выполняем запрос
+    $result = mysqli_query($mysql_link, $query);
+    
+    $query_end_time = microtime(true);
+    $query_time = ($query_end_time - $query_start_time);
+    $querytime += $query_time;
+    
+    // Логирование запроса
+    $query_stat[] = [
+        "seconds" => round($query_time, 6),
+        "query" => $query,
+        "error" => $result ? '' : mysqli_error($mysql_link)
+    ];
+    
+    if (!$result) {
+        $error = mysqli_error($mysql_link);
+        $errno = mysqli_errno($mysql_link);
+        
+        // Создаем лог ошибок
+        error_log("SQL Error [$errno]: $error - Query: $query");
+        
+        // В режиме отладки показываем ошибку
+        if (defined('DEBUG_MODE') && DEBUG_MODE) {
+            die("SQL Error [$errno]: $error<br>Query: $query");
+        }
+        
+        return false;
+    }
+    
+    return $result;
 }
-
 function dbconn(bool $autoclean = false, bool $lightmode = false): void
 {
     global $mysql_host, $mysql_user, $mysql_pass, $mysql_db, $mysql_charset;
@@ -624,32 +625,41 @@ function getip() {
 	return $ip;
 }
 
-function autoclean() {
-	global $autoclean_interval, $rootpath;
+function autoclean(): void 
+{
+    global $autoclean_interval, $rootpath, $mysql_link;
 
-	$now = time();
-	$docleanup = 0;
+    $now = time();
+    $docleanup = 0;
 
-	$res = sql_query("SELECT value_u FROM avps WHERE arg = 'lastcleantime'");
-	$row = mysqli_fetch_array($res);
-	if (!$row) {
-		sql_query("INSERT INTO avps (arg, value_u) VALUES ('lastcleantime',$now)");
-		return;
-	}
-	$ts = $row[0];
-	if ($ts + $autoclean_interval > $now)
-		return;
-	if ($ts > $now) { // Fuck, someone has set time in future!
-		sql_query("UPDATE avps SET value_u=$now WHERE arg='lastcleantime' AND value_u = $ts");
-		return;
-	}
-	sql_query("UPDATE avps SET value_u=$now WHERE arg='lastcleantime' AND value_u = $ts");
-	if (!mysql_affected_rows())
-		return;
+    $res = sql_query("SELECT value_u FROM avps WHERE arg = 'lastcleantime'");
+    $row = mysqli_fetch_array($res);
+    
+    if (!$row) {
+        // Исправленный INSERT с указанием значения для поля value_s
+        sql_query("INSERT INTO avps (arg, value_u, value_s) VALUES ('lastcleantime', $now, '')");
+        return;
+    }
+    
+    $ts = $row[0];
+    if ($ts + $autoclean_interval > $now) {
+        return;
+    }
+    
+    if ($ts > $now) { // Кто-то установил время в будущем!
+        sql_query("UPDATE avps SET value_u = $now WHERE arg = 'lastcleantime' AND value_u = $ts");
+        return;
+    }
+    
+    sql_query("UPDATE avps SET value_u = $now WHERE arg = 'lastcleantime' AND value_u = $ts");
+    
+    // Используем mysqli_affected_rows вместо mysql_affected_rows
+    if (mysqli_affected_rows($mysql_link) === 0) {
+        return;
+    }
 
-	require_once($rootpath . 'include/cleanup.php');
-
-	docleanup();
+    require_once($rootpath . 'include/cleanup.php');
+    docleanup();
 }
 
 function mksize($bytes) {
