@@ -214,10 +214,10 @@ function userlogin($lightmode = false) {
 	unset($GLOBALS["CURUSER"]);
 
 	if ($_COOKIE_SALT == 'default' && $_SERVER['SERVER_ADDR'] != '127.0.0.1' && $_SERVER['SERVER_ADDR'] != $_SERVER['REMOTE_ADDR'])
-		die('Скрипт заблокирован! Измените значение переменной $_COOKIE_SALT в файле include/config.local.php на случайное');
+		die('пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ! пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ $_COOKIE_SALT пїЅ пїЅпїЅпїЅпїЅпїЅ include/config.local.php пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ');
 
 	if (empty($_COOKIE_SALT) || !isset($_COOKIE_SALT))
-		die('Идите и учите <a href="http://www.php.net">PHP</a>... Сказано было ИЗМЕНИТЬ значение, а не удалить переменную!');
+		die('пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ <a href="http://www.php.net">PHP</a>... пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!');
 
 	$ip = getip();
 	$nip = ip2long($ip);
@@ -290,7 +290,7 @@ function userlogin($lightmode = false) {
 	if ($row['enabled'] == 'no') {
 		$GLOBALS['use_blocks'] = 0;
 		list($reason, $disuntil) = mysql_fetch_row(sql_query('SELECT reason, disuntil FROM users_ban WHERE userid = '.$row['id']));
-		stderr($tracker_lang['error'], 'Вы забанены на трекере.' . ($disuntil != '0000-00-00 00:00:00' ? '<br />Дата снятия бана: '.$disuntil : '<br />Дата снятия бана: никогда') . '<br />Причина: '.$reason);
+		stderr($tracker_lang['error'], 'пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.' . ($disuntil != '0000-00-00 00:00:00' ? '<br />пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ: '.$disuntil : '<br />пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅпїЅпїЅ') . '<br />пїЅпїЅпїЅпїЅпїЅпїЅпїЅ: '.$reason);
 	}
 
 	if (!$lightmode)
@@ -377,14 +377,58 @@ function unesc($x) {
 	return $x;
 }
 
-function gzip() {
-	global $use_gzip;
-	static $already_loaded;
-	if (extension_loaded('zlib') && ini_get('zlib.output_compression') != '1' && ini_get('output_handler') != 'ob_gzhandler' && $use_gzip && !$already_loaded) {
-		@ob_start('ob_gzhandler');
-	} elseif (!$already_loaded)
-		@ob_start();
-	$already_loaded = true;
+function gzip(): void
+{
+    global $use_gzip;
+    static $already_loaded = false;
+    
+    // Р•СЃР»Рё С„СѓРЅРєС†РёСЏ СѓР¶Рµ Р±С‹Р»Р° РІС‹Р·РІР°РЅР°, РІС‹С…РѕРґРёРј
+    if ($already_loaded) {
+        return;
+    }
+    
+    // РџСЂРѕРІРµСЂСЏРµРј, РІРєР»СЋС‡РµРЅРѕ Р»Рё СЃР¶Р°С‚РёРµ РІ РЅР°СЃС‚СЂРѕР№РєР°С…
+    if (!$use_gzip) {
+        @ob_start();
+        $already_loaded = true;
+        return;
+    }
+    
+    // РџСЂРѕРІРµСЂСЏРµРј РїРѕРґРґРµСЂР¶РєСѓ zlib
+    if (!extension_loaded('zlib')) {
+        @ob_start();
+        $already_loaded = true;
+        return;
+    }
+    
+    // РџСЂРѕРІРµСЂСЏРµРј, РЅРµ РІРєР»СЋС‡РµРЅРѕ Р»Рё СЃР¶Р°С‚РёРµ РЅР° СѓСЂРѕРІРЅРµ СЃРµСЂРІРµСЂР°
+    $zlib_output_compression = (string)ini_get('zlib.output_compression');
+    if ($zlib_output_compression === '1' || strtolower($zlib_output_compression) === 'on') {
+        $already_loaded = true;
+        return;
+    }
+    
+    // РџСЂРѕРІРµСЂСЏРµРј, РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅ Р»Рё РґСЂСѓРіРѕР№ РѕР±СЂР°Р±РѕС‚С‡РёРє РІС‹РІРѕРґР°
+    $output_handler = (string)ini_get('output_handler');
+    if ($output_handler === 'ob_gzhandler') {
+        $already_loaded = true;
+        return;
+    }
+    
+    // Р’РєР»СЋС‡Р°РµРј Р±СѓС„РµСЂРёР·Р°С†РёСЋ СЃ Gzip
+    try {
+        if (ob_start('ob_gzhandler')) {
+            $already_loaded = true;
+            return;
+        }
+    } catch (Throwable $e) {
+        // Р›РѕРіРёСЂСѓРµРј РѕС€РёР±РєСѓ РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё
+        // error_log('Gzip error: ' . $e->getMessage());
+    }
+    
+    // Р¤РѕР»Р±СЌРє: РѕР±С‹С‡РЅР°СЏ Р±СѓС„РµСЂРёР·Р°С†РёСЏ
+    @ob_start();
+    $already_loaded = true;
 }
 
 // IP Validation
@@ -701,7 +745,7 @@ function stdfoot() {
 	require_once('themes/' . $ss_uri . '/stdfoot.php');
 	if ((DEBUG_MODE || isset($_GET['yuna'])) && count($query_stat)) {
 		foreach ($query_stat as $key => $value) {
-			print('<div>['.($key+1).'] => <b>'.($value['seconds'] > 0.01 ? '<font color="red" title="Рекомендуется оптимизировать запрос. Время исполнения превышает норму.">'.$value['seconds'].'</font>' : '<font color="green" title="Запрос не нуждается в оптимизации. Время исполнения допустимое.">'.$value['seconds'].'</font>' ).'</b> ['.htmlspecialchars_uni($value['query']).']</div>'."\n");
+			print('<div>['.($key+1).'] => <b>'.($value['seconds'] > 0.01 ? '<font color="red" title="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.">'.$value['seconds'].'</font>' : '<font color="green" title="пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.">'.$value['seconds'].'</font>' ).'</b> ['.htmlspecialchars_uni($value['query']).']</div>'."\n");
 		}
 		print('<br />');
 	}
@@ -754,7 +798,7 @@ function logincookie($id, $passhash, $updatedb = 1, $expires = 0x7fffffff) {
 }
 
 function logoutcookie() {
-//	setcookie(COOKIE_UID, '', 0x7fffffff, '/'); // Не стоит убирать комментирование т.к небудет работать система анти-двойной реги
+//	setcookie(COOKIE_UID, '', 0x7fffffff, '/'); // пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ.пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	setcookie(COOKIE_PASSHASH, '', 0x7fffffff, '/');
 }
 
@@ -804,19 +848,19 @@ function pager($rpp, $count, $href, $opts = array()) {
 	else
 		$page = $pagedefault;
 
-	$pager = "<td class=\"pager\">Страницы:</td><td class=\"pagebr\">&nbsp;</td>";
+	$pager = "<td class=\"pager\">пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:</td><td class=\"pagebr\">&nbsp;</td>";
 	$pager2 = "";
 	$bregs = "";
 
 	$mp = $pages - 1;
-	$as = "<b>«</b>";
+	$as = "<b>пїЅ</b>";
 	if ($page >= 1) {
 		$pager .= "<td class=\"pager\">";
 		$pager .= "<a href=\"{$href}page=" . ($page - 1) . "\" style=\"text-decoration: none;\">$as</a>";
 		$pager .= "</td><td class=\"pagebr\">&nbsp;</td>";
 	}
 
-	$as = "<b>»</b>";
+	$as = "<b>пїЅ</b>";
 	if ($page < $mp && $mp >= 0) {
 		$pager2 .= "<td class=\"pager\">";
 		$pager2 .= "<a href=\"{$href}page=" . ($page + 1) . "\" style=\"text-decoration: none;\">$as</a>";
@@ -853,7 +897,7 @@ function pager($rpp, $count, $href, $opts = array()) {
 				  }
 		$pagerstr = join("", $pagerarr);
 		$pagertop = "<table class=\"main\"><tr>$pager $pagerstr $pager2</tr></table>\n";
-		$pagerbottom = "Всего $count на $i страницах по $rpp на каждой странице.<br /><br /><table class=\"main\">$pager $pagerstr $pager2</table>\n";
+		$pagerbottom = "пїЅпїЅпїЅпїЅпїЅ $count пїЅпїЅ $i пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ $rpp пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.<br /><br /><table class=\"main\">$pager $pagerstr $pager2</table>\n";
 	}
 	else {
 		$pagertop = $pager;
@@ -964,7 +1008,7 @@ function get_user_icons($arr, $big = false) {
 function parked() {
 	   global $CURUSER;
 	   if ($CURUSER['parked'] == 'yes')
-		  stderr($tracker_lang['error'], 'Ваш аккаунт припаркован.');
+		  stderr($tracker_lang['error'], 'пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.');
 }
 
 function magnet($html = true, $info_hash, $name, $size, $announces = array()) {
@@ -972,10 +1016,10 @@ function magnet($html = true, $info_hash, $name, $size, $announces = array()) {
 	return sprintf('magnet:?xt=urn:btih:%2$s%1$sdn=%3$s%1$sxl=%4$d%1$str=%5$s', $ampersand, $info_hash, urlencode($name), $size, implode($ampersand . 'tr=', $announces));
 }
 
-// В этой строке забит копирайт. При его убирании можешь поплатиться рабочим трекером ;) В данном случае - убирая строчки ниже ты не сможешь использовать трекер.
+// пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ;) пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
 define ('VERSION', '');
 define ('NUM_VERSION', '2.1.18');
-define ('TBVERSION', 'Powered by <a href="http://www.tbdev.net" target="_blank" style="cursor: help;" title="Бесплатная OpenSource база" class="copyright">TBDev</a> v'.NUM_VERSION.' <a href="http://bit-torrent.kiev.ua" target="_blank" style="cursor: help;" title="Сайт разработчика движка" class="copyright">Yuna Scatari Edition</a> '.VERSION.' Copyright &copy; 2001-'.date('Y'));
+define ('TBVERSION', 'Powered by <a href="http://www.tbdev.net" target="_blank" style="cursor: help;" title="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ OpenSource пїЅпїЅпїЅпїЅ" class="copyright">TBDev</a> v'.NUM_VERSION.' <a href="http://bit-torrent.kiev.ua" target="_blank" style="cursor: help;" title="пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ" class="copyright">Yuna Scatari Edition</a> '.VERSION.' Copyright &copy; 2001-'.date('Y'));
 
 function mysql_modified_rows () {
 	$info_str = mysql_info();
