@@ -286,3 +286,21 @@ Stack trace:
 #0 [internal function]: autoclean()
 #1 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 611
+[10-Dec-2025 10:42:34 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:42:34 Europe/Moscow] PHP Warning:  Undefined variable $messages in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 264
+[10-Dec-2025 10:42:34 Europe/Moscow] PHP Warning:  Undefined variable $outmessages in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 273
+[10-Dec-2025 10:42:34 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 334
+[10-Dec-2025 10:42:34 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 335
+[10-Dec-2025 10:42:34 Europe/Moscow] PHP Warning:  Undefined variable $medaldon in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 339
+[10-Dec-2025 10:42:34 Europe/Moscow] PHP Warning:  Undefined variable $warn in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 339
+[10-Dec-2025 10:42:34 Europe/Moscow] PHP Fatal error:  Uncaught Error: Undefined constant "COOKIE_SALT" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php:399
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(873): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 399
+[10-Dec-2025 10:42:34 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_array() in C:\OSPanel\domains\tbdev.net\include\functions.php:611
+Stack trace:
+#0 [internal function]: autoclean()
+#1 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 611
