@@ -26,11 +26,10 @@
 // +--------------------------------------------------------------------------+
 */
 
-# IMPORTANT: Do not edit below unless you know what you are doing!
 if (!defined("IN_TRACKER"))
-  die("Hacking attempt!");
+  die("Попытка взлома!");
 
-// INCLUDE/REQUIRE BACK-END
+// ПОДКЛЮЧЕНИЕ БЭКЕНД-СКРИПТОВ
 require_once($rootpath . 'include/init.php');
 require_once($rootpath . 'include/global.php');
 require_once($rootpath . 'include/config.php');
@@ -40,76 +39,77 @@ require_once($rootpath . 'include/blocks.php');
 require_once($rootpath . 'include/secrets.php');
 require_once($rootpath . 'include/secrets.local.php');
 
-// INCLUDE SECURITY BACK-END
+// ПОДКЛЮЧЕНИЕ СИСТЕМЫ БЕЗОПАСНОСТИ
 if ($ctracker) require_once($rootpath . 'include/ctracker.php');
 
-// LOAD GZIP/OUTPUT BUFFERING
+// ВКЛЮЧЕНИЕ GZIP-СЖАТИЯ И БУФЕРИЗАЦИИ ВЫВОДА
 if ($use_gzip) gzip();
 
-// IMPORTANT CONSTANTS
-define ("BETA", 0); // Set 0 to remove *BETA* notice.
-define ("BETA_NOTICE", "\n<br />��������! ������ �� ��� ������������ �������������!");
-define ("DEBUG_MODE", 0); // Shows the queries at the bottom of the page.
+// ВАЖНЫЕ КОНСТАНТЫ
+define("BETA", 0); // Установите 0, чтобы убрать пометку *BETA*
+define("BETA_NOTICE", "\n<br />Внимание! Это тестовая версия, не предназначенная для промышленного использования!");
+define("DEBUG_MODE", 0); // Показывает SQL-запросы внизу страницы для отладки
 
-// BACKWARD CODE COMPATIBILITY
+// ОБЕСПЕЧЕНИЕ ОБРАТНОЙ СОВМЕСТИМОСТИ КОДА
+// Для старых скриптов, использующих устаревшие переменные
 if (!isset($HTTP_POST_VARS) && isset($_POST)) {
-	$HTTP_POST_VARS = $_POST;
-	$HTTP_GET_VARS = $_GET;
-	$HTTP_SERVER_VARS = $_SERVER;
-	$HTTP_COOKIE_VARS = $_COOKIE;
-	$HTTP_ENV_VARS = $_ENV;
-	$HTTP_POST_FILES = $_FILES;
+    $HTTP_POST_VARS = $_POST;      // POST-данные формы
+    $HTTP_GET_VARS = $_GET;        // GET-параметры URL
+    $HTTP_SERVER_VARS = $_SERVER;  // Серверные переменные
+    $HTTP_COOKIE_VARS = $_COOKIE;  // Куки пользователя
+    $HTTP_ENV_VARS = $_ENV;        // Переменные окружения
+    $HTTP_POST_FILES = $_FILES;    // Загруженные файлы
 }
 
-// STRIP MAGIC QUOTES FROM REQUEST
+// УДАЛЕНИЕ ESCAPED-СЛЭШЕЙ (MAGIC QUOTES) ИЗ ВХОДНЫХ ДАННЫХ
+// Magic Quotes - устаревшая функция безопасности PHP, автоматически добавляющая слэши
 if (get_magic_quotes_gpc()) {
-	if (!empty($_GET))    { $_GET    = strip_magic_quotes($_GET);    }
-	if (!empty($_POST))   { $_POST   = strip_magic_quotes($_POST);   }
-	if (!empty($_COOKIE)) { $_COOKIE = strip_magic_quotes($_COOKIE); }
+    // Очищаем данные от автоматически добавленных слэшей
+    if (!empty($_GET))    { $_GET    = strip_magic_quotes($_GET);    }
+    if (!empty($_POST))   { $_POST   = strip_magic_quotes($_POST);   }
+    if (!empty($_COOKIE)) { $_COOKIE = strip_magic_quotes($_COOKIE); }
 }
-// DO SOME EXTRA STUFF
+
+// ДОБАВЛЕНИЕ ESCAPED-СЛЭШЕЙ ДЛЯ БЕЗОПАСНОСТИ SQL-ЗАПРОСОВ
+// Если Magic Quotes отключены, добавляем слэши вручную для защиты от SQL-инъекций
 if (!get_magic_quotes_gpc()) {
-	if (is_array($HTTP_GET_VARS)) {
-		while (list($k, $v) = each($HTTP_GET_VARS)) {
-			if (is_array($HTTP_GET_VARS[$k])) {
-				while (list($k2, $v2) = each($HTTP_GET_VARS[$k])) {
-					$HTTP_GET_VARS[$k][$k2] = addslashes($v2);
-				}
-				@reset($HTTP_GET_VARS[$k]);
-			} else {
-				$HTTP_GET_VARS[$k] = addslashes($v);
-			}
-		}
-		@reset($HTTP_GET_VARS);
-	}
+    // Обработка GET-параметров
+    if (is_array($HTTP_GET_VARS)) {
+        foreach ($HTTP_GET_VARS as $k => $v) {
+            if (is_array($v)) {
+                foreach ($v as $k2 => $v2) {
+                    $HTTP_GET_VARS[$k][$k2] = addslashes($v2);
+                }
+            } else {
+                $HTTP_GET_VARS[$k] = addslashes($v);
+            }
+        }
+    }
 
-	if (is_array($HTTP_POST_VARS)) {
-		while (list($k, $v) = each($HTTP_POST_VARS)) {
-			if (is_array($HTTP_POST_VARS[$k])) {
-				while (list($k2, $v2) = each($HTTP_POST_VARS[$k])) {
-					$HTTP_POST_VARS[$k][$k2] = addslashes($v2);
-				}
-				@reset($HTTP_POST_VARS[$k]);
-			} else {
-				$HTTP_POST_VARS[$k] = addslashes($v);
-			}
-		}
-		@reset($HTTP_POST_VARS);
-	}
+    // Обработка POST-данных
+    if (is_array($HTTP_POST_VARS)) {
+        foreach ($HTTP_POST_VARS as $k => $v) {
+            if (is_array($v)) {
+                foreach ($v as $k2 => $v2) {
+                    $HTTP_POST_VARS[$k][$k2] = addslashes($v2);
+                }
+            } else {
+                $HTTP_POST_VARS[$k] = addslashes($v);
+            }
+        }
+    }
 
-	if (is_array($HTTP_COOKIE_VARS)) {
-		while (list($k, $v) = each($HTTP_COOKIE_VARS)) {
-			if (is_array($HTTP_COOKIE_VARS[$k])) {
-				while (list($k2, $v2) = each($HTTP_COOKIE_VARS[$k])) {
-					$HTTP_COOKIE_VARS[$k][$k2] = addslashes($v2);
-				}
-				@reset($HTTP_COOKIE_VARS[$k]);
-			} else {
-				$HTTP_COOKIE_VARS[$k] = addslashes($v);
-			}
-		}
-		@reset($HTTP_COOKIE_VARS);
-	}
+    // Обработка COOKIE
+    if (is_array($HTTP_COOKIE_VARS)) {
+        foreach ($HTTP_COOKIE_VARS as $k => $v) {
+            if (is_array($v)) {
+                foreach ($v as $k2 => $v2) {
+                    $HTTP_COOKIE_VARS[$k][$k2] = addslashes($v2);
+                }
+            } else {
+                $HTTP_COOKIE_VARS[$k] = addslashes($v);
+            }
+        }
+    }
 }
-
 ?>
