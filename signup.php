@@ -35,23 +35,37 @@ if ($deny_signup && !$allow_invite_signup)
 if ($CURUSER)
 	stderr($tracker_lang['error'], sprintf($tracker_lang['signup_already_registered'], $SITENAME));
 
-// Исправленная строка 38 - получаем данные правильно
 $result = sql_query("SELECT COUNT(id) as user_count FROM users");
 $row = mysqli_fetch_assoc($result);
-$users = $row['user_count'] ?? 0; // Используем значение по умолчанию 0
+$users = $row['user_count'] ?? 0;
 
 if ($users >= $maxusers) {
     stderr($tracker_lang['error'], sprintf($tracker_lang['signup_users_limit'], number_format($maxusers)));
 }
 
-// Исправленная строка 42 - проверяем существование ключа
-if (($_POST["agree"] ?? '') != "yes") {
-stdhead("Правила трекера");
+// Проверяем, нажата ли кнопка и отмечен ли чекбокс
+$show_registration_form = false;
+
+// Если форма была отправлена методом POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Проверяем, согласился ли пользователь с правилами
+    $agree = $_POST["agree"] ?? '';
+    
+    if ($agree === "yes") {
+        // Пользователь согласился с правилами - показываем форму регистрации
+        $show_registration_form = true;
+    }
+}
+
+// Если пользователь еще не согласился с правилами или это первый заход на страницу
+if (!$show_registration_form) {
+    // Показываем форму с правилами
+    stdhead("Правила трекера");
 ?>
 <div style="width:80%" align="center">
 <fieldset class="fieldset">
 <legend>Правила трекера</legend>
-<form method="post" action="<?=$PHP_SELF?>">
+<form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
 <table cellpadding="4" cellspacing="0" border="0" style="width:100%" class="tableinborder">
 <tr>
 <td class="tablea">Для продолжения регистрации, Вы должны согласиться со следующими правилами:</td></tr>
@@ -60,7 +74,7 @@ stdhead("Правила трекера");
 <div class="page" style="border-right: thin inset; padding-right: 6px; border-top: thin inset; padding-left: 6px; padding-bottom: 6px; overflow: auto; border-left: thin inset; padding-top: 1px; border-bottom: thin inset; height: 170px">
 <p><strong>Правила трекера</strong></p>
 <p>Регистрация на трекере абсолютно бесплатна! Настоятельно рекомендуем ознакомиться с правилами нашего проекта.
-Если вы согласны со всеми условиями, поставьте галочку рядом с 'Я согласен' и нажмите 'Регистрация'.
+Если вы согласны со всеми условиями, поставьте галочку рядом с 'Я согласен' и нажмите 'Продолжить регистрацию'.
 Если вы передумали регистрироваться, нажмите <a href="<?=$DEFAULTBASEURL;?>">здесь</a>, чтобы вернуться на главную страницу.</p>
 <p>Хотя модераторы и администраторы, обслуживающие <?=$SITENAME;?>, стараются удалять все оскорбительные и некорректные
 сообщения из трекера, все равно все сообщения просмотреть невозможно. Сообщения отражают точку зрения только
@@ -72,36 +86,33 @@ stdhead("Правила трекера");
 <tr><td class="tablea">
 <div>
 <label>
-<input class="tablea" type="checkbox" name="agree" value="yes">
-<input type="hidden" name="do" value="register">
-  <strong>Я согласен исполнять установленные правила, посещая <?=$SITENAME;?>.</strong>
+<input type="checkbox" name="agree" value="yes" required>
+<strong>Я согласен исполнять установленные правила, посещая <?=$SITENAME;?>.</strong>
 </label>
 </div>
 </td></tr>
 </table>
 </fieldset><p>
 <center>
-<input class="tableinborder" type="submit" value="Регистрация">
+<input type="submit" value="Продолжить регистрацию">
 </center>
 </form>
-<?
-stdfoot();
-die;
+</div>
+<?php
+    stdfoot();
+    die;
 }
 
+// Если код дошел сюда, значит пользователь согласился с правилами
+// Показываем форму регистрации
 stdhead($tracker_lang['signup_signup']);
-
-$countries = "<option value=\"0\">".$tracker_lang['signup_not_selected']."</option>\n";
-$ct_r = sql_query("SELECT id, name FROM countries ORDER BY name") or die;
-while ($ct_a = mysqli_fetch_assoc($ct_r))
-  $countries .= "<option value=\"$ct_a[id]\">$ct_a[name]</option>\n";
-
 ?>
+
 <span style="color: red; font-weight: bold;"><?=$tracker_lang['signup_use_cookies'];?></span>
 
-<?
+<?php
 if ($deny_signup && $allow_invite_signup)
-	stdmsg("Внимание", "Регистрация доступна только тем у кого есть код приглашения!");
+    stdmsg("Внимание", "Регистрация доступна только тем у кого есть код приглашения!");
 ?>
 
 <p>
@@ -116,13 +127,15 @@ if ($deny_signup && $allow_invite_signup)
 </td></tr>
 <tr><td align="right" class="heading"><?=$tracker_lang['signup_gender'];?></td><td align=left><input type=radio name=gender value=1><?=$tracker_lang['signup_male'];?><input type=radio name=gender value=2><?=$tracker_lang['signup_female'];?></td></tr>
 <?
-$year .= "<select name=year><option value=\"0000\">".$tracker_lang['my_year']."</option>\n";
+// Инициализируем переменные перед использованием
+$year = "<select name=year><option value=\"0000\">".$tracker_lang['my_year']."</option>\n";
 $i = "1920";
 while ($i <= (date('Y',time())-13)) {
 	$year .= "<option value=" .$i. ">".$i."</option>\n";
 	$i++;
 }
 $year .= "</select>\n";
+
 $birthmonths = array(
 	"01" => $tracker_lang['my_months_january'],
 	"02" => $tracker_lang['my_months_february'],
@@ -137,12 +150,14 @@ $birthmonths = array(
 	"11" => $tracker_lang['my_months_november'],
 	"12" => $tracker_lang['my_months_december'],
 );
+
 $month = "<select name=\"month\"><option value=\"00\">".$tracker_lang['my_month']."</option>\n";
 foreach ($birthmonths as $month_no => $show_month) {
 	$month .= "<option value=$month_no>$show_month</option>\n";
 }
 $month .= "</select>\n";
-$day .= "<select name=day><option value=\"00\">".$tracker_lang['my_day']."</option>\n";
+
+$day = "<select name=day><option value=\"00\">".$tracker_lang['my_day']."</option>\n";
 $i = 1;
 while ($i <= 31) {
 	if ($i < 10) {
@@ -153,6 +168,14 @@ while ($i <= 31) {
 	$i++;
 }
 $day .="</select>\n";
+
+// Получаем список стран (добавляем этот код перед использованием $countries)
+$countries = "<option value=\"0\">".$tracker_lang['signup_not_selected']."</option>\n";
+$ct_r = sql_query("SELECT id, name FROM countries ORDER BY name") or die;
+while ($ct_a = mysqli_fetch_assoc($ct_r))
+  $countries .= "<option value=\"$ct_a[id]\">$ct_a[name]</option>\n";
+
+// Теперь используем переменные
 tr($tracker_lang['my_birthdate'], $year.$month.$day ,1);
 tr($tracker_lang['my_country'], "<select name=country>\n$countries\n</select>",1);
 tr($tracker_lang['signup_contact'], "<table cellSpacing=\"3\" cellPadding=\"0\" width=\"100%\" border=\"0\">

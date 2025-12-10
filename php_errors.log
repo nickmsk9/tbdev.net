@@ -242,3 +242,9 @@ Stack trace:
 [10-Dec-2025 16:17:16 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 59
 [10-Dec-2025 16:17:16 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 60
 [10-Dec-2025 16:17:16 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 61
+[10-Dec-2025 16:28:22 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_assoc() in C:\OSPanel\domains\tbdev.net\include\cleanup.php:114
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(660): docleanup()
+#1 [internal function]: autoclean()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 114
