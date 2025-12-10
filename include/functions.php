@@ -149,17 +149,40 @@ function decode_to_utf8($int = 0) {
 	return $t;
 }
 
-function convert_unicode($t, $to = 'windows-1251') {
-	$to = strtolower($to);
-	if ($to == 'utf-8') {
-		$t = preg_replace( '#%u([0-9A-F]{1,4})#ie', "decode_to_utf8(hexdec('\\1'))", utf8_encode($t) );
-		$t = urldecode ($t);
-	} else {
-		$t = preg_replace( '#%u([0-9A-F]{1,4})#ie', "'&#' . hexdec('\\1') . ';'", $t );
-		$t = urldecode ($t);
-		$t = @html_entity_decode($t, ENT_NOQUOTES, $to);
-	}
-	return $t;
+function convert_unicode(string $t, string $to = 'windows-1251'): string 
+{
+    $to = strtolower($to);
+    
+    // Удаляем устаревший модификатор /e из preg_replace
+    if ($to == 'utf-8') {
+        $t = preg_replace_callback(
+            '#%u([0-9A-F]{1,4})#i', 
+            function($matches) {
+                $hex = hexdec($matches[1]);
+                if ($hex < 0x80) {
+                    return chr($hex);
+                } elseif ($hex < 0x800) {
+                    return chr(0xC0 | ($hex >> 6)) . chr(0x80 | ($hex & 0x3F));
+                } else {
+                    return chr(0xE0 | ($hex >> 12)) . chr(0x80 | (($hex >> 6) & 0x3F)) . chr(0x80 | ($hex & 0x3F));
+                }
+            }, 
+            $t
+        );
+        $t = urldecode($t);
+    } else {
+        $t = preg_replace_callback(
+            '#%u([0-9A-F]{1,4})#i',
+            function($matches) {
+                return '&#' . hexdec($matches[1]) . ';';
+            },
+            $t
+        );
+        $t = urldecode($t);
+        $t = html_entity_decode($t, ENT_NOQUOTES, $to);
+    }
+    
+    return $t;
 }
 
 function strip_magic_quotes($arr) {
