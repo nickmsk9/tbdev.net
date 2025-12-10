@@ -304,3 +304,75 @@ Stack trace:
 #0 [internal function]: autoclean()
 #1 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 611
+[10-Dec-2025 10:44:27 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:44:27 Europe/Moscow] PHP Warning:  Undefined variable $messages in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 264
+[10-Dec-2025 10:44:27 Europe/Moscow] PHP Warning:  Undefined variable $outmessages in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 273
+[10-Dec-2025 10:44:27 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 334
+[10-Dec-2025 10:44:27 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 335
+[10-Dec-2025 10:44:27 Europe/Moscow] PHP Warning:  Undefined variable $medaldon in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 339
+[10-Dec-2025 10:44:27 Europe/Moscow] PHP Warning:  Undefined variable $warn in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 339
+[10-Dec-2025 10:44:27 Europe/Moscow] PHP Fatal error:  Uncaught Error: Undefined constant "COOKIE_SALT" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php:399
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(873): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 399
+[10-Dec-2025 10:44:27 Europe/Moscow] PHP Fatal error:  Uncaught mysqli_sql_exception: Field 'value_s' doesn't have a default value in C:\OSPanel\domains\tbdev.net\include\functions.php:186
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(186): mysqli_query()
+#1 C:\OSPanel\domains\tbdev.net\include\functions.php(613): sql_query()
+#2 [internal function]: autoclean()
+#3 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 186
+[10-Dec-2025 10:44:28 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:44:28 Europe/Moscow] PHP Warning:  Undefined variable $messages in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 264
+[10-Dec-2025 10:44:28 Europe/Moscow] PHP Warning:  Undefined variable $outmessages in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 273
+[10-Dec-2025 10:44:28 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 334
+[10-Dec-2025 10:44:28 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 335
+[10-Dec-2025 10:44:28 Europe/Moscow] PHP Warning:  Undefined variable $medaldon in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 339
+[10-Dec-2025 10:44:28 Europe/Moscow] PHP Warning:  Undefined variable $warn in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 339
+[10-Dec-2025 10:44:28 Europe/Moscow] PHP Fatal error:  Uncaught Error: Undefined constant "COOKIE_SALT" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php:399
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(873): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 399
+[10-Dec-2025 10:44:28 Europe/Moscow] PHP Fatal error:  Uncaught mysqli_sql_exception: Field 'value_s' doesn't have a default value in C:\OSPanel\domains\tbdev.net\include\functions.php:186
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(186): mysqli_query()
+#1 C:\OSPanel\domains\tbdev.net\include\functions.php(613): sql_query()
+#2 [internal function]: autoclean()
+#3 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 186
+[10-Dec-2025 10:45:57 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:45:57 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 340
+[10-Dec-2025 10:45:57 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 341
+[10-Dec-2025 10:45:57 Europe/Moscow] PHP Warning:  Undefined variable $medaldon in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 345
+[10-Dec-2025 10:45:57 Europe/Moscow] PHP Warning:  Undefined variable $warn in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 345
+[10-Dec-2025 10:45:57 Europe/Moscow] PHP Fatal error:  Uncaught Error: Undefined constant "COOKIE_SALT" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php:405
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(873): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 405
+[10-Dec-2025 10:45:57 Europe/Moscow] PHP Fatal error:  Uncaught mysqli_sql_exception: Field 'value_s' doesn't have a default value in C:\OSPanel\domains\tbdev.net\include\functions.php:186
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(186): mysqli_query()
+#1 C:\OSPanel\domains\tbdev.net\include\functions.php(613): sql_query()
+#2 [internal function]: autoclean()
+#3 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 186
+[10-Dec-2025 10:47:04 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:47:04 Europe/Moscow] PHP Fatal error:  Uncaught Error: Undefined constant "COOKIE_SALT" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php:429
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(873): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 429
+[10-Dec-2025 10:47:04 Europe/Moscow] PHP Fatal error:  Uncaught mysqli_sql_exception: Field 'value_s' doesn't have a default value in C:\OSPanel\domains\tbdev.net\include\functions.php:186
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(186): mysqli_query()
+#1 C:\OSPanel\domains\tbdev.net\include\functions.php(613): sql_query()
+#2 [internal function]: autoclean()
+#3 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 186
