@@ -54,9 +54,10 @@ $BASEURL = $DEFAULTBASEURL;
 $announce_urls = array();
 $announce_urls[] = "$DEFAULTBASEURL/announce.php";
 
-// После смены этих двух параметров всем пользователям надо будет ввести логин пароль
-define ('COOKIE_UID', 'uid'); // Имя куки для userid
-define ('COOKIE_PASSHASH', 'pass'); // Имя куки для пароля
+define('COOKIE_SALT', 'kQ3!9xP$vT#rA2bW&zY1mJ@qF%hN7^gS*'); // Р”РѕР»Р¶РµРЅ Р±С‹С‚СЊ РґР»РёРЅРЅС‹Рј СЃР»СѓС‡Р°Р№РЅС‹Рј СЃС‚СЂРѕРєРѕР№
+
+define('COOKIE_UID', 'tb_uid');      // РќР°Р·РІР°РЅРёРµ cookie РґР»СЏ ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+define('COOKIE_PASSHASH', 'tb_pass'); // РќР°Р·РІР°РЅРёРµ cookie РґР»СЏ С…СЌС€Р° РїР°СЂРѕР»СЏ
 
 // DEFINE TRACKER GROUPS
 define ("UC_USER", 0);
