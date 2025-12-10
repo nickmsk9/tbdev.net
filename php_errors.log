@@ -226,3 +226,19 @@ Stack trace:
 #1 [internal function]: autoclean()
 #2 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 114
+[10-Dec-2025 16:16:25 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 51
+[10-Dec-2025 16:16:25 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 52
+[10-Dec-2025 16:16:25 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 53
+[10-Dec-2025 16:16:25 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 55
+[10-Dec-2025 16:16:25 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 58
+[10-Dec-2025 16:16:25 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 59
+[10-Dec-2025 16:16:25 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 60
+[10-Dec-2025 16:16:25 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 61
+[10-Dec-2025 16:17:16 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 51
+[10-Dec-2025 16:17:16 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 52
+[10-Dec-2025 16:17:16 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 53
+[10-Dec-2025 16:17:16 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 55
+[10-Dec-2025 16:17:16 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 58
+[10-Dec-2025 16:17:16 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 59
+[10-Dec-2025 16:17:16 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 60
+[10-Dec-2025 16:17:16 Europe/Moscow] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in C:\OSPanel\domains\tbdev.net\blocks\block-stats.php on line 61
