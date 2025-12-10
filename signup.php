@@ -35,11 +35,17 @@ if ($deny_signup && !$allow_invite_signup)
 if ($CURUSER)
 	stderr($tracker_lang['error'], sprintf($tracker_lang['signup_already_registered'], $SITENAME));
 
-list($users) = mysqli_fetch_assoc(sql_query("SELECT COUNT(id) FROM users"));
-if ($users >= $maxusers)
-	stderr($tracker_lang['error'], sprintf($tracker_lang['signup_users_limit'], number_format($maxusers)));
+// Исправленная строка 38 - получаем данные правильно
+$result = sql_query("SELECT COUNT(id) as user_count FROM users");
+$row = mysqli_fetch_assoc($result);
+$users = $row['user_count'] ?? 0; // Используем значение по умолчанию 0
 
-if ($_POST["agree"] != "yes") {
+if ($users >= $maxusers) {
+    stderr($tracker_lang['error'], sprintf($tracker_lang['signup_users_limit'], number_format($maxusers)));
+}
+
+// Исправленная строка 42 - проверяем существование ключа
+if (($_POST["agree"] ?? '') != "yes") {
 stdhead("Правила трекера");
 ?>
 <div style="width:80%" align="center">
