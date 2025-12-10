@@ -47,3 +47,9 @@ Stack trace:
 #1 C:\OSPanel\domains\tbdev.net\index.php(36): require_once('C:\\OSPanel\\doma...')
 #2 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\core.php on line 66
+[10-Dec-2025 10:28:39 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function get_magic_quotes_gpc() in C:\OSPanel\domains\tbdev.net\include\core.php:66
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\bittorrent.php(131): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(36): require_once('C:\\OSPanel\\doma...')
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\core.php on line 66

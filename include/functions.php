@@ -1007,9 +1007,39 @@ function parked() {
 		  stderr($tracker_lang['error'], '��� ������� �����������.');
 }
 
-function magnet($html = true, $info_hash, $name, $size, $announces = array()) {
-	$ampersand = $html ? '&amp;' : '&';
-	return sprintf('magnet:?xt=urn:btih:%2$s%1$sdn=%3$s%1$sxl=%4$d%1$str=%5$s', $ampersand, $info_hash, urlencode($name), $size, implode($ampersand . 'tr=', $announces));
+function magnet(bool $html, string $info_hash, string $name, int $size, array $announces = []): string
+{
+    $ampersand = $html ? '&amp;' : '&';
+    
+    // Кодируем имя для URL
+    $encoded_name = urlencode($name);
+    
+    // Формируем часть с трекерами
+    $trackers_part = '';
+    if (!empty($announces)) {
+        foreach ($announces as $tracker) {
+            if (!empty($tracker)) {
+                $trackers_part .= $ampersand . 'tr=' . urlencode($tracker);
+            }
+        }
+    }
+    
+    // Основная часть magnet-ссылки
+    $magnet = sprintf(
+        'magnet:?xt=urn:btih:%s%sdn=%s%sxl=%d',
+        $info_hash,
+        $ampersand,
+        $encoded_name,
+        $ampersand,
+        $size
+    );
+    
+    // Добавляем трекеры, если есть
+    if ($trackers_part !== '') {
+        $magnet .= $trackers_part;
+    }
+    
+    return $magnet;
 }
 
 // � ���� ������ ����� ��������. ��� ��� �������� ������ ����������� ������� �������� ;) � ������ ������ - ������ ������� ���� �� �� ������� ������������ ������.
