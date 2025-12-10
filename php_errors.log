@@ -7,3 +7,102 @@ Stack trace:
 #4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
 #5 {main}
   thrown in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 12
+[10-Dec-2025 12:38:12 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php:12
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(20): require()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(269): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 12
+[10-Dec-2025 12:38:13 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php:12
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(20): require()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(269): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 12
+[10-Dec-2025 12:38:14 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php:12
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(20): require()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(269): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 12
+[10-Dec-2025 12:38:14 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php:12
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(20): require()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(269): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 12
+[10-Dec-2025 12:38:34 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php:12
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(20): require()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(269): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 12
+[10-Dec-2025 12:39:45 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php:12
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(20): require()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(269): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 12
+[10-Dec-2025 12:39:51 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php:12
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(20): require()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(269): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 12
+[10-Dec-2025 12:41:08 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php:12
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(18): include()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(244): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 12
+[10-Dec-2025 12:41:09 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php:12
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(18): include()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(244): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 12
+[10-Dec-2025 12:41:09 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php:12
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(18): include()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(244): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 12
+[10-Dec-2025 12:41:09 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php:12
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(18): include()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(244): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(453): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(906): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 12
