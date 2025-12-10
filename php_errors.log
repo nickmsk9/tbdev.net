@@ -239,3 +239,50 @@ Stack trace:
 #0 [internal function]: autoclean()
 #1 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 611
+[10-Dec-2025 10:40:50 Europe/Moscow] PHP Deprecated:  Return type of Language::offsetExists($offset) should either be compatible with ArrayAccess::offsetExists(mixed $offset): bool, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in C:\OSPanel\domains\tbdev.net\languages\lang_russian\lang_main.php on line 14
+[10-Dec-2025 10:40:50 Europe/Moscow] PHP Deprecated:  Return type of Language::offsetGet($offset) should either be compatible with ArrayAccess::offsetGet(mixed $offset): mixed, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in C:\OSPanel\domains\tbdev.net\languages\lang_russian\lang_main.php on line 20
+[10-Dec-2025 10:40:50 Europe/Moscow] PHP Deprecated:  Return type of Language::offsetSet($offset, $value) should either be compatible with ArrayAccess::offsetSet(mixed $offset, mixed $value): void, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in C:\OSPanel\domains\tbdev.net\languages\lang_russian\lang_main.php on line 9
+[10-Dec-2025 10:40:50 Europe/Moscow] PHP Deprecated:  Return type of Language::offsetUnset($offset) should either be compatible with ArrayAccess::offsetUnset(mixed $offset): void, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in C:\OSPanel\domains\tbdev.net\languages\lang_russian\lang_main.php on line 17
+[10-Dec-2025 10:40:50 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:40:50 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_array() in C:\OSPanel\domains\tbdev.net\include\blocks.php:153
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(262): show_blocks()
+#1 C:\OSPanel\domains\tbdev.net\include\functions.php(873): require_once('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#3 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\blocks.php on line 153
+[10-Dec-2025 10:40:50 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_array() in C:\OSPanel\domains\tbdev.net\include\functions.php:611
+Stack trace:
+#0 [internal function]: autoclean()
+#1 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 611
+[10-Dec-2025 10:40:54 Europe/Moscow] PHP Deprecated:  Return type of Language::offsetExists($offset) should either be compatible with ArrayAccess::offsetExists(mixed $offset): bool, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in C:\OSPanel\domains\tbdev.net\languages\lang_russian\lang_main.php on line 14
+[10-Dec-2025 10:40:54 Europe/Moscow] PHP Deprecated:  Return type of Language::offsetGet($offset) should either be compatible with ArrayAccess::offsetGet(mixed $offset): mixed, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in C:\OSPanel\domains\tbdev.net\languages\lang_russian\lang_main.php on line 20
+[10-Dec-2025 10:40:54 Europe/Moscow] PHP Deprecated:  Return type of Language::offsetSet($offset, $value) should either be compatible with ArrayAccess::offsetSet(mixed $offset, mixed $value): void, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in C:\OSPanel\domains\tbdev.net\languages\lang_russian\lang_main.php on line 9
+[10-Dec-2025 10:40:54 Europe/Moscow] PHP Deprecated:  Return type of Language::offsetUnset($offset) should either be compatible with ArrayAccess::offsetUnset(mixed $offset): void, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in C:\OSPanel\domains\tbdev.net\languages\lang_russian\lang_main.php on line 17
+[10-Dec-2025 10:40:54 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:40:54 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_array() in C:\OSPanel\domains\tbdev.net\include\blocks.php:153
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(262): show_blocks()
+#1 C:\OSPanel\domains\tbdev.net\include\functions.php(873): require_once('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#3 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\blocks.php on line 153
+[10-Dec-2025 10:40:54 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_array() in C:\OSPanel\domains\tbdev.net\include\functions.php:611
+Stack trace:
+#0 [internal function]: autoclean()
+#1 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 611
+[10-Dec-2025 10:41:47 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:41:47 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_array() in C:\OSPanel\domains\tbdev.net\include\blocks.php:153
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(262): show_blocks()
+#1 C:\OSPanel\domains\tbdev.net\include\functions.php(873): require_once('C:\\OSPanel\\doma...')
+#2 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#3 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\blocks.php on line 153
+[10-Dec-2025 10:41:47 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_array() in C:\OSPanel\domains\tbdev.net\include\functions.php:611
+Stack trace:
+#0 [internal function]: autoclean()
+#1 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 611
