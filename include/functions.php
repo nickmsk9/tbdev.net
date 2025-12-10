@@ -382,55 +382,51 @@ function gzip(): void
     global $use_gzip;
     static $already_loaded = false;
     
-    // Если функция уже была вызвана, выходим
-    if ($already_loaded) {
+    if ($already_loaded || !$use_gzip) {
         return;
     }
     
-    // Проверяем, включено ли сжатие в настройках
-    if (!$use_gzip) {
-        @ob_start();
-        $already_loaded = true;
+    $already_loaded = true;
+    
+    // Проверяем, не сжато ли уже
+    if (headers_sent() || ob_get_length() > 0) {
         return;
     }
     
-    // Проверяем поддержку zlib
-    if (!extension_loaded('zlib')) {
-        @ob_start();
-        $already_loaded = true;
+    // Проверяем поддержку браузером
+    $accept_encoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
+    if (strpos($accept_encoding, 'gzip') === false) {
         return;
     }
     
-    // Проверяем, не включено ли сжатие на уровне сервера
-    $zlib_output_compression = (string)ini_get('zlib.output_compression');
-    if ($zlib_output_compression === '1' || strtolower($zlib_output_compression) === 'on') {
-        $already_loaded = true;
+    // Проверяем расширение zlib
+    if (!extension_loaded('zlib') || !function_exists('ob_gzhandler')) {
         return;
     }
     
-    // Проверяем, не установлен ли другой обработчик вывода
-    $output_handler = (string)ini_get('output_handler');
-    if ($output_handler === 'ob_gzhandler') {
-        $already_loaded = true;
+    // Проверяем, не включено ли уже сжатие на уровне сервера
+    if (ini_get('zlib.output_compression') == '1') {
         return;
     }
     
-    // Включаем буферизацию с Gzip
+    // Устанавливаем правильные заголовки
+    if (!headers_sent()) {
+        header('Content-Encoding: gzip');
+        header('Vary: Accept-Encoding');
+    }
+    
+    // Включаем буферизацию с проверкой
     try {
         if (ob_start('ob_gzhandler')) {
-            $already_loaded = true;
             return;
         }
-    } catch (Throwable $e) {
-        // Логируем ошибку при необходимости
-        // error_log('Gzip error: ' . $e->getMessage());
+    } catch (Exception $e) {
+        // В случае ошибки - обычная буферизация
     }
     
-    // Фолбэк: обычная буферизация
-    @ob_start();
-    $already_loaded = true;
+    // Фолбэк
+    ob_start();
 }
-
 // IP Validation
 function validip($ip) {
 	if (!empty($ip) && $ip == long2ip(ip2long($ip)))
