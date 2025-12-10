@@ -61,9 +61,7 @@ if (!isset($HTTP_POST_VARS) && isset($_POST)) {
     $HTTP_POST_FILES = $_FILES;    // Загруженные файлы
 }
 
-// УДАЛЕНИЕ ESCAPED-СЛЭШЕЙ (MAGIC QUOTES) ИЗ ВХОДНЫХ ДАННЫХ
-// Magic Quotes - устаревшая функция безопасности PHP, автоматически добавляющая слэши
-if (get_magic_quotes_gpc()) {
+if (PHP_VERSION_ID < 80000 && function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
     // Очищаем данные от автоматически добавленных слэшей
     if (!empty($_GET))    { $_GET    = strip_magic_quotes($_GET);    }
     if (!empty($_POST))   { $_POST   = strip_magic_quotes($_POST);   }
@@ -71,8 +69,6 @@ if (get_magic_quotes_gpc()) {
 }
 
 // ДОБАВЛЕНИЕ ESCAPED-СЛЭШЕЙ ДЛЯ БЕЗОПАСНОСТИ SQL-ЗАПРОСОВ
-// Если Magic Quotes отключены, добавляем слэши вручную для защиты от SQL-инъекций
-if (!get_magic_quotes_gpc()) {
     // Обработка GET-параметров
     if (is_array($HTTP_GET_VARS)) {
         foreach ($HTTP_GET_VARS as $k => $v) {
@@ -111,5 +107,5 @@ if (!get_magic_quotes_gpc()) {
             }
         }
     }
-}
+
 ?>

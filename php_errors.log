@@ -53,3 +53,21 @@ Stack trace:
 #1 C:\OSPanel\domains\tbdev.net\index.php(36): require_once('C:\\OSPanel\\doma...')
 #2 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\core.php on line 66
+[10-Dec-2025 10:32:19 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function get_magic_quotes_gpc() in C:\OSPanel\domains\tbdev.net\include\core.php:73
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\bittorrent.php(131): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(36): require_once('C:\\OSPanel\\doma...')
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\core.php on line 73
+[10-Dec-2025 10:32:20 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function get_magic_quotes_gpc() in C:\OSPanel\domains\tbdev.net\include\core.php:73
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\bittorrent.php(131): require_once()
+#1 C:\OSPanel\domains\tbdev.net\index.php(36): require_once('C:\\OSPanel\\doma...')
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\core.php on line 73
+[10-Dec-2025 10:32:35 Europe/Moscow] PHP Parse error:  Unmatched '}' in C:\OSPanel\domains\tbdev.net\include\core.php on line 110
+[10-Dec-2025 10:32:41 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_connect() in C:\OSPanel\domains\tbdev.net\include\functions.php:195
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\index.php(37): dbconn()
+#1 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 195
