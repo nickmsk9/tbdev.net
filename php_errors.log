@@ -447,3 +447,98 @@ Stack trace:
 #2 [internal function]: autoclean()
 #3 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 186
+[10-Dec-2025 10:55:21 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:55:21 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 444
+[10-Dec-2025 10:55:21 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:55:21 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-news.php:15
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(179): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(450): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(896): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-news.php on line 15
+[10-Dec-2025 10:55:21 Europe/Moscow] PHP Fatal error:  Uncaught mysqli_sql_exception: Field 'value_s' doesn't have a default value in C:\OSPanel\domains\tbdev.net\include\functions.php:209
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(209): mysqli_query()
+#1 C:\OSPanel\domains\tbdev.net\include\functions.php(636): sql_query()
+#2 [internal function]: autoclean()
+#3 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 209
+[10-Dec-2025 10:55:22 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:55:22 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 444
+[10-Dec-2025 10:55:22 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:55:22 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-news.php:15
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(179): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(450): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(896): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-news.php on line 15
+[10-Dec-2025 10:55:22 Europe/Moscow] PHP Fatal error:  Uncaught mysqli_sql_exception: Field 'value_s' doesn't have a default value in C:\OSPanel\domains\tbdev.net\include\functions.php:209
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(209): mysqli_query()
+#1 C:\OSPanel\domains\tbdev.net\include\functions.php(636): sql_query()
+#2 [internal function]: autoclean()
+#3 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 209
+[10-Dec-2025 10:55:22 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:55:22 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 444
+[10-Dec-2025 10:55:22 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:55:22 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-news.php:15
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(179): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(450): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(896): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-news.php on line 15
+[10-Dec-2025 10:55:22 Europe/Moscow] PHP Fatal error:  Uncaught mysqli_sql_exception: Field 'value_s' doesn't have a default value in C:\OSPanel\domains\tbdev.net\include\functions.php:209
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(209): mysqli_query()
+#1 C:\OSPanel\domains\tbdev.net\include\functions.php(636): sql_query()
+#2 [internal function]: autoclean()
+#3 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 209
+[10-Dec-2025 10:55:55 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:55:55 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 444
+[10-Dec-2025 10:55:55 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:55:55 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-news.php:15
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(179): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(450): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(896): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-news.php on line 15
+[10-Dec-2025 10:55:55 Europe/Moscow] PHP Fatal error:  Uncaught mysqli_sql_exception: Field 'value_s' doesn't have a default value in C:\OSPanel\domains\tbdev.net\include\functions.php:209
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(209): mysqli_query()
+#1 C:\OSPanel\domains\tbdev.net\include\functions.php(636): sql_query()
+#2 [internal function]: autoclean()
+#3 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 209
+[10-Dec-2025 10:55:58 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:55:58 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 444
+[10-Dec-2025 10:55:58 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\include\functions_global.php on line 971
+[10-Dec-2025 10:55:58 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-news.php:15
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(14): require()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(179): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(450): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(896): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-news.php on line 15
+[10-Dec-2025 10:55:58 Europe/Moscow] PHP Fatal error:  Uncaught mysqli_sql_exception: Field 'value_s' doesn't have a default value in C:\OSPanel\domains\tbdev.net\include\functions.php:209
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(209): mysqli_query()
+#1 C:\OSPanel\domains\tbdev.net\include\functions.php(636): sql_query()
+#2 [internal function]: autoclean()
+#3 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 209
