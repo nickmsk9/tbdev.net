@@ -29,7 +29,7 @@
 # IMPORTANT: Do not edit below unless you know what you are doing!
 
 /* 
- * Защита от двойного инклуда ядра
+ * пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
  * Protection from double including the core
 */
 
@@ -50,7 +50,6 @@ if (!defined('IN_TRACKER')) {
 	@ini_set('ignore_repeated_errors', '1');
 	@ignore_user_abort(1);
 	@set_time_limit(0);
-	@set_magic_quotes_runtime(0);
 	@session_start();
 	define ('ROOT_PATH', dirname(dirname(__FILE__))."/");
 
@@ -102,25 +101,25 @@ REF;
 	// Some basic checking for engine to work
 	// Check for PHP version
 	if (version_compare(PHP_VERSION, '5.2.0', '<'))
-		die('Извините, трекер работает на PHP от версии 5.2 и выше. Обновите версию PHP.');
+		die('пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ PHP пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 5.2 пїЅ пїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ PHP.');
 	// Check for php-spl
 	if (!interface_exists('ArrayAccess'))
-		die('У вас не установлено расширение PHP SPL (Standard PHP Library). Без установки этого расширения дальнейшая работа невозможна.');
+		die('пїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ PHP SPL (Standard PHP Library). пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.');
 
 	// Additional security countermeasures
 	// Will be enabled later...
 	/*if (file_exists('install'))
-		die('После установки нужно обязательно удалить папку install.');*/
+		die('пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ install.');*/
 	if (ini_get('register_globals') == '1' || strtolower(ini_get('register_globals')) == 'on')
-		die('Отключите register_globals в php.ini/.htaccess (угроза безопасности)');
+		die('пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ register_globals пїЅ php.ini/.htaccess (пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)');
 	if ((int) ini_get('short_open_tag') == '0')
-		die('Включите short_open_tag в php.ini/.htaccess (техническое требование)');
+		die('пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ short_open_tag пїЅ php.ini/.htaccess (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)');
 
 	if (!file_exists('include/secrets.local.php'))
-		die('Создайте файл include/secrets.local.php и переместите в него свои локальные настройки из include/secrets.php (техническое требование)');
+		die('пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ include/secrets.local.php пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ include/secrets.php (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)');
 
 	if (!file_exists('include/config.local.php'))
-		die('Создайте файл include/config.local.php и переместите в него свои локальные настройки из include/config.php (техническое требование)');
+		die('пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ include/config.local.php пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ include/config.php (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)');
 
 	// Variables for Start Time
 	$tstart = timer(); // Start time
