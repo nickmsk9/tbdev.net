@@ -516,8 +516,6 @@ function user_session() {
 }
 
 function unesc($x) {
-	if (get_magic_quotes_gpc())
-		return stripslashes($x);
 	return $x;
 }
 
