@@ -649,42 +649,204 @@ function getip() {
 	return $ip;
 }
 
+
+/**
+ * Функция автоматической очистки системы
+ * Оптимизирована для PHP 8.1+ с улучшенной обработкой ошибок и логированием
+ */
 function autoclean(): void 
 {
     global $autoclean_interval, $rootpath, $mysql_link;
 
-    $now = time();
-    $docleanup = 0;
-
-    $res = sql_query("SELECT value_u FROM avps WHERE arg = 'lastcleantime'");
-    $row = mysqli_fetch_array($res);
+    // Начинаем транзакцию для атомарности операций
+    sql_query("START TRANSACTION") or sqlerr(__FILE__, __LINE__);
     
-    if (!$row) {
-        // Исправленный INSERT с указанием значения для поля value_s
-        sql_query("INSERT INTO avps (arg, value_u, value_s) VALUES ('lastcleantime', $now, '')");
-        return;
+    try {
+        $now = time();
+        $last_clean_time = null;
+        
+        // Получаем время последней очистки
+        $res = sql_query("SELECT value_u FROM avps WHERE arg = 'lastcleantime' FOR UPDATE");
+        
+        if ($res && mysqli_num_rows($res) > 0) {
+            $row = mysqli_fetch_assoc($res);
+            $last_clean_time = (int)$row['value_u'];
+            
+            // Проверяем, не нужно ли выполнить очистку
+            if (($last_clean_time + $autoclean_interval) > $now) {
+                sql_query("COMMIT");
+                return; // Еще рано для очистки
+            }
+            
+            // Проверяем, не установлено ли время в будущем (ошибка)
+            if ($last_clean_time > $now) {
+                // Корректируем время
+                sql_query("UPDATE avps SET value_u = $now WHERE arg = 'lastcleantime'");
+                sql_query("COMMIT");
+                write_log("Исправлено некорректное время последней очистки: $last_clean_time -> $now", "system", "autoclean_fix");
+                return;
+            }
+            
+            // Обновляем время последней очистки
+            sql_query("UPDATE avps SET value_u = $now WHERE arg = 'lastcleantime'");
+        } else {
+            // Первый запуск - создаем запись
+            $now_escaped = (int)$now;
+            sql_query("INSERT INTO avps (arg, value_u, value_s) VALUES ('lastcleantime', $now_escaped, '')");
+        }
+        
+        // Проверяем, была ли обновлена запись
+        if (mysqli_affected_rows($mysql_link) === 0 && !is_null($last_clean_time)) {
+            // Кто-то другой уже обновил время - откатываем
+            sql_query("ROLLBACK");
+            return;
+        }
+        
+        // Фиксируем изменения
+        sql_query("COMMIT") or sqlerr(__FILE__, __LINE__);
+        
+        // Выполняем очистку
+        if (file_exists($rootpath . 'include/cleanup.php')) {
+            require_once($rootpath . 'include/cleanup.php');
+            
+            // Логируем начало очистки
+            write_log("Запуск автоматической очистки системы", "system", "autoclean_start");
+            
+            // Выполняем очистку
+            docleanup();
+            
+            // Логируем завершение
+            write_log("Автоматическая очистка завершена успешно", "system", "autoclean_complete");
+            
+            // Обновляем статистику выполнения
+            update_cleanup_stats();
+        } else {
+            write_log("Ошибка: файл cleanup.php не найден по пути: $rootpath" . 'include/cleanup.php', "system", "autoclean_error");
+        }
+        
+    } catch (Exception $e) {
+        // Откатываем транзакцию при ошибке
+        sql_query("ROLLBACK");
+        
+        // Логируем ошибку
+        write_log("Ошибка при выполнении autoclean: " . $e->getMessage(), "system", "autoclean_error");
+        
+        // Можно добавить уведомление администратору
+        // notify_admin("Ошибка autoclean", $e->getMessage());
+        
+        throw $e; // Пробрасываем исключение дальше
     }
-    
-    $ts = $row[0];
-    if ($ts + $autoclean_interval > $now) {
-        return;
-    }
-    
-    if ($ts > $now) { // Кто-то установил время в будущем!
-        sql_query("UPDATE avps SET value_u = $now WHERE arg = 'lastcleantime' AND value_u = $ts");
-        return;
-    }
-    
-    sql_query("UPDATE avps SET value_u = $now WHERE arg = 'lastcleantime' AND value_u = $ts");
-    
-    // Используем mysqli_affected_rows вместо mysql_affected_rows
-    if (mysqli_affected_rows($mysql_link) === 0) {
-        return;
-    }
-
-    require_once($rootpath . 'include/cleanup.php');
-    docleanup();
 }
+
+/**
+ * Обновление статистики выполнения очистки
+ */
+function update_cleanup_stats(): void
+{
+    global $mysql_link;
+    
+    $now = time();
+    $today = date('Y-m-d');
+    
+    // Проверяем существование записи за сегодня
+    $res = sql_query("SELECT id, count FROM cleanup_stats WHERE date = '$today'");
+    
+    if ($res && mysqli_num_rows($res) > 0) {
+        // Обновляем существующую запись
+        $row = mysqli_fetch_assoc($res);
+        $new_count = (int)$row['count'] + 1;
+        $last_run = date('Y-m-d H:i:s', $now);
+        
+        sql_query("UPDATE cleanup_stats 
+                   SET count = $new_count, last_run = '$last_run', updated_at = NOW() 
+                   WHERE id = " . (int)$row['id']);
+    } else {
+        // Создаем новую запись
+        $last_run = date('Y-m-d H:i:s', $now);
+        sql_query("INSERT INTO cleanup_stats (date, count, last_run, created_at) 
+                   VALUES ('$today', 1, '$last_run', NOW())");
+    }
+}
+
+/**
+ * Функция для создания таблицы статистики очистки
+ * (выполнить один раз вручную или при установке)
+ */
+function create_cleanup_stats_table(): void
+{
+    $sql = "CREATE TABLE IF NOT EXISTS cleanup_stats (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        date DATE NOT NULL UNIQUE,
+        count INT UNSIGNED NOT NULL DEFAULT 0,
+        last_run DATETIME NULL,
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_date (date)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    
+    sql_query($sql);
+}
+
+/**
+ * Получение статистики очистки за период
+ */
+function get_cleanup_stats(string $start_date, string $end_date): array
+{
+    $stats = [
+        'total_runs' => 0,
+        'avg_runs_per_day' => 0,
+        'last_run' => null,
+        'daily_stats' => []
+    ];
+    
+    $start_date_esc = mysqli_real_escape_string($mysql_link, $start_date);
+    $end_date_esc = mysqli_real_escape_string($mysql_link, $end_date);
+    
+    $res = sql_query("SELECT date, count, last_run 
+                      FROM cleanup_stats 
+                      WHERE date BETWEEN '$start_date_esc' AND '$end_date_esc' 
+                      ORDER BY date DESC");
+    
+    if ($res) {
+        $total_days = 0;
+        while ($row = mysqli_fetch_assoc($res)) {
+            $stats['daily_stats'][] = $row;
+            $stats['total_runs'] += (int)$row['count'];
+            $total_days++;
+            
+            if ($row['last_run'] && (is_null($stats['last_run']) || $row['last_run'] > $stats['last_run'])) {
+                $stats['last_run'] = $row['last_run'];
+            }
+        }
+        
+        if ($total_days > 0) {
+            $stats['avg_runs_per_day'] = round($stats['total_runs'] / $total_days, 2);
+        }
+    }
+    
+    return $stats;
+}
+
+/**
+ * Уведомление администратора о проблемах
+ * (опциональная функция)
+ */
+function notify_admin(string $subject, string $message): void
+{
+    // Пример реализации отправки email
+    /*
+    $admin_email = 'admin@example.com';
+    $headers = "From: tracker@example.com\r\n";
+    $headers .= "Content-Type: text/plain; charset=utf-8\r\n";
+    
+    @mail($admin_email, $subject, $message, $headers);
+    */
+    
+    // Или запись в специальный лог для мониторинга
+    $log_message = date('[Y-m-d H:i:s]') . " $subject: $message\n";
+    @file_put_contents('/var/log/tracker/autoclean_errors.log', $log_message, FILE_APPEND);
+}
+
 
 function mksize($bytes) {
 	if ($bytes < 1000 * 1024)
