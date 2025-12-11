@@ -191,16 +191,21 @@ if (isset($_COOKIE[COOKIE_UID]) && is_numeric($_COOKIE[COOKIE_UID]) && $users &&
     $cid = intval($_COOKIE[COOKIE_UID]);
     $c = sql_query("SELECT enabled FROM users WHERE id = $cid ORDER BY id DESC LIMIT 1");
     $co = mysqli_fetch_row($c);
-    if ($co[0] == 'no') {
+    if ($co && $co[0] == 'no') { // Добавлена проверка $co
         sql_query("UPDATE users SET ip = '$ip', last_access = NOW() WHERE id = $cid");
         bark("Ваш IP забанен на этом трекере. Регистрация невозможна.");
-    } else
+    } elseif ($co) { // Если пользователь найден, но не забанен
         bark("Регистрация невозможна!");
+    }
+    // Если пользователь не найден - продолжаем
 } else {
-    $b = (mysqli_fetch_row(sql_query("SELECT enabled, id FROM users WHERE ip = '$ip' ORDER BY last_access DESC LIMIT 1")));
-    if ($b[0] == 'no') {
+    $result = sql_query("SELECT enabled, id FROM users WHERE ip = '$ip' ORDER BY last_access DESC LIMIT 1");
+    $b = mysqli_fetch_row($result);
+    
+    // Проверяем, есть ли результат и только потом обращаемся к элементам массива
+    if ($b && isset($b[0]) && $b[0] == 'no') { // Добавлена проверка $b и $b[0]
         $banned_id = $b[1];
-        setcookie(COOKIE_UID, $banned_id, "0x7fffffff", "/");
+        setcookie(COOKIE_UID, $banned_id, 0x7fffffff, "/");
         bark("Ваш IP забанен на этом трекере. Регистрация невозможна.");
     }
 }
