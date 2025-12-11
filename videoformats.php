@@ -29,204 +29,248 @@
 require "include/bittorrent.php";
 
 dbconn(false);
-stdhead("Video Formats");
+stdhead("Форматы видео");
 ?>
-<table class=main width=750 border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
-<h2>Downloaded a movie and don't know what CAM/TS/TC/SCR means?</h2>
-<table width=100% border=1 cellspacing=0 cellpadding=10><tr><td class=text> 
-
-<b>CAM -</b><br />
-<br />
-A cam is a theater rip usually done with a digital video camera. A mini tripod is
-sometimes used, but a lot of the time this wont be possible, so the camera make shake.
-Also seating placement isn't always idle, and it might be filmed from an angle.
-If cropped properly, this is hard to tell unless there's text on the screen, but a lot
-of times these are left with triangular borders on the top and bottom of the screen.
-Sound is taken from the onboard microphone of the camera, and especially in comedies,
-laughter can often be heard during the film. Due to these factors picture and sound
-quality are usually quite poor, but sometimes we're lucky, and the theater will be'
-fairly empty and a fairly clear signal will be heard.<br />
-<br />
-<br />
-<b>TELESYNC (TS) -</b><br />
-<br />
-A telesync is the same spec as a CAM except it uses an external audio source (most
-likely an audio jack in the chair for hard of hearing people). A direct audio source
-does not ensure a good quality audio source, as a lot of background noise can interfere.
-A lot of the times a telesync is filmed in an empty cinema or from the projection booth
-with a professional camera, giving a better picture quality. Quality ranges drastically,
-check the sample before downloading the full release. A high percentage of Telesyncs
-are CAMs that have been mislabeled.<br />
-<br />
-<br />
-<b>TELECINE (TC) -</b><br />
-<br />
-A telecine machine copies the film digitally from the reels. Sound and picture should
-be very good, but due to the equipment involved and cost telecines are fairly uncommon.
-Generally the film will be in correct aspect ratio, although 4:3 telecines have existed.
-A great example is the JURASSIC PARK 3 TC done last year. TC should not be confused with
-TimeCode , which is a visible counter on screen throughout the film.<br />
-<br />
-<br />
-<b>SCREENER (SCR) -</b><br />
-<br />
-A pre VHS tape, sent to rental stores, and various other places for promotional use.
-A screener is supplied on a VHS tape, and is usually in a 4:3 (full screen) a/r, although
-letterboxed screeners are sometimes found. The main draw back is a "ticker" (a message
-that scrolls past at the bottom of the screen, with the copyright and anti-copy
-telephone number). Also, if the tape contains any serial numbers, or any other markings
-that could lead to the source of the tape, these will have to be blocked, usually with a
-black mark over the section. This is sometimes only for a few seconds, but unfortunately
-on some copies this will last for the entire film, and some can be quite big. Depending
-on the equipment used, screener quality can range from excellent if done from a MASTER
-copy, to very poor if done on an old VHS recorder thru poor capture equipment on a copied
-tape. Most screeners are transferred to VCD, but a few attempts at SVCD have occurred,
-some looking better than others.<br />
-<br />
-<br />
-<b>DVD-SCREENER (DVDscr) -</b><br />
-<br />
-Same premise as a screener, but transferred off a DVD. Usually letterbox , but without
-the extras that a DVD retail would contain. The ticker is not usually in the black bars,
-and will disrupt the viewing. If the ripper has any skill, a DVDscr should be very good.
-Usually transferred to SVCD or DivX/XviD.<br />
-<br />
-<br />
-<b>DVDRip -</b><br />
-<br />
-A copy of the final released DVD. If possible this is released PRE retail (for example,
-Star Wars episode 2) again, should be excellent quality. DVDrips are released in SVCD
-and DivX/XviD.<br />
-<br />
-<br />
-<b>VHSRip -</b><br />
-<br />
-Transferred off a retail VHS, mainly skating/sports videos and XXX releases.<br />
-<br />
-<br />
-<b>TVRip -</b><br />
-<br />
-TV episode that is either from Network (capped using digital cable/satellite boxes are
-preferable) or PRE-AIR from satellite feeds sending the program around to networks a few
-days earlier (do not contain "dogs" but sometimes have flickers etc) Some programs such
-as WWF Raw Is War contain extra parts, and the "dark matches" and camera/commentary
-tests are included on the rips. PDTV is capped from a digital TV PCI card, generally
-giving the best results, and groups tend to release in SVCD for these. VCD/SVCD/DivX/XviD
-rips are all supported by the TV scene.<br />
-<br />
-<br />
-<b>WORKPRINT (WP) -</b><br />
-<br />
-A workprint is a copy of the film that has not been finished. It can be missing scenes,
-music, and quality can range from excellent to very poor. Some WPs are very different
-from the final print (Men In Black is missing all the aliens, and has actors in their
-places) and others can contain extra scenes (Jay and Silent Bob) . WPs can be nice
-additions to the collection once a good quality final has been obtained.<br />
-<br />
-<br />
-<b>DivX Re-Enc -</b><br />
-<br />
-A DivX re-enc is a film that has been taken from its original VCD source, and re-encoded
-into a small DivX file. Most commonly found on file sharers, these are usually labeled
-something like Film.Name.Group(1of2) etc. Common groups are SMR and TND. These aren't
-really worth downloading, unless you're that unsure about a film u only want a 200mb copy
-of it. Generally avoid.<br />
-<br />
-<br />
-<b>Watermarks -</b><br />
-<br />
-A lot of films come from Asian Silvers/PDVD (see below) and these are tagged by the
-people responsible. Usually with a letter/initials or a little logo, generally in one
-of the corners. Most famous are the "Z" "A" and "Globe" watermarks.<br />
-<br />
-<br />
-<b>Asian Silvers / PDVD -</b><br />
-<br />
-These are films put out by eastern bootleggers, and these are usually bought by some
-groups to put out as their own. Silvers are very cheap and easily available in a lot of
-countries, and its easy to put out a release, which is why there are so many in the scene
-at the moment, mainly from smaller groups who don't last more than a few releases. PDVDs
-are the same thing pressed onto a DVD. They have removable subtitles, and the quality is
-usually better than the silvers. These are ripped like a normal DVD, but usually released
-as VCD.<br />
-<br />
-<br />
-<b>Scene Tags...</b><br />
-<br />
-<b>PROPER -</b><br />
-<br />
-Due to scene rules, whoever releases the first Telesync has won that race (for example).
-But if the quality of that release is fairly poor, if another group has another telesync
-(or the same source in higher quality) then the tag PROPER is added to the folder to
-avoid being duped. PROPER is the most subjective tag in the scene, and a lot of people
-will generally argue whether the PROPER is better than the original release. A lot of
-groups release PROPERS just out of desperation due to losing the race. A reason for the
-PROPER should always be included in the NFO.<br />
-<br />
-<br />
-<b>LIMITED -</b><br />
-<br />
-A limited movie means it has had a limited theater run, generally opening in less than
-250 theaters, generally smaller films (such as art house films) are released as limited.<br />
-<br />
-<br />
-<b>INTERNAL -</b><br />
-<br />
-An internal release is done for several reasons. Classic DVD groups do a lot of INTERNAL
-releases, as they wont be dupe'd on it. Also lower quality theater rips are done INTERNAL
-so not to lower the reputation of the group, or due to the amount of rips done already.
-An INTERNAL release is available as normal on the groups affiliate sites, but they can't
-be traded to other sites without request from the site ops. Some INTERNAL releases still
-trickle down to IRC/Newsgroups, it usually depends on the title and the popularity.
-Earlier in the year people referred to Centropy going "internal". This meant the group
-were only releasing the movies to their members and site ops. This is in a different
-context to the usual definition.<br />
-<br />
-<br />
-<b>STV -</b><br />
-<br />
-Straight To Video. Was never released in theaters, and therefore a lot of sites do not
-allow these.<br />
-<br />
-<br />
-<b>ASPECT RATIO TAGS -</b><br />
-<br />
-These are *WS* for widescreen (letterbox) and *FS* for Fullscreen.<br />
-<br />
-<br />
-<b>REPACK -</b><br />
-<br />
-If a group releases a bad rip, they will release a Repack which will fix the problems.<br />
-<br />
-<br />
-<b>NUKED -</b><br />
-<br />
-A film can be nuked for various reasons. Individual sites will nuke for breaking their
-rules (such as "No Telesyncs") but if the film has something extremely wrong with it
-(no soundtrack for 20mins, CD2 is incorrect film/game etc) then a global nuke will occur,
-and people trading it across sites will lose their credits. Nuked films can still reach
-other sources such as p2p/usenet, but its a good idea to check why it was nuked first in
-case. If a group realise there is something wrong, they can request a nuke.<br />
-<br />
-<br />
-<b>NUKE REASONS...</b><br />
-<br />
-this is a list of common reasons a film can be nuked for (generally DVDRip)<br />
-<br />
-<b>BAD A/R</b> = bad aspect ratio, ie people appear too fat/thin<br />
-<b>BAD IVTC</b> = bad inverse telecine. process of converting framerates was incorrect.<br />
-<b>INTERLACED</b> = black lines on movement as the field order is incorrect.<br />
-<br />
-<br />
-<b>DUPE -</b><br />
-<br />
-Dupe is quite simply, if something exists already, then theres no reason for it to exist
-again without proper reason.<br />
-<br />
-<br />
-</td></tr></table>
-</td></tr></table>
-<br />
-<?
+<table class="main" width="750" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td class="embedded">
+            <h2>Скачали фильм и не знаете, что означают CAM/TS/TC/SCR?</h2>
+            
+            <table width="100%" border="1" cellspacing="0" cellpadding="10">
+                <tr>
+                    <td class="text">
+                        
+                        <h3><b>CAM (Кэм) -</b></h3>
+                        <p>
+                            Кэм - это рип из кинотеатра, обычно сделанный с помощью цифровой видеокамеры. 
+                            Иногда используется мини-штатив, но часто это невозможно, поэтому камера может дрожать. 
+                            Также расположение сидений не всегда идеально, и фильм может сниматься под углом.
+                        </p>
+                        <p>
+                            Если кадрирование выполнено правильно, это трудно заметить, если только на экране нет текста, 
+                            но часто остаются треугольные границы вверху и внизу экрана. Звук записывается встроенным 
+                            микрофоном камеры, и особенно в комедиях часто слышен смех во время фильма. 
+                            Из-за этих факторов качество изображения и звука обычно довольно низкое, но иногда нам везёт, 
+                            и кинотеатр будет довольно пустым, и будет слышен довольно чистый сигнал.
+                        </p>
+                        
+                        <hr>
+                        
+                        <h3><b>TELESYNC (TS) -</b></h3>
+                        <p>
+                            Телисинк имеет те же характеристики, что и CAM, за исключением того, что использует внешний 
+                            источник звука (скорее всего, разъём для наушников в кресле для слабослышащих людей). 
+                            Прямой источник звука не гарантирует хорошего качества звука, так как может возникать много фонового шума.
+                        </p>
+                        <p>
+                            Часто телисинк снимается в пустом кинотеатре или из проекционной будки профессиональной камерой, 
+                            что даёт лучшее качество изображения. Качество сильно варьируется, проверяйте образец перед 
+                            загрузкой полного релиза. Большой процент телисинков - это CAM, которые были неправильно помечены.
+                        </p>
+                        
+                        <hr>
+                        
+                        <h3><b>TELECINE (TC) -</b></h3>
+                        <p>
+                            Телесин - это машина, которая копирует фильм с плёнок в цифровом формате. Звук и изображение должны 
+                            быть очень хорошими, но из-за используемого оборудования и стоимости телесины встречаются довольно редко.
+                        </p>
+                        <p>
+                            Обычно фильм имеет правильное соотношение сторон, хотя существуют и телесины 4:3. Отличный пример - 
+                            телесин "Парк Юрского периода 3", сделанный в прошлом году. TC не следует путать с TimeCode, 
+                            который представляет собой видимый счётчик на экране на протяжении всего фильма.
+                        </p>
+                        
+                        <hr>
+                        
+                        <h3><b>SCREENER (SCR) -</b></h3>
+                        <p>
+                            Предварительная VHS-кассета, отправляемая в видеопрокаты и другие места для рекламного использования. 
+                            Скринер поставляется на VHS-кассете и обычно имеет соотношение сторон 4:3 (полный экран), 
+                            хотя иногда встречаются скринеры с чёрными полосами.
+                        </p>
+                        <p>
+                            Основной недостаток - "бегущая строка" (сообщение, которое прокручивается в нижней части экрана 
+                            с информацией об авторских правах и телефонным номером для борьбы с пиратством). Также, если на 
+                            ленте есть серийные номера или другие отметки, которые могут привести к источнику ленты, 
+                            их приходится блокировать, обычно чёрной полосой поверх секции.
+                        </p>
+                        <p>
+                            В зависимости от используемого оборудования качество скринера может варьироваться от отличного, 
+                            если сделано с МАСТЕР-копии, до очень плохого, если сделано на старом VHS-рекордере через плохое 
+                            оборудование захвата на скопированной ленте. Большинство скринеров конвертируются в VCD, 
+                            но были попытки сделать SVCD, некоторые из которых выглядят лучше других.
+                        </p>
+                        
+                        <hr>
+                        
+                        <h3><b>DVD-SCREENER (DVDscr) -</b></h3>
+                        <p>
+                            То же самое, что и скринер, но перенесённый с DVD. Обычно с чёрными полосами, но без дополнительных 
+                            материалов, которые содержит розничный DVD. Бегущая строка обычно не находится в чёрных полосах 
+                            и будет мешать просмотру. Если риппер обладает навыками, DVDscr должен быть очень хорошим. 
+                            Обычно конвертируется в SVCD или DivX/XviD.
+                        </p>
+                        
+                        <hr>
+                        
+                        <h3><b>DVDRip -</b></h3>
+                        <p>
+                            Копия финального выпущенного DVD. Если возможно, это выпускается ДО розничной продажи 
+                            (например, "Звёздные войны: Эпизод 2"), опять же, качество должно быть отличным. 
+                            DVDRip выпускаются в форматах SVCD и DivX/XviD.
+                        </p>
+                        
+                        <hr>
+                        
+                        <h3><b>VHSRip -</b></h3>
+                        <p>
+                            Перенесён с розничной VHS-кассеты, в основном видеозаписи катания на скейтах/спортивных видео и XXX-релизы.
+                        </p>
+                        
+                        <hr>
+                        
+                        <h3><b>TVRip -</b></h3>
+                        <p>
+                            Эпизод телепередачи, который либо с телеканала (записанный с использованием цифровых кабельных/спутниковых 
+                            приставок, предпочтительно), либо ПРЕДВАРИТЕЛЬНЫЙ эфир со спутниковых каналов, отправляющих программу 
+                            по сетям на несколько дней раньше (не содержит "водяных знаков", но иногда имеет мерцания и т.д.).
+                        </p>
+                        <p>
+                            Некоторые программы, такие как WWF Raw Is War, содержат дополнительные части, а "тёмные матчи" и тесты 
+                            камеры/комментариев включены в рипы. PDTV записывается с цифровой ТВ PCI-карты, обычно дающей лучшие 
+                            результаты, и группы обычно выпускают их в SVCD. Рипы VCD/SVCD/DivX/XviD поддерживаются TV-сценой.
+                        </p>
+                        
+                        <hr>
+                        
+                        <h3><b>WORKPRINT (WP) -</b></h3>
+                        <p>
+                            Рабочая копия фильма, которая не была завершена. В ней могут отсутствовать сцены, музыка, 
+                            а качество может варьироваться от отличного до очень плохого.
+                        </p>
+                        <p>
+                            Некоторые WP сильно отличаются от финальной версии ("Люди в чёрном" не содержит всех инопланетян, 
+                            вместо них актёры), а другие могут содержать дополнительные сцены ("Джей и Молчаливый Боб"). 
+                            WP могут быть хорошим дополнением к коллекции после получения качественной финальной версии.
+                        </p>
+                        
+                        <hr>
+                        
+                        <h3><b>DivX Re-Enc -</b></h3>
+                        <p>
+                            DivX re-enc - это фильм, который был взят из исходного источника VCD и перекодирован в небольшой 
+                            файл DivX. Чаще всего встречается на файлообменниках, обычно помечается как Film.Name.Group(1of2) и т.д.
+                        </p>
+                        <p>
+                            Обычные группы - SMR и TND. Их действительно не стоит скачивать, если только вы не настолько 
+                            неуверены в фильме, что хотите только 200мб копию. Вообще, избегайте.
+                        </p>
+                        
+                        <hr>
+                        
+                        <h3><b>Водяные знаки -</b></h3>
+                        <p>
+                            Многие фильмы поступают из азиатских Silvers/PDVD (см. ниже) и помечаются ответственными лицами. 
+                            Обычно буквой/инициалами или маленьким логотипом, обычно в одном из углов. 
+                            Самые известные - водяные знаки "Z", "A" и "Globe".
+                        </p>
+                        
+                        <hr>
+                        
+                        <h3><b>Азиатские Silvers / PDVD -</b></h3>
+                        <p>
+                            Это фильмы, выпущенные восточными пиратами, и их обычно покупают некоторые группы, 
+                            чтобы выпустить как свои собственные. Silers очень дешёвые и легко доступны во многих странах, 
+                            и легко выпустить релиз, поэтому в сцене сейчас так много таких, в основном от небольших групп, 
+                            которые не существуют более нескольких релизов.
+                        </p>
+                        <p>
+                            PDVD - это то же самое, записанное на DVD. У них есть съёмные субтитры, и качество обычно лучше, 
+                            чем у Silvers. Они рипуются как обычный DVD, но обычно выпускаются как VCD.
+                        </p>
+                        
+                        <hr>
+                        
+                        <h3><b>Тэги сцены...</b></h3>
+                        
+                        <h4><b>PROPER -</b></h4>
+                        <p>
+                            Согласно правилам сцены, тот, кто выпустил первый телисинк, выиграл эту гонку (например). 
+                            Но если качество этого релиза довольно низкое, если другая группа имеет другой телисинк 
+                            (или тот же источник более высокого качества), то к папке добавляется тэг PROPER, чтобы избежать дублирования.
+                        </p>
+                        <p>
+                            PROPER - самый субъективный тэг в сцене, и многие люди обычно спорят, лучше ли PROPER, 
+                            чем оригинальный релиз. Многие группы выпускают PROPERS просто из-за отчаяния из-за проигрыша в гонке. 
+                            Причина для PROPER всегда должна быть указана в NFO.
+                        </p>
+                        
+                        <h4><b>LIMITED -</b></h4>
+                        <p>
+                            Фильм с ограниченным прокатом означает, что он имел ограниченный театральный прокат, 
+                            обычно открываясь менее чем в 250 кинотеатрах, обычно небольшие фильмы (например, арт-хаусные) 
+                            выпускаются как limited.
+                        </p>
+                        
+                        <h4><b>INTERNAL -</b></h4>
+                        <p>
+                            Внутренний релиз делается по нескольким причинам. Классические DVD-группы делают много внутренних релизов, 
+                            так как они не будут дублироваться. Также низкокачественные театральные рипы делаются внутренними, 
+                            чтобы не снижать репутацию группы или из-за количества уже сделанных рипов.
+                        </p>
+                        <p>
+                            Внутренний релиз доступен как обычно на сайтах-партнёрах группы, но они не могут быть переданы 
+                            на другие сайты без запроса от операторов сайта. Некоторые внутренние релизы всё ещё просачиваются 
+                            в IRC/Newsgroups, это обычно зависит от названия и популярности.
+                        </p>
+                        
+                        <h4><b>STV -</b></h4>
+                        <p>
+                            Straight To Video (Прямо на видео). Никогда не выпускался в кинотеатрах, и поэтому многие сайты 
+                            не разрешают их.
+                        </p>
+                        
+                        <h4><b>ТЭГИ СООТНОШЕНИЯ СТОРОН -</b></h4>
+                        <p>
+                            Это *WS* для широкоэкранного (с чёрными полосами) и *FS* для полноэкранного.
+                        </p>
+                        
+                        <h4><b>REPACK -</b></h4>
+                        <p>
+                            Если группа выпускает плохой рип, они выпускают Repack, который исправит проблемы.
+                        </p>
+                        
+                        <h4><b>NUKED -</b></h4>
+                        <p>
+                            Фильм может быть "нукнут" по разным причинам. Отдельные сайты нукают за нарушение их правил 
+                            (например, "Нет телисинков"), но если с фильмом что-то сильно не так (нет звуковой дорожки 
+                            в течение 20 минут, CD2 содержит неправильный фильм/игру и т.д.), то произойдёт глобальный нук, 
+                            и люди, торгующие им на разных сайтах, потеряют свои кредиты.
+                        </p>
+                        
+                        <h4><b>ПРИЧИНЫ NUKED...</b></h4>
+                        <p>
+                            Это список распространённых причин, по которым фильм может быть нукнут (обычно DVDRip)
+                        </p>
+                        <ul>
+                            <li><b>BAD A/R</b> = плохое соотношение сторон, т.е. люди выглядят слишком толстыми/тонкими</li>
+                            <li><b>BAD IVTC</b> = плохой обратный телесин. Процесс преобразования частоты кадров был выполнен неправильно.</li>
+                            <li><b>INTERLACED</b> = чёрные линии при движении, так как порядок полей неправильный.</li>
+                        </ul>
+                        
+                        <h4><b>DUPE -</b></h4>
+                        <p>
+                            Дубликат - это просто, если что-то уже существует, то нет причин для его повторного существования без уважительной причины.
+                        </p>
+                        
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<br />
+<?php
 stdfoot();
 ?>
