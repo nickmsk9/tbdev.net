@@ -4,3 +4,4 @@ Stack trace:
 #1 [internal function]: autoclean()
 #2 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 114
+[11-Dec-2025 13:06:12 Europe/Moscow] PHP Fatal error:  Cannot redeclare deadtime() (previously declared in C:\OSPanel\domains\tbdev.net\include\functions.php:877) in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 450
