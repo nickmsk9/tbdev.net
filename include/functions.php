@@ -787,64 +787,100 @@ function send_pm($sender, $receiver, $added, $subject, $msg) {
 	sql_query('INSERT INTO messages (sender, receiver, added, subject, msg) VALUES ('.implode(', ', array_map('sqlesc', array($sender, $receiver, $added, $subject, $msg))).')') or sqlerr(__FILE__,__LINE__);
 }
 
-function sent_mail($to,$fromname,$fromemail,$subject,$body,$multiple=false,$multiplemail='') {
-	global $SITENAME,$SITEEMAIL,$smtptype,$smtp,$smtp_host,$smtp_port,$smtp_from,$smtpaddress,$accountname,$accountpassword,$rootpath;
-	# Sent Mail Function v.05 by xam (This function to help avoid spam-filters.)
-	$result = true;
-	if ($smtptype == 'default') {
-		@mail($to, $subject, $body, "From: $SITEEMAIL") or $result = false;
-	} elseif ($smtptype == 'advanced') {
-	# Is the OS Windows or Mac or Linux?
-	if (strtoupper(substr(PHP_OS,0,3)=='WIN')) {
-		$eol="\r\n";
-		$windows = true;
-	}
-	elseif (strtoupper(substr(PHP_OS,0,3)=='MAC'))
-		$eol="\r";
-	else
-		$eol="\n";
-	$mid = md5(getip() . $fromname);
-	$name = $_SERVER["SERVER_NAME"];
-	$headers .= "From: $fromname <$fromemail>".$eol;
-	$headers .= "Reply-To: $fromname <$fromemail>".$eol;
-	$headers .= "Return-Path: $fromname <$fromemail>".$eol;
-	$headers .= "Message-ID: <$mid.thesystem@$name>".$eol;
-	$headers .= "X-Mailer: PHP v".phpversion().$eol;
-    $headers .= "MIME-Version: 1.0".$eol;
-    $headers .= "Content-type: text/plain; charset=windows-1251".$eol;
-    $headers .= "X-Sender: PHP".$eol;
-    if ($multiple)
-    	$headers .= "Bcc: $multiplemail.$eol";
-	if ($smtp == "yes") {
-		ini_set('SMTP', $smtp_host);
-		ini_set('smtp_port', $smtp_port);
-		if ($windows)
-			ini_set('sendmail_from', $smtp_from);
-		}
-
-    	@mail($to, $subject, $body, $headers) or $result = false;
-
-    	ini_restore(SMTP);
-		ini_restore(smtp_port);
-		if ($windows)
-			ini_restore(sendmail_from);
-	} elseif ($smtptype == 'external') {
-		require_once($rootpath . 'include/smtp/smtp.lib.php');
-		$mail = new smtp;
-		$mail->debug(false);
-		$mail->open($smtp_host, $smtp_port);
-		if (!empty($accountname) && !empty($accountpassword))
-			$mail->auth($accountname, $accountpassword);
-		$mail->from($SITEEMAIL);
-		$mail->to($to);
-		$mail->subject($subject);
-		$mail->body($body);
-		$result = $mail->send();
-		$mail->close();
-	} else
-		$result = false;
-
-	return $result;
+function sent_mail($to, $fromname, $fromemail, $subject, $body, $multiple = false, $multiplemail = '') {
+    global $SITENAME, $SITEEMAIL, $smtptype, $smtp, $smtp_host, $smtp_port, $smtp_from, $smtpaddress, $accountname, $accountpassword, $rootpath;
+    
+    $result = true;
+    
+    if ($smtptype == 'default') {
+        $headers = "From: $SITEEMAIL\r\n";
+        $headers .= "Content-type: text/plain; charset=utf-8\r\n";
+        $headers .= "X-Mailer: PHP/" . phpversion();
+        
+        if (!@mail($to, $subject, $body, $headers)) {
+            $result = false;
+        }
+    } 
+    elseif ($smtptype == 'advanced') {
+        $eol = "\r\n"; // Всегда используем CRLF для email
+        $mid = md5(getip() . $fromname);
+        $name = $_SERVER["SERVER_NAME"] ?? 'localhost';
+        
+        $headers = "From: $fromname <$fromemail>" . $eol;
+        $headers .= "Reply-To: $fromname <$fromemail>" . $eol;
+        $headers .= "Return-Path: $fromname <$fromemail>" . $eol;
+        $headers .= "Message-ID: <$mid.thesystem@$name>" . $eol;
+        $headers .= "X-Mailer: PHP v" . phpversion() . $eol;
+        $headers .= "MIME-Version: 1.0" . $eol;
+        $headers .= "Content-type: text/plain; charset=utf-8" . $eol; // Используем utf-8 вместо windows-1251
+        $headers .= "X-Sender: PHP" . $eol;
+        
+        if ($multiple && !empty($multiplemail)) {
+            $headers .= "Bcc: $multiplemail" . $eol;
+        }
+        
+        // Исправляем условие для Windows
+        $windows = (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN');
+        
+        if ($smtp == "yes") {
+            ini_set('SMTP', $smtp_host);
+            ini_set('smtp_port', $smtp_port);
+            if ($windows) {
+                ini_set('sendmail_from', $smtp_from);
+            }
+        }
+        
+        if (!@mail($to, '=?UTF-8?B?'.base64_encode($subject).'?=', $body, $headers)) {
+            $result = false;
+        }
+        
+        // Восстанавливаем настройки
+        if ($smtp == "yes") {
+            ini_restore('SMTP');
+            ini_restore('smtp_port');
+            if ($windows) {
+                ini_restore('sendmail_from');
+            }
+        }
+    } 
+    elseif ($smtptype == 'external') {
+        // Проверяем существование файла
+        $smtp_file = $rootpath . 'include/smtp/smtp.lib.php';
+        if (!file_exists($smtp_file)) {
+            return false;
+        }
+        
+        require_once($smtp_file);
+        
+        if (!class_exists('smtp')) {
+            return false;
+        }
+        
+        try {
+            $mail = new smtp();
+            $mail->debug(false);
+            $mail->open($smtp_host, $smtp_port);
+            
+            if (!empty($accountname) && !empty($accountpassword)) {
+                $mail->auth($accountname, $accountpassword);
+            }
+            
+            $mail->from($SITEEMAIL);
+            $mail->to($to);
+            $mail->subject($subject);
+            $mail->body($body);
+            
+            $result = $mail->send();
+            $mail->close();
+        } catch (Exception $e) {
+            $result = false;
+        }
+    } 
+    else {
+        $result = false;
+    }
+    
+    return $result;
 }
 
 function sqlesc($value, bool $force = false): string 
