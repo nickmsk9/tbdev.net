@@ -5,6 +5,7 @@ if (!defined('BLOCK_FILE')) {
 }
 
 global $tracker_lang;
+$blocktitle = $tracker_lang['help_seed'];
 
 $content .= "<b><center><font color=\"#FF6633\">".$tracker_lang['help_seed']."</font></center>
 <table width=\"100%\" border=\"1\" cellspacing=\"0\" cellpadding=\"10\"><tr><td class=\"text\">";

@@ -260,3 +260,6 @@ Stack trace:
 #1 [internal function]: autoclean()
 #2 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 114
+[11-Dec-2025 09:05:11 Europe/Moscow] PHP Parse error:  syntax error, unexpected string content "", expecting "-" or identifier or variable or number in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 8
+[11-Dec-2025 09:05:19 Europe/Moscow] PHP Parse error:  syntax error, unexpected string content "", expecting "-" or identifier or variable or number in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 8
+[11-Dec-2025 09:05:20 Europe/Moscow] PHP Parse error:  syntax error, unexpected string content "", expecting "-" or identifier or variable or number in C:\OSPanel\domains\tbdev.net\blocks\block-helpseed.php on line 8
