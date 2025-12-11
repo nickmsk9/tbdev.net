@@ -950,31 +950,74 @@ function parsedescr($d, $html) {
 }
 
 function stdhead($title = "", $msgalert = true) {
-	global $CURUSER, $SITE_ONLINE, $FUNDS, $SITENAME, $DEFAULTBASEURL, $ss_uri, $tracker_lang, $default_theme, $keywords, $description, $pic_base_url;
+    global $CURUSER, $SITE_ONLINE, $FUNDS, $SITENAME, $DEFAULTBASEURL, $ss_uri, $tracker_lang, $default_theme, $keywords, $description, $pic_base_url;
 
-	if (!$SITE_ONLINE)
-		die('Site is down for maintenance, please check back again later... thanks<br />');
+    // Проверка, что сайт онлайн
+    if (!$SITE_ONLINE) {
+        die('Site is down for maintenance, please check back again later... thanks<br />');
+    }
 
-	header ('Content-Type: text/html; charset=' . $tracker_lang['language_charset']);
-	header ('X-Powered-by: TBDev Yuna Scatari Edition - http://bit-torrent.kiev.ua');
-	header ('X-Chocolate-to: ICQ 7282521');
-	header ('Cache-Control: no-cache');
-	header ('Pragma: no-cache');
-	if ($title == '')
-		$title = $SITENAME . (isset($_GET['yuna']) ? ' ('.TBVERSION.')' : '');
-	else
-		$title = $SITENAME . (isset($_GET['yuna']) ? ' ('.TBVERSION.')' : ''). ' :: ' . htmlspecialchars_uni($title);
+    // Установка заголовков
+    $charset = $tracker_lang['language_charset'] ?? 'UTF-8';
+    header('Content-Type: text/html; charset=' . $charset);
+    header('X-Powered-by: TBDev Yuna Scatari Edition');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: 0');
 
-	$ss_uri = select_theme();
+    // Формирование заголовка страницы
+    $page_title = htmlspecialchars($SITENAME ?? '', ENT_QUOTES, 'UTF-8');
+    
+    if (isset($_GET['yuna'])) {
+        $page_title .= ' (' . (defined('TBVERSION') ? TBVERSION : '1.0') . ')';
+    }
+    
+    if (!empty($title)) {
+        $page_title .= ' :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+    }
 
-	if ($msgalert && $CURUSER) {
-		$res = sql_query('SELECT COUNT(*) FROM messages WHERE receiver = ' . $CURUSER['id'] . ' AND unread="yes"') or die('OopppsY!');
-		$arr = mysql_fetch_row($res);
-		$unread = $arr[0];
-	}
+    // Выбор темы
+    $ss_uri = select_theme() ?? $default_theme ?? 'default';
+    
+    // Проверка на существование пользователя и подсчет непрочитанных сообщений
+    $unread = 0;
+    if ($msgalert && !empty($CURUSER) && isset($CURUSER['id'])) {
+        $user_id = (int)$CURUSER['id'];
+        
+        // Используем безопасный запрос с подготовленным выражением
+        $stmt = sql_prepare('SELECT COUNT(*) FROM messages WHERE receiver = ? AND unread = "yes"');
+        if ($stmt) {
+            $stmt->bind_param('i', $user_id);
+            $stmt->execute();
+            $stmt->bind_result($unread_count);
+            $stmt->fetch();
+            $unread = (int)$unread_count;
+            $stmt->close();
+        }
+    }
 
-	require_once('themes/' . $ss_uri . '/template.php');
-	require_once('themes/' . $ss_uri . '/stdhead.php');
+    // Подключаем файлы темы с проверкой их существования
+    $template_file = 'themes/' . $ss_uri . '/template.php';
+    $stdhead_file = 'themes/' . $ss_uri . '/stdhead.php';
+    
+    if (!file_exists($template_file) || !file_exists($stdhead_file)) {
+        // Фоллбэк на дефолтную тему
+        $ss_uri = $default_theme ?? 'default';
+        $template_file = 'themes/' . $ss_uri . '/template.php';
+        $stdhead_file = 'themes/' . $ss_uri . '/stdhead.php';
+        
+        if (!file_exists($template_file) || !file_exists($stdhead_file)) {
+            die("Theme files not found!");
+        }
+    }
+
+    // Определяем переменные для шаблона
+    define('PAGE_TITLE', $page_title);
+    define('UNREAD_MESSAGES', $unread);
+    
+    // Подключаем файлы темы
+    require_once($template_file);
+    require_once($stdhead_file);
 
 } // stdhead
 
