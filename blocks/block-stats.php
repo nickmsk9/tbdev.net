@@ -71,6 +71,9 @@ $peers = safe_number_format($seeders + $leechers);
 $seeders_formatted = safe_number_format($seeders);
 $leechers_formatted = safe_number_format($leechers);
 
+$blocktitle = "Статистика трекера";
+
+
 // Генерация HTML
 $content .= "<table width=\"100%\" class=\"main\" border=\"0\" cellspacing=\"0\" cellpadding=\"2\"><td align=\"center\">
 <table class=\"main\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\">

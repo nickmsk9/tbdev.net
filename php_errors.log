@@ -248,3 +248,15 @@ Stack trace:
 #1 [internal function]: autoclean()
 #2 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 114
+[11-Dec-2025 08:02:01 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_assoc() in C:\OSPanel\domains\tbdev.net\include\cleanup.php:114
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(660): docleanup()
+#1 [internal function]: autoclean()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 114
+[11-Dec-2025 08:59:18 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_assoc() in C:\OSPanel\domains\tbdev.net\include\cleanup.php:114
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(660): docleanup()
+#1 [internal function]: autoclean()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 114
