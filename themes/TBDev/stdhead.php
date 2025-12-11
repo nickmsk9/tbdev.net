@@ -131,13 +131,13 @@ if ($CURUSER['warned'] == "yes")
 
 //// check for messages ////////////////// 
         $res1 = sql_query("SELECT COUNT(*) FROM messages WHERE receiver=" . $CURUSER["id"] . " AND location=1") or print(mysql_error()); 
-        $arr1 = mysql_fetch_row($res1);
+        $arr1 = mysqli_fetch_row($res1);
         $messages = $arr1[0];
         /*$res1 = sql_query("SELECT COUNT(*) FROM messages WHERE receiver=" . $CURUSER["id"] . " AND location=1 AND unread='yes'") or print(mysql_error()); 
         $arr1 = mysql_fetch_row($res1);
         $unread = $arr1[0];*/
         $res1 = sql_query("SELECT COUNT(*) FROM messages WHERE sender=" . $CURUSER["id"] . " AND saved='yes'") or print(mysql_error()); 
-        $arr1 = mysql_fetch_row($res1);
+        $arr1 = mysqli_fetch_row($res1);
         $outmessages = $arr1[0];
         if ($unread)
                 $inboxpic = "<img height=\"16px\" style=\"border:none\" alt=\"inbox\" title=\"���� ����� ���������\" src=\"{$pic_base_url}/pn_inboxnew.gif\">";
@@ -145,11 +145,11 @@ if ($CURUSER['warned'] == "yes")
                 $inboxpic = "<img height=\"16px\" style=\"border:none\" alt=\"inbox\" title=\"��� ����� ���������\" src=\"{$pic_base_url}/pn_inbox.gif\">";
 
 $res2 = sql_query("SELECT COUNT(*) FROM peers WHERE userid = {$CURUSER["id"]} AND seeder='yes'") or print(mysql_error());
-$row = mysql_fetch_row($res2);
+$row = mysqli_fetch_row($res2);
 $activeseed = $row[0];
 
 $res2 = sql_query("SELECT COUNT(*) FROM peers WHERE userid = {$CURUSER["id"]} AND seeder='no'") or print(mysql_error());
-$row = mysql_fetch_row($res2);
+$row = mysqli_fetch_row($res2);
 $activeleech = $row[0];
 
 //// end

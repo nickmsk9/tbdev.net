@@ -215,23 +215,74 @@ $wantpasshash = md5($secret . $wantpassword . $secret);
 $editsecret = (!$users ? "" : mksecret());
 
 if ((!$users) || (!$use_email_act == true))
-    $status = 'confirmed'; else
+    $status = 'confirmed'; 
+else
     $status = 'pending';
 
-// This is ugly, we but we have it...
-// To-Do rewrite
-$ret = sql_query("INSERT INTO users (username, passhash, secret, editsecret, gender, country, icq, msn, aim, yahoo, skype, mirc, website, email, status, " . (!$users ? "class, " : "") . "added, birthday, invitedby, invitedroot, theme) VALUES (" . implode(",", array_map("sqlesc", array($wantusername, $wantpasshash, $secret, $editsecret, $gender, $country, $icq, $msn, $aim, $yahoo, $skype, $mirc, $website, $email, $status))) . ", " . (!$users ? UC_SYSOP . ", " : "") . "'" . get_date_time() . "', '$birthday', '$inviter', '$invitedroot', '" . select_theme() . "')");
-// or sqlerr(__FILE__, __LINE__);
+// Определяем текущую дату-время
+$current_datetime = get_date_time();
 
-if (!$ret) {
-    if (mysql_errno() == 1062)
-        bark("Пользователь $wantusername уже зарегистрирован!");
-    bark("Неизвестная ошибка. Ответ от сервера mySQL: " . htmlspecialchars_uni(mysql_error()));
+// Формируем SQL запрос
+$fields = "username, passhash, secret, editsecret, gender, country, icq, msn, aim, yahoo, skype, mirc, website, email, status, added, birthday, invitedby, invitedroot, theme";
+$values = "'" . mysqli_real_escape_string($mysql_link, $wantusername) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $wantpasshash) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $secret) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $editsecret) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $gender) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $country) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $icq) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $msn) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $aim) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $yahoo) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $skype) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $mirc) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $website) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $email) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $status) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $current_datetime) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $birthday) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $inviter) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $invitedroot) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, select_theme()) . "'";
+
+if (!$users) {
+    $fields = "username, passhash, secret, editsecret, gender, country, icq, msn, aim, yahoo, skype, mirc, website, email, status, class, added, birthday, invitedby, invitedroot, theme";
+    $values = "'" . mysqli_real_escape_string($mysql_link, $wantusername) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $wantpasshash) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $secret) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $editsecret) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $gender) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $country) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $icq) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $msn) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $aim) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $yahoo) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $skype) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $mirc) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $website) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $email) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $status) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, UC_SYSOP) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $current_datetime) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $birthday) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $inviter) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $invitedroot) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, select_theme()) . "'";
 }
 
-$id = mysql_insert_id();
+$query = "INSERT INTO users ($fields) VALUES ($values)";
+$ret = sql_query($query);
 
-sql_query("DELETE FROM invites WHERE invite = " . sqlesc($_POST["invite"]));
+if (!$ret) {
+    if (mysqli_errno($mysql_link) == 1062) {
+        bark("Пользователь $wantusername уже зарегистрирован!");
+    }
+    bark("Неизвестная ошибка. Ответ от сервера mySQL: " . htmlspecialchars(mysqli_error($mysql_link)));
+}
+
+$id = mysqli_insert_id($mysql_link);
+
+sql_query("DELETE FROM invites WHERE invite = '" . mysqli_real_escape_string($mysql_link, $_POST["invite"]) . "'");
 
 write_log("Зарегистрирован новый пользователь $wantusername", "FFFFFF", "tracker");
 

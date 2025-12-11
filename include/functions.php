@@ -243,6 +243,7 @@ function sql_query(string $query)
     
     return $result;
 }
+
 function dbconn(bool $autoclean = false, bool $lightmode = false): void
 {
     global $mysql_host, $mysql_user, $mysql_pass, $mysql_db, $mysql_charset;
