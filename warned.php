@@ -26,77 +26,125 @@
 // +--------------------------------------------------------------------------+
 */
 
+
 require "include/bittorrent.php";
 
 dbconn();
-
 loggedinorreturn();
 
-if (get_user_class() < UC_MODERATOR)
-stderr($tracker_lang['error'], "Отказано в доступе.");
+// Проверка прав доступа
+if (get_user_class() < UC_MODERATOR) {
+    stderr($tracker_lang['error'] ?? 'Ошибка', "Отказано в доступе.");
+}
 
+// Заголовок
 stdhead("Предупрежденные пользователи");
-$warned = number_format(get_row_count("users", "WHERE warned='yes'"));
-begin_frame("Предупрежденные пользователи: ($warned)", true);
-begin_table();
 
-$res = sql_query("SELECT * FROM users WHERE warned=1 AND enabled='yes' ORDER BY (users.uploaded/users.downloaded)") or sqlerr(__FILE__, __LINE__);
-$num = mysql_num_rows($res);
-print("<table border=1 width=675 cellspacing=0 cellpadding=2><form action=\"nowarn.php\" method=post>\n");
-print("<tr align=center><td class=colhead width=90>Пользователь</td>
-<td class=colhead width=70>Зарегистрирован</td>
-<td class=colhead width=75>Последний&nbsp;раз&nbsp;был&nbsp;на&nbsp;трекере</td>
-<td class=colhead width=75>Класс</td>
-<td class=colhead width=70>Закачал</td>
-<td class=colhead width=70>Раздал</td>
-<td class=colhead width=45>Рейтинг</td>
-<td class=colhead width=125>Окончание</td>
-<td class=colhead width=65>Убрать</td>
-<td class=colhead width=65>Отключить</td></tr>\n");
-for ($i = 1; $i <= $num; $i++)
-{
-$arr = mysql_fetch_assoc($res);
-if ($arr['added'] == '0000-00-00 00:00:00')
-$arr['added'] = '-';
-if ($arr['last_access'] == '0000-00-00 00:00:00')
-$arr['last_access'] = '-';
+// Подсчет предупрежденных пользователей
+$warned_count = number_format(get_row_count("users", "WHERE warned='yes'"));
+begin_frame("Предупрежденные пользователи: ($warned_count)", true);
 
+// Получение данных
+$res = sql_query("SELECT * FROM users WHERE warned='yes' AND enabled='yes' ORDER BY (uploaded/downloaded)") or sqlerr(__FILE__, __LINE__);
+$num = mysqli_num_rows($res);
 
-if($arr["downloaded"] != 0){
-$ratio = number_format($arr["uploaded"] / $arr["downloaded"], 3);
-} else {
-$ratio="---";
+// Форма для действий
+print('<table border="1" width="675" cellspacing="0" cellpadding="2"><form action="nowarn.php" method="post">' . PHP_EOL);
+print('<tr align="center">
+    <td class="colhead" width="90">Пользователь</td>
+    <td class="colhead" width="70">Зарегистрирован</td>
+    <td class="colhead" width="75">Последний визит</td>
+    <td class="colhead" width="75">Класс</td>
+    <td class="colhead" width="70">Закачал</td>
+    <td class="colhead" width="70">Раздал</td>
+    <td class="colhead" width="45">Рейтинг</td>
+    <td class="colhead" width="125">Окончание</td>
+    <td class="colhead" width="65">Снять</td>
+    <td class="colhead" width="65">Отключить</td>
+</tr>' . PHP_EOL);
+
+// Обработка результатов
+for ($i = 0; $i < $num; $i++) {
+    $arr = mysqli_fetch_assoc($res);
+    
+    // Обработка дат
+    $added = ($arr['added'] == '0000-00-00 00:00:00') ? '-' : substr($arr['added'], 0, 10);
+    $last_access = ($arr['last_access'] == '0000-00-00 00:00:00') ? '-' : substr($arr['last_access'], 0, 10);
+    $warned_until = htmlspecialchars($arr['warneduntil'] ?? '-');
+    
+    // Расчет рейтинга
+    if ((float)$arr["downloaded"] != 0) {
+        $ratio = (float)$arr["uploaded"] / (float)$arr["downloaded"];
+        $ratio_formatted = number_format($ratio, 3);
+        $ratio_html = '<font color="' . get_ratio_color($ratio) . '">' . $ratio_formatted . '</font>';
+    } else {
+        $ratio_html = '---';
+    }
+    
+    // Форматирование размеров
+    $uploaded = mksize((float)$arr["uploaded"]);
+    $downloaded = mksize((float)$arr["downloaded"]);
+    $uploaded_formatted = str_replace(" ", "<br />", $uploaded);
+    $downloaded_formatted = str_replace(" ", "<br />", $downloaded);
+    
+    // Класс пользователя
+    $class = get_user_class_name($arr["class"]);
+    
+    // Дополнительные метки (донор и т.д.)
+    $user_extra = '';
+    if (isset($arr["donor"]) && $arr["donor"] == "yes") {
+        $user_extra = '<img src="pic/star.gif" border="0" alt="Donor">';
+    }
+    
+    $user_id = (int)$arr['id'];
+    $username = htmlspecialchars($arr['username']);
+    
+    // Вывод строки таблицы
+    print('<tr>
+        <td align="left">
+            <a href="userdetails.php?id=' . $user_id . '"><b>' . $username . '</b></a>' . $user_extra . '
+        </td>
+        <td align="center">' . $added . '</td>
+        <td align="center">' . $last_access . '</td>
+        <td align="center">' . htmlspecialchars($class) . '</td>
+        <td align="center">' . $downloaded_formatted . '</td>
+        <td align="center">' . $uploaded_formatted . '</td>
+        <td align="center">' . $ratio_html . '</td>
+        <td align="center">' . $warned_until . '</td>
+        <td bgcolor="#008000" align="center">
+            <input type="checkbox" name="usernw[]" value="' . $user_id . '">
+        </td>
+        <td bgcolor="#FF0000" align="center">
+            <input type="checkbox" name="desact[]" value="' . $user_id . '">
+        </td>
+    </tr>' . PHP_EOL);
 }
-$ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
-$uploaded = mksize($arr["uploaded"]);
-$downloaded = mksize($arr["downloaded"]);
-// $uploaded = str_replace(" ", "<br />", mksize($arr["uploaded"]));
-// $downloaded = str_replace(" ", "<br />", mksize($arr["downloaded"]));
 
-$added = substr($arr['added'],0,10);
-$last_access = substr($arr['last_access'],0,10);
-$class=get_user_class_name($arr["class"]);
-
-print("<tr><td align=left><a href=userdetails.php?id=$arr[id]><b>$arr[username]</b></a>" .($arr["donor"] =="yes" ? "<img src=pic/star.gif border=0 alt='Donor'>" : "")."</td>
-<td align=center>$added</td>
-<td align=center>$last_access</td>
-<td align=center>$class</td>
-<td align=center>$downloaded</td>
-<td align=center>$uploaded</td>
-<td align=center>$ratio</td>
-<td align=center>$arr[warneduntil]</td>
-<td bgcolor=\"#008000\" align=center><input type=\"checkbox\" name=\"usernw[]\" value=\"$arr[id]\"></td>
-<td bgcolor=\"#FF000\" align=center><input type=\"checkbox\" name=\"desact[]\" value=\"$arr[id]\"></td></tr>\n");
-}
+// Кнопка применения для администраторов
 if (get_user_class() >= UC_ADMINISTRATOR) {
-print("<tr><td colspan=10 align=right><input type=\"submit\" name=\"submit\" value=\"Применить\"></td></tr>\n");
-print("<input type=\"hidden\" name=\"nowarned\" value=\"nowarned\"></form></table>\n");
+    print('<tr>
+        <td colspan="10" align="right">
+            <input type="submit" name="submit" value="Применить">
+        </td>
+    </tr>' . PHP_EOL);
+    print('<input type="hidden" name="nowarned" value="nowarned">' . PHP_EOL);
 }
-print("<p>$pagemenu<br />$browsemenu</p>");
+
+// Закрываем форму и таблицу
+print('</form></table>' . PHP_EOL);
+
+// Пагинация (если есть)
+if (isset($pagemenu) || isset($browsemenu)) {
+    print('<p>');
+    if (isset($pagemenu)) {
+        print($pagemenu);
+    }
+    if (isset($browsemenu)) {
+        print('<br />' . $browsemenu);
+    }
+    print('</p>' . PHP_EOL);
+}
 
 end_frame();
-
-end_table();
-
 stdfoot();
 ?>
