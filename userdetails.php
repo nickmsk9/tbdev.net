@@ -379,6 +379,13 @@ else
 
 ?><script language="javascript" type="text/javascript" src="js/show_hide.js"></script><?
 
+$torrents = $torrents ?? '';
+$seeding = $seeding ?? '';
+$leeching = $leeching ?? '';
+$completed = $completed ?? '';
+$invitetree = $invitetree ?? '';
+$showpmbutton = $showpmbutton ?? 0;
+
 if ($torrents)
  print("<tr valign=\"top\"><td class=\"rowhead\">Залитые&nbsp;торренты</td><td align=\"left\"><a href=\"javascript: show_hide('s1')\"><img border=\"0\" src=\"pic/plus.gif\" id=\"pics1\" title=\"Показать\"></a><div id=\"ss1\" style=\"display: none;\">$torrents</div></td></tr>\n");
 if ($seeding)
