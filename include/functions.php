@@ -1196,35 +1196,39 @@ function pager($rpp, $count, $href, $opts = array()) {
 }
 
 function downloaderdata($res) {
-	$rows = array();
-	$ids = array();
-	$peerdata = array();
-	while ($row = mysql_fetch_assoc($res)) {
-		$rows[] = $row;
-		$id = $row["id"];
-		$ids[] = $id;
-		$peerdata[$id] = array(downloaders => 0, seeders => 0, comments => 0);
-	}
+    $rows = array();
+    $ids = array();
+    $peerdata = array();
+    
+    // Заменяем mysql_fetch_assoc на mysqli_fetch_assoc
+    while ($row = mysqli_fetch_assoc($res)) {
+        $rows[] = $row;
+        $id = $row["id"];
+        $ids[] = $id;
+        // Исправляем синтаксис массива - строковые ключи должны быть в кавычках
+        $peerdata[$id] = array('downloaders' => 0, 'seeders' => 0, 'comments' => 0);
+    }
 
-	if (count($ids)) {
-		$allids = implode(",", $ids);
-		$res = sql_query("SELECT COUNT(*) AS c, torrent, seeder FROM peers WHERE torrent IN ($allids) GROUP BY torrent, seeder");
-		while ($row = mysql_fetch_assoc($res)) {
-			if ($row["seeder"] == "yes")
-				$key = "seeders";
-			else
-				$key = "downloaders";
-			$peerdata[$row["torrent"]][$key] = $row["c"];
-		}
-		$res = sql_query("SELECT COUNT(*) AS c, torrent FROM comments WHERE torrent IN ($allids) GROUP BY torrent");
-		while ($row = mysql_fetch_assoc($res)) {
-			$peerdata[$row["torrent"]]["comments"] = $row["c"];
-		}
-	}
+    if (count($ids)) {
+        $allids = implode(",", $ids);
+        $res = sql_query("SELECT COUNT(*) AS c, torrent, seeder FROM peers WHERE torrent IN ($allids) GROUP BY torrent, seeder");
+        while ($row = mysqli_fetch_assoc($res)) {
+            // Исправляем ключи массива - должны быть в кавычках
+            if ($row["seeder"] == "yes")
+                $key = "seeders";
+            else
+                $key = "downloaders";
+            $peerdata[$row["torrent"]][$key] = $row["c"];
+        }
+        
+        $res = sql_query("SELECT COUNT(*) AS c, torrent FROM comments WHERE torrent IN ($allids) GROUP BY torrent");
+        while ($row = mysqli_fetch_assoc($res)) {
+            $peerdata[$row["torrent"]]["comments"] = $row["c"];
+        }
+    }
 
-	return array($rows, $peerdata);
+    return array($rows, $peerdata);
 }
-
 function genrelist() {
 	$ret = array();
 	$res = sql_query('SELECT id, name FROM categories ORDER BY sort ASC');
