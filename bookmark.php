@@ -26,31 +26,51 @@
 // +--------------------------------------------------------------------------+
 */
 
+
 require_once("include/bittorrent.php");
 dbconn();
 loggedinorreturn();
 
 function bark($msg, $error = true) {
-global $tracker_lang;
-stdhead(($error ? $tracker_lang['error'] : $tracker_lang['torrent']." ".$tracker_lang['bookmarked']));
-   stdmsg(($error ? $tracker_lang['error'] : $tracker_lang['success']), $msg, ($error ? 'error' : 'success'));
-stdfoot();
-exit;
+    global $tracker_lang;
+    $title = $error ? 'Ошибка' : 'Закладка добавлена';
+    stdhead($title);
+    $msg_title = $error ? 'Ошибка' : 'Успешно';
+    $msg_type = $error ? 'error' : 'success';
+    stdmsg($msg_title, $msg, $msg_type);
+    stdfoot();
+    exit;
 }
 
-$id = (int) $_GET["torrent"];
-if (!is_valid_id($id))
-	bark($tracker_lang['torrent_not_selected']);
+$id = (int) ($_GET["torrent"] ?? 0);
+if (!is_valid_id($id)) {
+    bark('Торрент не выбран');
+}
 
+// Получаем информацию о торренте
 $res = sql_query("SELECT name FROM torrents WHERE id = $id") or sqlerr(__FILE__, __LINE__);
-$arr = mysql_fetch_array($res);
+if (!$res || mysqli_num_rows($res) == 0) {
+    bark('Торрент не найден');
+}
 
-if ((get_row_count("bookmarks", "WHERE userid = $CURUSER[id] AND torrentid = $id")) > 0)
-       bark($tracker_lang['torrent']." \"".$arr['name']."\"".$tracker_lang['already_bookmarked']);
+$arr = mysqli_fetch_assoc($res);
+$torrent_name = htmlspecialchars($arr['name'], ENT_QUOTES, 'UTF-8');
 
-sql_query("INSERT INTO bookmarks (userid, torrentid) VALUES ($CURUSER[id], $id)") or sqlerr(__FILE__,__LINE__);
+// Проверяем, не добавлен ли уже торрент в закладки
+$bookmark_check = sql_query("SELECT COUNT(*) FROM bookmarks WHERE userid = {$CURUSER['id']} AND torrentid = $id") or sqlerr(__FILE__, __LINE__);
+$bookmark_row = mysqli_fetch_row($bookmark_check);
+$bookmark_count = (int) $bookmark_row[0];
 
+if ($bookmark_count > 0) {
+    bark("Торрент \"$torrent_name\" уже добавлен в закладки");
+}
+
+// Добавляем торрент в закладки
+$user_id = (int) $CURUSER['id'];
+sql_query("INSERT INTO bookmarks (userid, torrentid) VALUES ($user_id, $id)") or sqlerr(__FILE__, __LINE__);
+
+// Перенаправляем с сообщением об успехе
 header("Refresh: 3; url=browse.php");
-bark($tracker_lang['torrent']." \"".$arr['name']."\"".$tracker_lang['bookmarked'],false);
+bark("Торрент \"$torrent_name\" добавлен в закладки", false);
 
 ?>
