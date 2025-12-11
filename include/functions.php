@@ -443,28 +443,53 @@ function userlogin(bool $lightmode = false): void
 }
 
 function get_server_load() {
-	global $tracker_lang, $phpver;
-	if (strtolower(substr(PHP_OS, 0, 3)) === 'win') {
-		return 0;
-	} elseif (@file_exists("/proc/loadavg")) {
-		$load = @file_get_contents("/proc/loadavg");
-		$serverload = explode(" ", $load);
-		$serverload[0] = round($serverload[0], 4);
-		if(!$serverload) {
-			$load = @exec("uptime");
-			$load = @split("load averages?: ", $load);
-			$serverload = explode(",", $load[1]);
-		}
-	} else {
-		$load = @exec("uptime");
-		$load = @split("load averages?: ", $load);
-		$serverload = explode(",", $load[1]);
-	}
-	$returnload = trim($serverload[0]);
-	if(!$returnload) {
-		$returnload = $tracker_lang['unknown'];
-	}
-	return $returnload;
+    global $tracker_lang, $phpver;
+    
+    if (strtolower(substr(PHP_OS, 0, 3)) === 'win') {
+        return 0;
+    }
+    
+    $returnload = $tracker_lang['unknown'] ?? 'Unknown'; // Используем значение по умолчанию
+    
+    if (@file_exists("/proc/loadavg")) {
+        $load = @file_get_contents("/proc/loadavg");
+        if ($load !== false) {
+            $serverload = explode(" ", $load);
+            if (isset($serverload[0])) {
+                $returnload = round($serverload[0], 4);
+            }
+        }
+        
+        // Если не удалось получить через /proc/loadavg, пробуем uptime
+        if ($returnload === ($tracker_lang['unknown'] ?? 'Unknown')) {
+            $load = @exec("uptime");
+            if (!empty($load)) {
+                // Используем explode вместо устаревшего split()
+                $load_parts = explode("load average:", $load);
+                if (isset($load_parts[1])) {
+                    $serverload = explode(",", trim($load_parts[1]));
+                    if (isset($serverload[0])) {
+                        $returnload = trim($serverload[0]);
+                    }
+                }
+            }
+        }
+    } else {
+        // Для систем без /proc/loadavg
+        $load = @exec("uptime");
+        if (!empty($load)) {
+            // Используем explode вместо устаревшего split()
+            $load_parts = explode("load average:", $load);
+            if (isset($load_parts[1])) {
+                $serverload = explode(",", trim($load_parts[1]));
+                if (isset($serverload[0])) {
+                    $returnload = trim($serverload[0]);
+                }
+            }
+        }
+    }
+    
+    return $returnload;
 }
 
 function user_session() {
