@@ -48,7 +48,7 @@ if (isset($_GET["edited"])) {
 <tr>
 <td align="center" width="33%"><a href="logout.php"><b><?=$tracker_lang['logout'];?></b></a></td>
 <td align="center" width="33%"><a href="mytorrents.php"><b><?=$tracker_lang['my_torrents'];?></b></a></td>
-<td align="center" width="33%"><a href="friends.php"><b>��� ������ �������������</b></a></td>
+<td align="center" width="33%"><a href="friends.php"><b>Мои друзья</b></a></td>
 </tr>
 <tr>
 <td colspan="3">
@@ -107,10 +107,11 @@ function format_tz($a)
 }
 
 tr($tracker_lang['my_allow_pm_from'],
-"<input type=radio name=acceptpms" . ($CURUSER["acceptpms"] == "yes" ? " checked" : "") . " value=\"yes\">��� (�������� �������������)
-<br /><input type=radio name=acceptpms" .  ($CURUSER["acceptpms"] == "friends" ? " checked" : "") . " value=\"friends\">������ ������
-<br /><input type=radio name=acceptpms" .  ($CURUSER["acceptpms"] == "no" ? " checked" : "") . " value=\"no\">������ �������������"
-,1);
+    "<input type=radio name=acceptpms" . ($CURUSER["acceptpms"] == "yes" ? " checked" : "") . " value=\"yes\">Все (неограниченное общение)
+    <br /><input type=radio name=acceptpms" .  ($CURUSER["acceptpms"] == "friends" ? " checked" : "") . " value=\"friends\">Только друзья
+    <br /><input type=radio name=acceptpms" .  ($CURUSER["acceptpms"] == "no" ? " checked" : "") . " value=\"no\">Запретить общение",
+    1
+);
 
 tr($tracker_lang['my_parked'],
 "<input type=\"radio\" name=\"parked\"" . ($CURUSER["parked"] == "yes" ? " checked" : "") . " value=\"yes\">".$tracker_lang['yes']."
@@ -136,9 +137,15 @@ if (count($r) > 0)
 	$categories .= "</tr></table>\n";
 }
 
-tr($tracker_lang['my_email_notify'], "<input type=checkbox name=pmnotif" . (strpos($CURUSER['notifs'], "[pm]") !== false ? " checked" : "") . " value=yes> ��������� ���� ��� ��������� ��<br />\n" .
-	 "<input type=checkbox name=emailnotif" . (strpos($CURUSER['notifs'], "[email]") !== false ? " checked" : "") . " value=yes> ��������� ���� ��� ���������� �������� � ����� <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; �� ��������� �������������� ���������.\n"
-   , 1);
+tr($tracker_lang['my_email_notify'], 
+    "<input type='checkbox' name='pmnotif'" . 
+    (isset($CURUSER['notifs']) && str_contains($CURUSER['notifs'], "[pm]") ? " checked" : "") . 
+    " value='yes'> Уведомлять меня при получении ЛС<br />\n" .
+    "<input type='checkbox' name='emailnotif'" . 
+    (isset($CURUSER['notifs']) && str_contains($CURUSER['notifs'], "[email]") ? " checked" : "") . 
+    " value='yes'> Уведомлять меня при появлении новых торрентов <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; в отслеживаемых разделах.\n", 
+    1
+);
 tr($tracker_lang['my_default_browse'],$categories,1);
 tr($tracker_lang['my_style'], "$themes",1);
 tr($tracker_lang['my_country'], "<select name=country>\n$countries\n</select>",1);
@@ -238,45 +245,85 @@ tr(" ", "    <table cellspacing=\"3\" cellpadding=\"0\" width=\"100%\" border=\"
         <input maxLength=\"30\" size=\"25\" name=\"mirc\" value=\"" . $CURUSER["mirc"] . "\" ></td>
       </tr>
     </table>",1);
-tr($tracker_lang['my_website'], "<input type=\"text\" name=\"website\" size=50 value=\"" . htmlspecialchars_uni($CURUSER["website"]) . "\" /> ", 1);
-tr($tracker_lang['my_torrents_per_page'], "<input type=text size=10 name=torrentsperpage value=$CURUSER[torrentsperpage]> (0 = ��������� �� ���������)",1);
-tr($tracker_lang['my_topics_per_page'], "<input type=text size=10 name=topicsperpage value=$CURUSER[topicsperpage]> (0 = ��������� �� ���������)",1);
-tr($tracker_lang['my_messages_per_page'], "<input type=text size=10 name=postsperpage value=$CURUSER[postsperpage]> (0 = ��������� �� ���������)",1);
-tr($tracker_lang['my_show_avatars'], "<input type=checkbox name=avatars" . ($CURUSER["avatars"] == "yes" ? " checked" : "") . "> (������������ � ���������� �������� ����� ��������� ��� �����)",1);
-tr($tracker_lang['my_info'], "<textarea name=info cols=50 rows=4>" . $CURUSER["info"] . "</textarea><br />������������ �� ����� ��������� ��������. ����� ��������� <a href=tags.php target=_new>BB ����</a>.", 1);
-tr($tracker_lang['my_userbar'], "<img src=\"torrentbar/bar.php/".$CURUSER["id"].".png\" border=\"0\"><br />".$tracker_lang['my_userbar_descr'].":<br /><input type=\"text\" size=65 value=\"[url=$DEFAULTBASEURL][img]$DEFAULTBASEURL/torrentbar/bar.php/".$CURUSER["id"].".png[/img][/url]\" readonly />",1);
-tr($tracker_lang['my_mail'], "<input type=\"text\" name=\"email\" size=50 value=\"" . htmlspecialchars_uni($CURUSER["email"]) . "\" />", 1);
-print("<tr><td colspan=\"2\" align=left><b>����������:</b> ���� �� ������� ��� Email �����, �� ��� ������ ������ � ������������� �� ��� ����� Email-�����. ���� �� �� ����������� ������, �� Email ����� �� ����� �������.</td></tr>\n");
-tr("������� �������","<input type=checkbox name=resetpasskey value=1 /> (�� ������ ���������� ��� �������� �������� ����� ����� �������)", 1);
+// Веб-сайт
+tr($tracker_lang['my_website'], "<input type=\"text\" name=\"website\" size=50 value=\"" . htmlspecialchars_uni($CURUSER["website"] ?? '') . "\" /> ", 1);
 
-if (strlen($CURUSER['passkey']) != 32) {
-	$CURUSER['passkey'] = md5($CURUSER['username'].get_date_time().$CURUSER['passhash']);
-	sql_query("UPDATE users SET passkey='$CURUSER[passkey]' WHERE id=$CURUSER[id]");
+// Торренты на странице
+tr($tracker_lang['my_torrents_per_page'], "<input type='text' size='10' name='torrentsperpage' value='" . ($CURUSER['torrentsperpage'] ?? 0) . "'> (0 = использовать настройки по умолчанию)", 1);
+
+// Темы на странице
+tr($tracker_lang['my_topics_per_page'], "<input type='text' size='10' name='topicsperpage' value='" . ($CURUSER['topicsperpage'] ?? 0) . "'> (0 = использовать настройки по умолчанию)", 1);
+
+// Сообщения на странице
+tr($tracker_lang['my_messages_per_page'], "<input type='text' size='10' name='postsperpage' value='" . ($CURUSER['postsperpage'] ?? 0) . "'> (0 = использовать настройки по умолчанию)", 1);
+
+// Показывать аватары
+tr($tracker_lang['my_show_avatars'], "<input type='checkbox' name='avatars'" . (($CURUSER["avatars"] ?? '') == "yes" ? " checked" : "") . "> (отображаются в профиле пользователя и в комментариях под аватаркой)", 1);
+
+// Информация о себе
+tr($tracker_lang['my_info'], "<textarea name='info' cols='50' rows='4'>" . ($CURUSER["info"] ?? '') . "</textarea><br />Разрешено использовать только следующие теги. Полный список <a href='tags.php' target='_new'>BB кодов</a>.", 1);
+
+// Пользовательская панель
+tr($tracker_lang['my_userbar'], "<img src=\"torrentbar/bar.php/".($CURUSER["id"] ?? 0).".png\" border=\"0\"><br />".$tracker_lang['my_userbar_descr'].":<br /><input type=\"text\" size=65 value=\"[url=$DEFAULTBASEURL][img]$DEFAULTBASEURL/torrentbar/bar.php/".($CURUSER["id"] ?? 0).".png[/img][/url]\" readonly />",1);
+
+// Email
+tr($tracker_lang['my_mail'], "<input type=\"text\" name=\"email\" size=50 value=\"" . htmlspecialchars_uni($CURUSER["email"] ?? '') . "\" />", 1);
+
+print("<tr><td colspan=\"2\" align='left'><b>Внимание:</b> если вы измените ваш Email адрес, то вы должны будете подтвердить свой аккаунт снова через Email-письмо. Если вы не получите письмо, то Email адрес не будет изменён.</td></tr>\n");
+
+// Сброс пасскей
+tr("Сбросить пасскей","<input type='checkbox' name='resetpasskey' value='1' /> (не забудьте обновить все свои раздачи если сбросите пасскей!)", 1);
+
+// Генерация пасскея если его нет
+if (isset($CURUSER['passkey']) && strlen($CURUSER['passkey'] ?? '') != 32) {
+    $CURUSER['passkey'] = md5(($CURUSER['username'] ?? '') . get_date_time() . ($CURUSER['passhash'] ?? ''));
+    if (isset($CURUSER['id'])) {
+        $passkey = mysqli_real_escape_string($connection, $CURUSER['passkey']);
+        $userId = (int)$CURUSER['id'];
+        sql_query("UPDATE users SET passkey='$passkey' WHERE id=$userId");
+    }
 }
-tr("��� �������","<b>$CURUSER[passkey]</b>", 1);
-tr("��������� IP � �������", "<input type=checkbox name=passkey_ip" . ($CURUSER["passkey_ip"] != "" ? " checked" : "") . "> ������� ��� ����� �� ������ �������� ���� �� ���������������� ��������� �� ������ ������� �������� ��� � IP. ���� ��� IP ������������ - �� ��������� ��� �����.<br />�� ������ ������ ��� IP: <b>".getip()."</b>", 1);
-tr("������ ������", "<input type=\"password\" name=\"oldpassword\" size=\"50\" />", 1);
-tr("������� ������", "<input type=\"password\" name=\"chpassword\" size=\"50\" />", 1);
-tr("������ ��� ���", "<input type=\"password\" name=\"passagain\" size=\"50\" />", 1);
+// Пасскей пользователя
+tr("Ваш пасскей", "<b>" . ($CURUSER['passkey'] ?? '') . "</b>", 1);
 
+// Привязка IP к пасскею
+$ip_checked = (isset($CURUSER["passkey_ip"]) && $CURUSER["passkey_ip"] != "") ? " checked" : "";
+tr("Привязка IP к пасскею", 
+    "<input type='checkbox' name='passkey_ip'{$ip_checked}> Привязка вашего пасскея к одному или нескольким разрешённым IP адресам. Если ваш IP изменится - то скачивание будет запрещено.<br />Ваш текущий IP адрес: <b>" . getip() . "</b>", 
+    1
+);
+
+// Старый пароль
+tr("Старый пароль", "<input type=\"password\" name=\"oldpassword\" size=\"50\" />", 1);
+
+// Новый пароль
+tr("Новый пароль", "<input type=\"password\" name=\"chpassword\" size=\"50\" />", 1);
+
+// Подтверждение пароля
+tr("Повторите пароль", "<input type=\"password\" name=\"passagain\" size=\"50\" />", 1);
+
+// Функция выбора уровня приватности
 function priv($name, $descr) {
-	global $CURUSER;
-	if ($CURUSER["privacy"] == $name)
-		return "<input type=\"radio\" name=\"privacy\" value=\"$name\" checked=\"checked\" /> $descr";
-	return "<input type=\"radio\" name=\"privacy\" value=\"$name\" /> $descr";
+    global $CURUSER;
+    $checked = (isset($CURUSER["privacy"]) && $CURUSER["privacy"] == $name) ? " checked=\"checked\"" : "";
+    return "<input type=\"radio\" name=\"privacy\" value=\"" . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . "\"{$checked} /> " . htmlspecialchars($descr, ENT_QUOTES, 'UTF-8');
 }
 
 /* tr("Privacy level",  priv("normal", "Normal") . " " . priv("low", "Low (email address will be shown)") . " " . priv("strong", "Strong (no info will be made available)"), 1); */
 
 ?>
-<tr><td colspan="2" align="center"><input type="submit" value="�������� �������" style='height: 25px'> <input type="reset" value="�������� ���������" style='height: 25px'></td></tr>
+<tr><td colspan="2" align="center">
+    <input type="submit" value="Сохранить изменения" style='height: 25px'> 
+    <input type="reset" value="Сбросить изменения" style='height: 25px'>
+</td>
+</tr>
 </table>
 </form>
 </td>
 </tr>
 </table>
-<?
-print("<p><a href=users.php><b>����� ������������/������ �������������</b></a></p>");
+<?php
+print("<p><a href='users.php'><b>Поиск пользователей/список участников</b></a></p>");
 stdfoot();
 
 ?>
