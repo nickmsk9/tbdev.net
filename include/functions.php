@@ -952,72 +952,42 @@ function parsedescr($d, $html) {
 function stdhead($title = "", $msgalert = true) {
     global $CURUSER, $SITE_ONLINE, $FUNDS, $SITENAME, $DEFAULTBASEURL, $ss_uri, $tracker_lang, $default_theme, $keywords, $description, $pic_base_url;
 
-    // Проверка, что сайт онлайн
-    if (!$SITE_ONLINE) {
+    if (!$SITE_ONLINE)
         die('Site is down for maintenance, please check back again later... thanks<br />');
-    }
 
-    // Установка заголовков
-    $charset = $tracker_lang['language_charset'] ?? 'UTF-8';
-    header('Content-Type: text/html; charset=' . $charset);
-    header('X-Powered-by: TBDev Yuna Scatari Edition');
-    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Content-Type: text/html; charset=' . $tracker_lang['language_charset']);
+    header('X-Powered-by: TBDev nickmsk9 Yuna Scatari Edition - https://github.com/nickmsk9/tbdev.net');
+    header('X-Chocolate-to: github nickmsk9');
+    header('Cache-Control: no-cache');
     header('Pragma: no-cache');
-    header('Expires: 0');
-
-    // Формирование заголовка страницы
-    $page_title = htmlspecialchars($SITENAME ?? '', ENT_QUOTES, 'UTF-8');
     
-    if (isset($_GET['yuna'])) {
-        $page_title .= ' (' . (defined('TBVERSION') ? TBVERSION : '1.0') . ')';
-    }
-    
-    if (!empty($title)) {
-        $page_title .= ' :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+    // Формируем заголовок страницы для тега <title>
+    if ($title == '') {
+        $title = $SITENAME . (isset($_GET['yuna']) ? ' ('.TBVERSION.')' : '');
+    } else {
+        $title = $SITENAME . (isset($_GET['yuna']) ? ' ('.TBVERSION.')' : ''). ' :: ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
     }
 
-    // Выбор темы
-    $ss_uri = select_theme() ?? $default_theme ?? 'default';
-    
-    // Проверка на существование пользователя и подсчет непрочитанных сообщений
+    $ss_uri = select_theme();
+
     $unread = 0;
-    if ($msgalert && !empty($CURUSER) && isset($CURUSER['id'])) {
+    if ($msgalert && $CURUSER) {
         $user_id = (int)$CURUSER['id'];
-        
-        // Используем безопасный запрос с подготовленным выражением
-        $stmt = sql_prepare('SELECT COUNT(*) FROM messages WHERE receiver = ? AND unread = "yes"');
-        if ($stmt) {
-            $stmt->bind_param('i', $user_id);
-            $stmt->execute();
-            $stmt->bind_result($unread_count);
-            $stmt->fetch();
-            $unread = (int)$unread_count;
-            $stmt->close();
+        $res = sql_query('SELECT COUNT(*) FROM messages WHERE receiver = ' . $user_id . ' AND unread="yes"') or die('OopppsY!');
+        $arr = mysqli_fetch_row($res);
+        if ($arr) {
+            $unread = (int)$arr[0];
         }
     }
 
-    // Подключаем файлы темы с проверкой их существования
-    $template_file = 'themes/' . $ss_uri . '/template.php';
-    $stdhead_file = 'themes/' . $ss_uri . '/stdhead.php';
-    
-    if (!file_exists($template_file) || !file_exists($stdhead_file)) {
-        // Фоллбэк на дефолтную тему
-        $ss_uri = $default_theme ?? 'default';
-        $template_file = 'themes/' . $ss_uri . '/template.php';
-        $stdhead_file = 'themes/' . $ss_uri . '/stdhead.php';
-        
-        if (!file_exists($template_file) || !file_exists($stdhead_file)) {
-            die("Theme files not found!");
-        }
-    }
-
-    // Определяем переменные для шаблона
-    define('PAGE_TITLE', $page_title);
-    define('UNREAD_MESSAGES', $unread);
+    // Передаем переменные в шаблон
+    $GLOBALS['title'] = $title;  // Для тега <title>
+    $GLOBALS['unread'] = $unread;
+    $GLOBALS['SITENAME'] = $SITENAME; // На всякий случай
     
     // Подключаем файлы темы
-    require_once($template_file);
-    require_once($stdhead_file);
+    require_once('themes/' . $ss_uri . '/template.php');
+    require_once('themes/' . $ss_uri . '/stdhead.php');
 
 } // stdhead
 
@@ -1256,17 +1226,17 @@ function ratingpic($num) {
 function writecomment($userid, $comment) {
     $userid = intval($userid);
     if (!$userid)
-        throw new Exception(E_FATAL_ERROR, 'User ID cannot be 0 or null');
-	/*$res = sql_query("SELECT modcomment FROM users WHERE id = $userid") or sqlerr(__FILE__, __LINE__);
-	$arr = mysql_fetch_assoc($res);
-
-	$modcomment = date('d-m-Y') . ' - ' . $comment . '' . ($arr['modcomment'] != '' ? "\n" : "") . $arr['modcomment'];
-	$modcom = sqlesc($modcomment);
-
-	return sql_query("UPDATE users SET modcomment = $modcom WHERE id = $userid") or sqlerr(__FILE__, __LINE__);*/
-
-    $modcomment = sqlesc(date('d-m-Y') . ' - ' . $comment);
-    return sql_query("UPDATE users SET modcomment = CONCAT_WS('\n', $modcomment, modcomment) WHERE id = $userid") or sqlerr(__FILE__,__LINE__);
+        throw new Exception('User ID cannot be 0 or null');
+    
+    // Очищаем и экранируем комментарий
+    $clean_comment = mysqli_real_escape_string($GLOBALS['mysql_link'], $comment);
+    $date = date('d-m-Y');
+    $modcomment = $date . ' - ' . $clean_comment;
+    
+    // Используем CONCAT_WS для добавления нового комментария в начало
+    $query = "UPDATE users SET modcomment = CONCAT_WS('\n', '" . mysqli_real_escape_string($GLOBALS['mysql_link'], $modcomment) . "', modcomment) WHERE id = $userid";
+    
+    return sql_query($query) or sqlerr(__FILE__, __LINE__);
 }
 
 function hash_pad($hash) {
