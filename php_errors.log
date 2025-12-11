@@ -269,3 +269,36 @@ Stack trace:
 #1 [internal function]: autoclean()
 #2 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 114
+[11-Dec-2025 09:37:25 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-polls.php:11
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(18): include()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(244): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(454): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(991): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-polls.php on line 11
+[11-Dec-2025 09:37:25 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_assoc() in C:\OSPanel\domains\tbdev.net\include\cleanup.php:114
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(686): docleanup()
+#1 [internal function]: autoclean()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 114
+[11-Dec-2025 09:38:32 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-polls.php:11
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(18): include()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(244): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(454): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(991): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-polls.php on line 11
+[11-Dec-2025 09:38:36 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_num_rows() in C:\OSPanel\domains\tbdev.net\blocks\block-polls.php:11
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\blocks.php(18): include()
+#1 C:\OSPanel\domains\tbdev.net\include\blocks.php(244): render_blocks()
+#2 C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php(454): show_blocks()
+#3 C:\OSPanel\domains\tbdev.net\include\functions.php(991): require_once('C:\\OSPanel\\doma...')
+#4 C:\OSPanel\domains\tbdev.net\index.php(58): stdhead()
+#5 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\blocks\block-polls.php on line 11

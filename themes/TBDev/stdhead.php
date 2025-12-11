@@ -125,26 +125,27 @@ else
 $medaldon = $warn = '';
 
 if ($CURUSER['donor'] == "yes")
-	$medaldon = "<img src=\"{$pic_base_url}/star.gif\" alt=\"�����\" title=\"�����\">";
+	$medaldon = "<img src=\"{$pic_base_url}/star.gif\" alt=\"Донатер\" title=\"Донатер\">";
 if ($CURUSER['warned'] == "yes")
-	$warn = "<img src=\"{$pic_base_url}/warned.gif\" alt=\"������������\" title=\"������������\">";
+	$warn = "<img src=\"{$pic_base_url}/warned.gif\" alt=\"Предупреждение\" title=\"Предупреждение\">";
 
 //// check for messages ////////////////// 
-        $res1 = sql_query("SELECT COUNT(*) FROM messages WHERE receiver=" . $CURUSER["id"] . " AND location=1") or print(mysql_error()); 
-        $arr1 = mysqli_fetch_row($res1);
-        $messages = $arr1[0];
-        /*$res1 = sql_query("SELECT COUNT(*) FROM messages WHERE receiver=" . $CURUSER["id"] . " AND location=1 AND unread='yes'") or print(mysql_error()); 
-        $arr1 = mysql_fetch_row($res1);
-        $unread = $arr1[0];*/
-        $res1 = sql_query("SELECT COUNT(*) FROM messages WHERE sender=" . $CURUSER["id"] . " AND saved='yes'") or print(mysql_error()); 
-        $arr1 = mysqli_fetch_row($res1);
-        $outmessages = $arr1[0];
-        if ($unread)
-                $inboxpic = "<img height=\"16px\" style=\"border:none\" alt=\"inbox\" title=\"���� ����� ���������\" src=\"{$pic_base_url}/pn_inboxnew.gif\">";
-        else
-                $inboxpic = "<img height=\"16px\" style=\"border:none\" alt=\"inbox\" title=\"��� ����� ���������\" src=\"{$pic_base_url}/pn_inbox.gif\">";
+$res1 = sql_query("SELECT COUNT(*) FROM messages WHERE receiver=" . $CURUSER["id"] . " AND location=1") or print(mysqli_error($mysql_link)); 
+$arr1 = mysqli_fetch_row($res1);
+$messages = $arr1[0];
+/*$res1 = sql_query("SELECT COUNT(*) FROM messages WHERE receiver=" . $CURUSER["id"] . " AND location=1 AND unread='yes'") or print(mysqli_error($mysql_link)); 
+$arr1 = mysqli_fetch_row($res1);
+$unread = $arr1[0];*/
+$res1 = sql_query("SELECT COUNT(*) FROM messages WHERE sender=" . $CURUSER["id"] . " AND saved='yes'") or print(mysqli_error($mysql_link)); 
+$arr1 = mysqli_fetch_row($res1);
+$outmessages = $arr1[0];
 
-$res2 = sql_query("SELECT COUNT(*) FROM peers WHERE userid = {$CURUSER["id"]} AND seeder='yes'") or print(mysql_error());
+if ($unread)
+	$inboxpic = "<img height=\"16px\" style=\"border:none\" alt=\"inbox\" title=\"У вас есть непрочитанные\" src=\"{$pic_base_url}/pn_inboxnew.gif\">";
+else
+	$inboxpic = "<img height=\"16px\" style=\"border:none\" alt=\"inbox\" title=\"Нет непрочитанных\" src=\"{$pic_base_url}/pn_inbox.gif\">";
+
+$res2 = sql_query("SELECT COUNT(*) FROM peers WHERE userid = {$CURUSER["id"]} AND seeder='yes'") or print(mysqli_error($mysql_link));
 $row = mysqli_fetch_row($res2);
 $activeseed = $row[0];
 
@@ -167,10 +168,10 @@ $activeleech = $row[0];
 		<td class="tablea">
 			<table align="center" style="width:100%" cellspacing="0" cellpadding="0" border="0">
 				<tr>
-					<td class="bottom" align="left"><span class="smallfont"><?= $tracker_lang['welcome_back']; ?><b><a
+				<td class="bottom" align="left"><span class="smallfont"><?= $tracker_lang['welcome_back']; ?><b><a
 									href="userdetails.php?id=<?= $CURUSER['id'] ?>"><?= get_user_class_color($CURUSER['class'], $CURUSER['username']) ?></a></b><?= $medaldon ?><?= $warn ?>
-							&nbsp; [<a href="bookmarks.php">��������</a>] [<a href="mybonus.php">��� �����</a>] [<a
-								href="logout.php">�����</a>]<br/>
+							&nbsp; [<a href="bookmarks.php">Закладки</a>] [<a href="mybonus.php">Мой бонус</a>] [<a
+								href="logout.php">Выйти</a>]<br/>
 <font color=1900D1><?= $tracker_lang['ratio']; ?>:</font> <?= $ratio ?>&nbsp;&nbsp;<font
 								color=green><?= $tracker_lang['uploaded']; ?>:</font> <font
 								color=black><?= $uped ?></font>&nbsp;&nbsp;<font
