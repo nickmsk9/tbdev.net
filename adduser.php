@@ -46,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 
 	sql_query("INSERT INTO users (added, last_access, secret, username, passhash, status, email) VALUES(".sqlesc(get_date_time()).", ".sqlesc(get_date_time()).", $secret, $username, $passhash, 'confirmed', $email)") or sqlerr(__FILE__, __LINE__);
 	$res = sql_query("SELECT id FROM users WHERE username=$username");
-	$arr = mysql_fetch_row($res);
+	$arr = mysqli_fetch_row($res);
 	if (!$arr)
 		stderr($tracker_lang['error'], $tracker_lang['unable_to_create_account']);
 	header("Location: $DEFAULTBASEURL/userdetails.php?id=$arr[0]");

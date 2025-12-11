@@ -29,7 +29,7 @@
 require_once("include/bittorrent.php");
 
 function bark($msg) {
-	stderr("Произошла ошибка", $msg);
+	stderr("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ", $msg);
 }
 
 dbconn();
@@ -46,11 +46,11 @@ $changedemail = 0;
 
 if ($chpassword != "") {
 	if (strlen($chpassword) > 40)
-		bark("Извините, ваш пароль слишком длинный (максимум 40 символов)");
+		bark("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 40 пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)");
 	if ($chpassword != $passagain)
-		bark("Пароли не совпадают. Попробуйте еще раз.");
+		bark("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ.");
     if ($CURUSER["passhash"] != md5($CURUSER["secret"] . $oldpassword . $CURUSER["secret"]))
-            bark("Вы ввели неправильный старый пароль.");
+            bark("пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.");
 
 	$sec = mksecret();
 	$passhash = md5($sec . $chpassword . $sec);
@@ -61,10 +61,10 @@ if ($chpassword != "") {
 
 if ($email != $CURUSER["email"]) {
 	if (!validemail($email))
-		bark("Это не похоже на настоящий E-Mail.");
+		bark("пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ E-Mail.");
   $r = sql_query("SELECT id FROM users WHERE email=" . sqlesc($email)) or sqlerr(__FILE__, __LINE__);
 	if (mysql_num_rows($r) > 0)
-		bark("Этот e-mail адрес уже используется одним из пользователей трекера. (<b>$email</b>)");
+		bark("пїЅпїЅпїЅпїЅ e-mail пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. (<b>$email</b>)");
 	$changedemail = 1;
 }
 
@@ -120,7 +120,7 @@ $theme = $_POST["theme"];
 $country = $_POST["country"];
 $language = $_POST["language"];
 if (!file_exists('./languages/lang_'.$language.'/lang_main.php')) {
-    bark('Выбранный язык в системе отсутствует!');
+    bark('пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!');
 }
 $updateset[] = "language = " . sqlesc($language);
 //$timezone = 0 + $_POST["timezone"];
@@ -128,32 +128,32 @@ $updateset[] = "language = " . sqlesc($language);
 
 $icq = (int) unesc($_POST["icq"]);
 if (strlen($icq) > 10)
-    bark("Жаль, Номер icq слишком длинный  (Макс - 10)");
+    bark("пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ icq пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ  (пїЅпїЅпїЅпїЅ - 10)");
 $updateset[] = "icq = " . sqlesc($icq);
 
 $msn = unesc($_POST["msn"]);
 if (strlen($msn) > 30)
-    bark("Жаль, Ваш msn слишком длинный  (Макс - 30)");
+    bark("пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ msn пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ  (пїЅпїЅпїЅпїЅ - 30)");
 $updateset[] = "msn = " . sqlesc(htmlspecialchars_uni($msn));
 
 $aim = unesc($_POST["aim"]);
 if (strlen($aim) > 30)
-    bark("Жаль, Ваш aim слишком длинный  (Макс - 30)");
+    bark("пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ aim пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ  (пїЅпїЅпїЅпїЅ - 30)");
 $updateset[] = "aim = " . sqlesc(htmlspecialchars_uni($aim));
 
 $yahoo = unesc($_POST["yahoo"]);
 if (strlen($yahoo) > 30)
-    bark("Жаль, Ваш yahoo слишком длинный  (Макс - 30)");
+    bark("пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ yahoo пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ  (пїЅпїЅпїЅпїЅ - 30)");
 $updateset[] = "yahoo = " . sqlesc(htmlspecialchars_uni($yahoo));
 
 $mirc = unesc($_POST["mirc"]);
 if (strlen($mirc) > 30)
-    bark("Жаль, Ваш mirc слишком длинный  (Макс - 30)");
+    bark("пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ mirc пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ  (пїЅпїЅпїЅпїЅ - 30)");
 $updateset[] = "mirc = " . sqlesc(htmlspecialchars_uni($mirc));
 
 $skype = unesc($_POST["skype"]);
 if (strlen($skype) > 20)
-    bark("Жаль, Ваш skype слишком длинный  (Макс - 20)");
+    bark("пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ skype пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ  (пїЅпїЅпїЅпїЅ - 20)");
 $updateset[] = "skype = " . sqlesc(htmlspecialchars_uni($skype));
 
 /*
@@ -215,7 +215,7 @@ Your new email address will appear in your profile after you do this. Otherwise
 your profile will remain unchanged.
 EOD;
 
-	sent_mail($email, $SITENAME, $SITEEMAIL, "Изменение настроек профиля на $thisdomain", $body, false);
+	sent_mail($email, $SITENAME, $SITEEMAIL, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ $thisdomain", $body, false);
 //	mail($email, "$thisdomain profile change confirmation", $body, "From: $SITEEMAIL");
 	$urladd .= "&mailsent=1";
 }
