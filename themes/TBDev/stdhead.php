@@ -343,30 +343,43 @@ $medaldon = $medaldon ?? '';
 $warn = $warn ?? '';
 $usrclass = '';
 
+// Сначала определим значения по умолчанию для констант если они не определены
+if (!defined('UC_PEASANT')) define('UC_PEASANT', 1);
+if (!defined('UC_MODERATOR')) define('UC_MODERATOR', 4);
+
 // Проверяем существование CURUSER и его элементов
 if (isset($CURUSER) && is_array($CURUSER)) {
-    if (($CURUSER['override_class'] ?? 255) != 255) {
+    $usrclass = '';
+    
+    $override_class = isset($CURUSER['override_class']) ? (int)$CURUSER['override_class'] : 255;
+    $user_class = isset($CURUSER['class']) ? (int)$CURUSER['class'] : UC_PEASANT;
+    
+    if ($override_class != 255) {
+        $class_name = get_user_class_name($user_class);
         $usrclass = "&nbsp;<img src=\"{$pic_base_url}/warning.gif\" title=\"" . 
-                   get_user_class_name($CURUSER['class'] ?? UC_PEASANT) . 
+                   htmlspecialchars($class_name, ENT_QUOTES, 'UTF-8') . 
                    "\" alt=\"" . 
-                   get_user_class_name($CURUSER['class'] ?? UC_PEASANT) . 
+                   htmlspecialchars($class_name, ENT_QUOTES, 'UTF-8') . 
                    "\">&nbsp;";
     } elseif (get_user_class() >= UC_MODERATOR) {
+        $class_name = get_user_class_name($user_class);
         $usrclass = "&nbsp;<a href=\"setclass.php\"><img src=\"{$pic_base_url}/warning.gif\" title=\"" . 
-                   get_user_class_name($CURUSER['class'] ?? UC_PEASANT) . 
+                   htmlspecialchars($class_name, ENT_QUOTES, 'UTF-8') . 
                    "\" alt=\"" . 
-                   get_user_class_name($CURUSER['class'] ?? UC_PEASANT) . 
+                   htmlspecialchars($class_name, ENT_QUOTES, 'UTF-8') . 
                    "\" border=\"0\"></a>&nbsp;";
     }
     
-    $welcome_text = $tracker_lang['welcome_back'] . 
-                   "<a href=\"$DEFAULTBASEURL/userdetails.php?id=" . ($CURUSER["id"] ?? 0) . "\">" . 
-                   ($CURUSER["username"] ?? 'Гость') . 
+    $user_id = isset($CURUSER["id"]) ? (int)$CURUSER["id"] : 0;
+    $username = isset($CURUSER["username"]) ? $CURUSER["username"] : 'Гость';
+    
+    $welcome_text = (isset($tracker_lang['welcome_back']) ? $tracker_lang['welcome_back'] : 'Добро пожаловать, ') . 
+                   "<a href=\"$DEFAULTBASEURL/userdetails.php?id=" . $user_id . "\">" . 
+                   htmlspecialchars($username, ENT_QUOTES, 'UTF-8') . 
                    "</a>&nbsp;" . $usrclass . "&nbsp;";
 } else {
-    $welcome_text = $tracker_lang['welcome_back'] . "Гость";
+    $welcome_text = (isset($tracker_lang['welcome_back']) ? $tracker_lang['welcome_back'] : 'Добро пожаловать, ') . "Гость";
 }
-
 blok_menu($welcome_text . $medaldon . $warn, $userbar, "155");
 
 	$mainmenu = "<a class=\"menu\" href=\"index.php\">&nbsp;{$tracker_lang['homepage']}</a>"
