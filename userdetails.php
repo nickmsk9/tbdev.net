@@ -274,7 +274,7 @@ if ($addr)
 if (get_user_class() >= UC_MODERATOR)
 	print("<tr><td class=\"rowhead\">Приглашений</td><td align=left><a href=\"invite.php?id=$id\">".$user["invites"]."</a></td></tr>");
 if ($user["invitedby"] != 0) {
-	$inviter = mysql_fetch_assoc(sql_query("SELECT username FROM users WHERE id = ".sqlesc($user["invitedby"])));
+	$inviter = mysqli_fetch_assoc(sql_query("SELECT username FROM users WHERE id = ".sqlesc($user["invitedby"])));
 	print("<tr><td class=\"rowhead\">Пригласил</td><td align=\"left\"><a href=\"userdetails.php?id=$user[invitedby]\">$inviter[username]</a></td></tr>");
 }
 if ($user["downloaded"] > 0) {
