@@ -155,9 +155,21 @@ else
 $completed .= "</table>";
 }
 
-if (!empty($user['added']) && $user['added'] != "0000-00-00 00:00:00") {
-    $joindate = $user['added'] . " (" . get_et(sql_timestamp_to_unix_timestamp($user['added'])) . " " . ($tracker_lang['ago'] ?? 'назад') . ")";
-} else {
+try {
+    if (!empty($user['added']) && $user['added'] != "0000-00-00 00:00:00") {
+        $dateTime = DateTime::createFromFormat('Y-m-d H:i:s', $user['added']);
+        
+        if ($dateTime === false) {
+            throw new Exception('Invalid date format');
+        }
+        
+        $formattedDate = $dateTime->format('Y-m-d H:i:s');
+        $timeAgo = get_et($dateTime->getTimestamp());
+        $joindate = $formattedDate . " (" . $timeAgo . " " . ($tracker_lang['ago'] ?? 'назад') . ")";
+    } else {
+        $joindate = 'N/A';
+    }
+} catch (Exception $e) {
     $joindate = 'N/A';
 }
 
