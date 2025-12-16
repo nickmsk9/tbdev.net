@@ -1139,28 +1139,28 @@ function get_left_time_plural($time_end, $decimals = 0) {
 }
 
 function get_elapsed_time_plural($time_start, $decimals = 0) {
-	$divider['years']   = (60 * 60 * 24 * 365);
-	$divider['months']  = (60 * 60 * 24 * 365 / 12);
-	$divider['weeks']   = (60 * 60 * 24 * 7);
-	$divider['days']    = (60 * 60 * 24);
-	$divider['hours']   = (60 * 60);
-	$divider['minutes'] = (60);
+    $divider['years']   = (60 * 60 * 24 * 365);
+    $divider['months']  = (60 * 60 * 24 * 365 / 12);
+    $divider['weeks']   = (60 * 60 * 24 * 7);
+    $divider['days']    = (60 * 60 * 24);
+    $divider['hours']   = (60 * 60);
+    $divider['minutes'] = (60);
 
-	$langs['years']		= array("���", "����", "���");
-	$langs['months']	= array("�����", "������", "�������");
-	$langs['weeks']		= array("������", "������", "������");
-	$langs['days']		= array("����", "���", "����");
-	$langs['hours']		= array("���", "����", "�����");
-	$langs['minutes']	= array("������", "������", "�����");
+    $langs['years']     = array("год", "года", "лет");
+    $langs['months']    = array("месяц", "месяца", "месяцев");
+    $langs['weeks']     = array("неделя", "недели", "недель");
+    $langs['days']      = array("день", "дня", "дней");
+    $langs['hours']     = array("час", "часа", "часов");
+    $langs['minutes']   = array("минута", "минуты", "минут");
 
-	foreach ($divider as $unit => $div) {
-		${'elapsed_time_'.$unit} = floor(((TIMENOW - $time_start) / $div));
-		if (${'elapsed_time_'.$unit} >= 1)
-			break;
-	}
-	$elapsed_time = ${'elapsed_time_'.$unit} . ' ' . getWord(${'elapsed_time_'.$unit}, $langs[$unit]);
+    foreach ($divider as $unit => $div) {
+        ${'elapsed_time_'.$unit} = floor(((TIMENOW - $time_start) / $div));
+        if (${'elapsed_time_'.$unit} >= 1)
+            break;
+    }
+    $elapsed_time = ${'elapsed_time_'.$unit} . ' ' . getWord(${'elapsed_time_'.$unit}, $langs[$unit]);
 
-	return $elapsed_time;
+    return $elapsed_time;
 }
 
 function get_elapsed_time($ts) {
