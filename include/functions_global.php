@@ -1114,28 +1114,49 @@ function get_lt($ts) {
 }
 
 function get_left_time_plural($time_end, $decimals = 0) {
-	$divider['years']   = (60 * 60 * 24 * 365);
-	$divider['months']  = (60 * 60 * 24 * 365 / 12);
-	$divider['weeks']   = (60 * 60 * 24 * 7);
-	$divider['days']    = (60 * 60 * 24);
-	$divider['hours']   = (60 * 60);
-	$divider['minutes'] = (60);
-
-	$langs['years']		= array("���", "����", "���");
-	$langs['months']	= array("�����", "������", "�������");
-	$langs['weeks']		= array("������", "������", "������");
-	$langs['days']		= array("�����", "�����", "�����");
-	$langs['hours']		= array("���", "����", "�����");
-	$langs['minutes']	= array("������", "������", "�����");
-
-	foreach ($divider as $unit => $div) {
-		${'left_time_'.$unit} = floor((($time_end - TIMENOW) / $div));
-		if (${'left_time_'.$unit} >= 1)
-			break;
-	}
-	$left_time = ${'left_time_'.$unit} . ' ' . getWord(${'left_time_'.$unit}, $langs[$unit]);
-
-	return $left_time;
+    $seconds_left = $time_end - TIMENOW;
+    
+    if ($seconds_left <= 0) {
+        return "0 минут";
+    }
+    
+    $divider = [
+        'years'   => 31536000, // 60 * 60 * 24 * 365
+        'months'  => 2592000,  // 60 * 60 * 24 * 30
+        'weeks'   => 604800,   // 60 * 60 * 24 * 7
+        'days'    => 86400,    // 60 * 60 * 24
+        'hours'   => 3600,     // 60 * 60
+        'minutes' => 60
+    ];
+    
+    $langs = [
+        'years'   => ["год", "года", "лет"],
+        'months'  => ["месяц", "месяца", "месяцев"],
+        'weeks'   => ["неделя", "недели", "недель"],
+        'days'    => ["день", "дня", "дней"],
+        'hours'   => ["час", "часа", "часов"],
+        'minutes' => ["минута", "минуты", "минут"]
+    ];
+    
+    $value = 0;
+    $unit = 'minutes';
+    
+    foreach ($divider as $unit_name => $div) {
+        if ($seconds_left >= $div) {
+            $value = floor($seconds_left / $div);
+            $unit = $unit_name;
+            break;
+        }
+    }
+    
+    // Если прошло меньше минуты, показываем секунды
+    if ($value === 0 && $seconds_left > 0) {
+        $value = $seconds_left;
+        $langs['seconds'] = ["секунда", "секунды", "секунд"];
+        $unit = 'seconds';
+    }
+    
+    return $value . ' ' . getWord($value, $langs[$unit]);
 }
 
 function get_elapsed_time_plural($time_start, $decimals = 0) {
