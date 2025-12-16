@@ -1164,23 +1164,57 @@ function get_elapsed_time_plural($time_start, $decimals = 0) {
 }
 
 function get_elapsed_time($ts) {
-	$mins = floor((time() - $ts) / 60);
-	$hours = floor($mins / 60);
-	$mins -= $hours * 60;
-	$days = floor($hours / 24);
-	$hours -= $days * 24;
-	$weeks = floor($days / 7);
-	$days -= $weeks * 7;
-	$t = "";
-	if ($weeks > 0)
-		return "$weeks �����" . ($weeks > 1 ? "�" : "�");
-	if ($days > 0)
-		return "$days �" . ($days > 1 ? "���" : "���");
-	if ($hours > 0)
-		return "$hours ���" . ($hours > 1 ? "��" : "");
-	if ($mins > 0)
-		return "$mins �����" . ($mins > 1 ? "" : "�");
-	return "< 1 ������";
+    $seconds = time() - $ts;
+    
+    if ($seconds < 60) {
+        return "< 1 минуты";
+    }
+    
+    $mins = floor($seconds / 60);
+    $hours = floor($mins / 60);
+    $mins -= $hours * 60;
+    $days = floor($hours / 24);
+    $hours -= $days * 24;
+    $weeks = floor($days / 7);
+    $days -= $weeks * 7;
+    
+    if ($weeks > 0) {
+        $ending = match(true) {
+            $weeks % 10 == 1 && $weeks % 100 != 11 => "а",
+            ($weeks % 10 >= 2 && $weeks % 10 <= 4) && ($weeks % 100 < 10 || $weeks % 100 >= 20) => "и",
+            default => ""
+        };
+        return "$weeks недел$ending";
+    }
+    
+    if ($days > 0) {
+        $ending = match($days) {
+            1 => "ь",
+            2, 3, 4 => "я",
+            default => "ей"
+        };
+        return "$days дн$ending";
+    }
+    
+    if ($hours > 0) {
+        $ending = match($hours % 10) {
+            1 => "",
+            2, 3, 4 => "а",
+            default => "ов"
+        };
+        return "$hours час$ending";
+    }
+    
+    if ($mins > 0) {
+        $ending = match($mins % 10) {
+            1 => "а",
+            2, 3, 4 => "ы",
+            default => ""
+        };
+        return "$mins минут$ending";
+    }
+    
+    return "< 1 минуты";
 }
 
 ?>
