@@ -1,61 +1,87 @@
 <?php
-if (!defined('UC_SYSOP'))
-	die('Direct access denied.');
-?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html lang="ru">
-<head>
-<title><?= $title ?></title>
-<link rel="stylesheet" href="./themes/<?=$ss_uri."/".$ss_uri?>.css" type="text/css">
-<script language="javascript" type="text/javascript" src="js/resizer.js"></script>
-<!--<script language="javascript" type="text/javascript" src="js/tooltips.js"></script>-->
-<script language="javascript" type="text/javascript" src="js/jquery.js"></script>
-<script language="javascript" type="text/javascript" src="js/jquery.migrate.js"></script>
-<script language="javascript" type="text/javascript" src="js/jquery.cookies.js"></script>
+declare(strict_types=1);
 
-<!-- GreenSock JS -->
-<script language="javascript" type="text/javascript" src="js/TweenMax.min.js"></script>
-<!-- GreenSock jQuery plugin for .animate() via GSAP -->
-<script language="javascript" type="text/javascript" src="js/jquery.gsap.min.js"></script>
-
-<script language="javascript" type="text/javascript" src="js/blocks.js"></script>
-<script language="javascript" type="text/javascript" src="js/lightbox.js"></script>
-<script type="text/javascript">
-<!--
-
-var ExternalLinks_InNewWindow = '1';
-
-function initSpoilers(context) {
-	var context = context || 'body';
-	$('div.spoiler-head', $(context))
-		.click(function(){
-		    var ctx = $(this).next('div.spoiler-body');
-			var code = ctx.children('textarea').text();
-			if (code) {
-			    ctx.children('textarea').replaceWith(code);
-			    initSpoilers(ctx);
-			}
-			$(this).toggleClass('unfolded');
-            $(this).next('div.spoiler-body').slideToggle('fast');
-            $(this).next('div.spoiler-body').next().slideToggle('fast');
-		});
+if (!defined('UC_SYSOP')) {
+	http_response_code(403);
+	exit('Direct access denied.');
 }
 
-$(document).ready(function(){
-	initSpoilers('body');
-	$(function() {$('a[rel*=lightbox]').lightBox();});
-});
+$pageTitle = (string)($title ?? 'Torrentside');
+$theme     = (string)($ss_uri ?? 'default');
+$baseUrl   = rtrim((string)($DEFAULTBASEURL ?? ''), '/');
 
-//-->
-</script>
-<?
-if($keywords)
-    echo "<meta name=\"keywords\" content=\"$keywords\" />\n";
-if($description)
-    echo "<meta name=\"description\" content=\"$description\" />\n";
+// helpers
+$h = static fn($v): string => htmlspecialchars((string)$v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+$u = static fn($v): string => rawurlencode((string)$v);
+
+// cache-bust (опционально: поставь сюда git hash/версию)
+$assetV = (string)($GLOBALS['ASSET_VERSION'] ?? '1');
 ?>
-<link rel="alternate" type="application/rss+xml" title="��������� ��������" href="<?=$DEFAULTBASEURL?>/rss.php">
-<link rel="shortcut icon" href="<?=$DEFAULTBASEURL;?>/favicon.ico" type="image/x-icon" />
+<!doctype html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title><?= $h($pageTitle) ?></title>
+
+	<?php if (!empty($keywords)): ?>
+		<meta name="keywords" content="<?= $h($keywords) ?>">
+	<?php endif; ?>
+
+	<?php if (!empty($description)): ?>
+		<meta name="description" content="<?= $h($description) ?>">
+	<?php endif; ?>
+
+	<link rel="stylesheet" href="themes/<?= $u($theme) ?>/<?= $u($theme) ?>.css?v=<?= $h($assetV) ?>" type="text/css">
+
+	<link rel="alternate" type="application/rss+xml" title="Последние торренты" href="<?= $h($baseUrl) ?>/rss.php">
+	<link rel="icon" href="<?= $h($baseUrl) ?>/favicon.ico" sizes="any">
+	<link rel="shortcut icon" href="<?= $h($baseUrl) ?>/favicon.ico" type="image/x-icon">
+
+	<script src="js/jquery.js?v=<?= $h($assetV) ?>" defer></script>
+	<script src="js/jquery.migrate.js?v=<?= $h($assetV) ?>" defer></script>
+	<script src="js/jquery.cookies.js?v=<?= $h($assetV) ?>" defer></script>
+
+	<script src="js/resizer.js?v=<?= $h($assetV) ?>" defer></script>
+
+	<!-- GreenSock / GSAP -->
+	<script src="js/TweenMax.min.js?v=<?= $h($assetV) ?>" defer></script>
+	<script src="js/jquery.gsap.min.js?v=<?= $h($assetV) ?>" defer></script>
+
+	<script src="js/blocks.js?v=<?= $h($assetV) ?>" defer></script>
+	<script src="js/lightbox.js?v=<?= $h($assetV) ?>" defer></script>
+
+	<script>
+		// оставлено для совместимости со старым кодом
+		window.ExternalLinks_InNewWindow = 1;
+
+		document.addEventListener('DOMContentLoaded', () => {
+			const initSpoilers = (context = document.body) => {
+				$('div.spoiler-head', context)
+					.off('click.spoiler')
+					.on('click.spoiler', function () {
+						const $body = $(this).next('div.spoiler-body');
+						const code = $body.children('textarea').text();
+						if (code) {
+							$body.children('textarea').replaceWith(code);
+							initSpoilers($body);
+						}
+						$(this).toggleClass('unfolded');
+						$body.slideToggle('fast');
+						$body.next().slideToggle('fast');
+					});
+			};
+
+			initSpoilers(document.body);
+
+			if ($.fn.lightBox) {
+				$('a[rel*=lightbox]').lightBox();
+			}
+		});
+	</script>
 </head>
+
 <body>
 
 <table width="90%" class="clear" align="center" border="0" cellspacing="0" cellpadding="0" style="background: transparent;">
@@ -64,7 +90,6 @@ if($description)
 <a href="<?=$DEFAULTBASEURL?>"><img style="border: none" alt="<?=$SITENAME?>" title="<?=$SITENAME?>" src="./themes/<?=$ss_uri;?>/images/logo.gif" /></a>
 </td>
 <td class="embedded" width="50%" align="right" style="text-align: right" background="./themes/<?=$ss_uri;?>/images/logobg.gif">
-	<noindex><iframe src="http://bit-torrent.kiev.ua/banner.php" width="468" height="60" marginwidth="0" marginheight="0" scrolling="no" frameborder="0"></iframe></noindex>&nbsp;
 </td>
 </tr>
 </table>

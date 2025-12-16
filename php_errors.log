@@ -21,3 +21,30 @@ Stack trace:
   thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 264
 [11-Dec-2025 15:39:30 Europe/Moscow] PHP Fatal error:  Cannot redeclare deadtime() (previously declared in C:\OSPanel\domains\tbdev.net\include\functions.php:877) in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 450
 [16-Dec-2025 08:50:13 Europe/Moscow] PHP Fatal error:  Cannot redeclare deadtime() (previously declared in C:\OSPanel\domains\tbdev.net\include\functions.php:877) in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 450
+[16-Dec-2025 09:41:32 Europe/Moscow] PHP Fatal error:  Cannot redeclare deadtime() (previously declared in C:\OSPanel\domains\tbdev.net\include\functions.php:877) in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 450
+[16-Dec-2025 09:44:18 Europe/Moscow] PHP Parse error:  Unmatched '}' in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 248
+[16-Dec-2025 09:44:30 Europe/Moscow] PHP Parse error:  Unmatched '}' in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 252
+[16-Dec-2025 09:44:36 Europe/Moscow] PHP Warning:  Undefined variable $medaldon in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 179
+[16-Dec-2025 09:44:36 Europe/Moscow] PHP Warning:  Undefined variable $warn in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 179
+[16-Dec-2025 09:44:36 Europe/Moscow] PHP Warning:  Undefined variable $ratio in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 182
+[16-Dec-2025 09:44:36 Europe/Moscow] PHP Warning:  Undefined variable $uped in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 184
+[16-Dec-2025 09:44:36 Europe/Moscow] PHP Warning:  Undefined variable $downed in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 186
+[16-Dec-2025 09:44:36 Europe/Moscow] PHP Warning:  Undefined variable $ratio in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 297
+[16-Dec-2025 09:44:36 Europe/Moscow] PHP Warning:  Undefined variable $uped in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 298
+[16-Dec-2025 09:44:36 Europe/Moscow] PHP Warning:  Undefined variable $downed in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 299
+[16-Dec-2025 09:44:40 Europe/Moscow] PHP Warning:  Undefined variable $medaldon in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 179
+[16-Dec-2025 09:44:40 Europe/Moscow] PHP Warning:  Undefined variable $warn in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 179
+[16-Dec-2025 09:44:40 Europe/Moscow] PHP Warning:  Undefined variable $ratio in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 182
+[16-Dec-2025 09:44:40 Europe/Moscow] PHP Warning:  Undefined variable $uped in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 184
+[16-Dec-2025 09:44:40 Europe/Moscow] PHP Warning:  Undefined variable $downed in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 186
+[16-Dec-2025 09:44:40 Europe/Moscow] PHP Warning:  Undefined variable $ratio in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 297
+[16-Dec-2025 09:44:40 Europe/Moscow] PHP Warning:  Undefined variable $uped in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 298
+[16-Dec-2025 09:44:40 Europe/Moscow] PHP Warning:  Undefined variable $downed in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 299
+[16-Dec-2025 09:44:54 Europe/Moscow] PHP Warning:  Undefined variable $medaldon in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 179
+[16-Dec-2025 09:44:54 Europe/Moscow] PHP Warning:  Undefined variable $warn in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 179
+[16-Dec-2025 09:44:54 Europe/Moscow] PHP Warning:  Undefined variable $ratio in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 182
+[16-Dec-2025 09:44:54 Europe/Moscow] PHP Warning:  Undefined variable $uped in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 184
+[16-Dec-2025 09:44:54 Europe/Moscow] PHP Warning:  Undefined variable $downed in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 186
+[16-Dec-2025 09:44:54 Europe/Moscow] PHP Warning:  Undefined variable $ratio in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 297
+[16-Dec-2025 09:44:54 Europe/Moscow] PHP Warning:  Undefined variable $uped in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 298
+[16-Dec-2025 09:44:54 Europe/Moscow] PHP Warning:  Undefined variable $downed in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 299
