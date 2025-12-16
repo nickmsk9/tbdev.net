@@ -264,7 +264,15 @@ tr($tracker_lang['my_show_avatars'], "<input type='checkbox' name='avatars'" . (
 tr($tracker_lang['my_info'], "<textarea name='info' cols='50' rows='4'>" . ($CURUSER["info"] ?? '') . "</textarea><br />Разрешено использовать только следующие теги. Полный список <a href='tags.php' target='_new'>BB кодов</a>.", 1);
 
 // Пользовательская панель
-tr($tracker_lang['my_userbar'], "<img src=\"torrentbar/bar.php/".($CURUSER["id"] ?? 0).".png\" border=\"0\"><br />".$tracker_lang['my_userbar_descr'].":<br /><input type=\"text\" size=65 value=\"[url=$DEFAULTBASEURL][img]$DEFAULTBASEURL/torrentbar/bar.php/".($CURUSER["id"] ?? 0).".png[/img][/url]\" readonly />",1);
+$user_id = $CURUSER["id"] ?? 0;
+$image_url = "torrentbar/bar.php?id=" . $user_id;
+
+tr($tracker_lang['my_userbar'], 
+   "<img src=\"" . $image_url . "\" alt=\"Userbar\" border=\"0\" /><br />"
+   .$tracker_lang['my_userbar_descr'].":<br />"
+   ."<input type=\"text\" size=\"65\" value=\"[url=".$DEFAULTBASEURL."][img]"
+   .$DEFAULTBASEURL."/" . $image_url . "[/img][/url]\" readonly />"
+   ,1);
 
 // Email
 tr($tracker_lang['my_mail'], "<input type=\"text\" name=\"email\" size=50 value=\"" . htmlspecialchars_uni($CURUSER["email"] ?? '') . "\" />", 1);
