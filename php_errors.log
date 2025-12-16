@@ -88,3 +88,4 @@ Stack trace:
 [16-Dec-2025 09:52:33 Europe/Moscow] PHP Warning:  Undefined variable $downed in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 212
 [16-Dec-2025 09:52:33 Europe/Moscow] PHP Warning:  Undefined variable $activeseed in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 216
 [16-Dec-2025 09:52:33 Europe/Moscow] PHP Warning:  Undefined variable $activeleech in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 217
+[16-Dec-2025 09:57:05 Europe/Moscow] PHP Fatal error:  Cannot redeclare deadtime() (previously declared in C:\OSPanel\domains\tbdev.net\include\functions.php:877) in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 450
