@@ -164,60 +164,86 @@ $logo   = 'themes/'.$u($theme).'/images/logo.gif';
 </table>
 
 <!-- /////// Top Navigation Menu for unregistered-->
-
 <!-- /////// some vars for the statusbar;o) //////// -->
 
-<? if ($CURUSER) { ?>
+<?php if (!empty($CURUSER)) : ?>
+<?php
+// quick aliases
+$uid = (int)$CURUSER['id'];
 
-<?
+// sizes
+$uped   = mksize((float)$CURUSER['uploaded']);
+$downed = mksize((float)$CURUSER['downloaded']);
 
-$uped = mksize($CURUSER['uploaded']);
-$downed = mksize($CURUSER['downloaded']);
-
-if ($CURUSER["downloaded"] > 0) {
-	$ratio = $CURUSER['uploaded'] / $CURUSER['downloaded'];
-	$ratio = number_format($ratio, 3);
-	$color = get_ratio_color($ratio);
-	if ($color)
-		$ratio = "<font color=$color>$ratio</font>";
-} elseif ($CURUSER["uploaded"] > 0)
+// ratio (как у тебя, но аккуратнее)
+if (!empty($CURUSER['downloaded']) && (float)$CURUSER['downloaded'] > 0) {
+	$ratioNum = (float)$CURUSER['uploaded'] / (float)$CURUSER['downloaded'];
+	$ratioNum = (float)number_format($ratioNum, 3, '.', '');
+	$color = get_ratio_color($ratioNum);
+	$ratio = $color ? "<font color=\"$color\">{$ratioNum}</font>" : (string)$ratioNum;
+} elseif (!empty($CURUSER['uploaded']) && (float)$CURUSER['uploaded'] > 0) {
 	$ratio = "Inf.";
-else
+} else {
 	$ratio = "---";
+}
 
-$medaldon = $warn = '';
+// donor / warn icons
+$medaldon = (!empty($CURUSER['donor']) && $CURUSER['donor'] === 'yes')
+	? "<img src=\"{$pic_base_url}/star.gif\" alt=\"Донатер\" title=\"Донатер\">"
+	: "";
 
-if ($CURUSER['donor'] == "yes")
-	$medaldon = "<img src=\"{$pic_base_url}/star.gif\" alt=\"Донатер\" title=\"Донатер\">";
-if ($CURUSER['warned'] == "yes")
-	$warn = "<img src=\"{$pic_base_url}/warned.gif\" alt=\"Предупреждение\" title=\"Предупреждение\">";
+$warn = (!empty($CURUSER['warned']) && $CURUSER['warned'] === 'yes')
+	? "<img src=\"{$pic_base_url}/warned.gif\" alt=\"Предупреждение\" title=\"Предупреждение\">"
+	: "";
 
-//// check for messages ////////////////// 
-$res1 = sql_query("SELECT COUNT(*) FROM messages WHERE receiver=" . $CURUSER["id"] . " AND location=1") or print(mysqli_error($mysql_link)); 
-$arr1 = mysqli_fetch_row($res1);
-$messages = $arr1[0];
-/*$res1 = sql_query("SELECT COUNT(*) FROM messages WHERE receiver=" . $CURUSER["id"] . " AND location=1 AND unread='yes'") or print(mysqli_error($mysql_link)); 
-$arr1 = mysqli_fetch_row($res1);
-$unread = $arr1[0];*/
-$res1 = sql_query("SELECT COUNT(*) FROM messages WHERE sender=" . $CURUSER["id"] . " AND saved='yes'") or print(mysqli_error($mysql_link)); 
-$arr1 = mysqli_fetch_row($res1);
-$outmessages = $arr1[0];
+// ---------- DB: 2 запроса вместо 4 ----------
+// 1) сообщения (входящие / непрочитанные / исходящие-сохранённые) одним запросом
+$messages = 0;
+$unread = 0;
+$outmessages = 0;
 
-if ($unread)
-	$inboxpic = "<img height=\"16px\" style=\"border:none\" alt=\"inbox\" title=\"У вас есть непрочитанные\" src=\"{$pic_base_url}/pn_inboxnew.gif\">";
-else
-	$inboxpic = "<img height=\"16px\" style=\"border:none\" alt=\"inbox\" title=\"Нет непрочитанных\" src=\"{$pic_base_url}/pn_inbox.gif\">";
+$resMsg = sql_query("
+	SELECT
+		SUM(CASE WHEN receiver = {$uid} AND location = 1 THEN 1 ELSE 0 END) AS inbox_total,
+		SUM(CASE WHEN receiver = {$uid} AND location = 1 AND unread = 'yes' THEN 1 ELSE 0 END) AS inbox_unread,
+		SUM(CASE WHEN sender  = {$uid} AND saved = 'yes' THEN 1 ELSE 0 END) AS out_saved
+	FROM messages
+") or print(mysqli_error($mysql_link));
 
-$res2 = sql_query("SELECT COUNT(*) FROM peers WHERE userid = {$CURUSER["id"]} AND seeder='yes'") or print(mysqli_error($mysql_link));
-$row = mysqli_fetch_row($res2);
-$activeseed = $row[0];
+if ($resMsg) {
+	$rowMsg = mysqli_fetch_assoc($resMsg);
+	$messages    = (int)($rowMsg['inbox_total'] ?? 0);
+	$unread      = (int)($rowMsg['inbox_unread'] ?? 0);
+	$outmessages = (int)($rowMsg['out_saved'] ?? 0);
+}
 
-$res2 = sql_query("SELECT COUNT(*) FROM peers WHERE userid = {$CURUSER["id"]} AND seeder='no'") or print(mysql_error());
-$row = mysqli_fetch_row($res2);
-$activeleech = $row[0];
+// inbox icon
+if ($unread > 0) {
+	$inboxpic = "<img height=\"16\" style=\"border:none\" alt=\"Входящие\" title=\"Есть непрочитанные\" src=\"{$pic_base_url}/pn_inboxnew.gif\">";
+} else {
+	$inboxpic = "<img height=\"16\" style=\"border:none\" alt=\"Входящие\" title=\"Нет непрочитанных\" src=\"{$pic_base_url}/pn_inbox.gif\">";
+}
 
-//// end
+// 2) сид/лич одним запросом (условная агрегация)
+$activeseed = 0;
+$activeleech = 0;
 
+$resPeers = sql_query("
+	SELECT
+		SUM(CASE WHEN seeder = 'yes' THEN 1 ELSE 0 END) AS seed_cnt,
+		SUM(CASE WHEN seeder = 'no'  THEN 1 ELSE 0 END) AS leech_cnt
+	FROM peers
+	WHERE userid = {$uid}
+") or print(mysqli_error($mysql_link));
+
+if ($resPeers) {
+	$rowP = mysqli_fetch_assoc($resPeers);
+	$activeseed  = (int)($rowP['seed_cnt'] ?? 0);
+	$activeleech = (int)($rowP['leech_cnt'] ?? 0);
+}
+
+// sent icon (один раз, без дублирования)
+$sentIcon = "<img height=\"16\" style=\"border:none\" alt=\"Исходящие\" title=\"Исходящие\" src=\"{$pic_base_url}/pn_sentbox.gif\">";
 ?>
 
 <!-- //////// start the statusbar ///////////// -->
@@ -231,82 +257,88 @@ $activeleech = $row[0];
 		<td class="tablea">
 			<table align="center" style="width:100%" cellspacing="0" cellpadding="0" border="0">
 				<tr>
-				<td class="bottom" align="left"><span class="smallfont"><?= $tracker_lang['welcome_back']; ?><b><a
-									href="userdetails.php?id=<?= $CURUSER['id'] ?>"><?= get_user_class_color($CURUSER['class'], $CURUSER['username']) ?></a></b><?= $medaldon ?><?= $warn ?>
-							&nbsp; [<a href="bookmarks.php">Закладки</a>] [<a href="mybonus.php">Мой бонус</a>] [<a
-								href="logout.php">Выйти</a>]<br/>
-<font color=1900D1><?= $tracker_lang['ratio']; ?>:</font> <?= $ratio ?>&nbsp;&nbsp;<font
-								color=green><?= $tracker_lang['uploaded']; ?>:</font> <font
-								color=black><?= $uped ?></font>&nbsp;&nbsp;<font
-								color=darkred><?= $tracker_lang['downloaded']; ?>:</font> <font
-								color=black><?= $downed ?></font>&nbsp;&nbsp;<font
-								color=darkblue><?= $tracker_lang['bonus']; ?>:</font> <a href="mybonus.php"
-																						 class="online"><font
-									color=black><?= $CURUSER["bonus"] ?></font></a>&nbsp;&nbsp;<font color="1900D1"><?=$tracker_lang['torrents'];?>:&nbsp;</font></span>
-						<img alt="<?=$tracker_lang['seeding'];?>" title="<?=$tracker_lang['seeding'];?>" src="./themes/<?= $ss_uri; ?>/images/arrowup.gif">&nbsp;<font
-							color="black"><span class="smallfont"><?= $activeseed ?></span></font>&nbsp;&nbsp;<img
-							alt="<?=$tracker_lang['leeching'];?>" title="<?=$tracker_lang['leeching'];?>" src="./themes/<?= $ss_uri; ?>/images/arrowdown.gif">&nbsp;<font
-							color="black"><span class="smallfont"><?= $activeleech ?></span></font></td>
-					<td class="bottom" align="right"><span class="smallfont"><?=$tracker_lang['clock'];?>: <span
-								id="clock"><?=$tracker_lang['loading'];?>...</span>
+					<td class="bottom" align="left">
+						<span class="smallfont">
+							<?= $tracker_lang['welcome_back']; ?>
+							<b>
+								<a href="userdetails.php?id=<?= (int)$CURUSER['id'] ?>">
+									<?= get_user_class_color((int)$CURUSER['class'], (string)$CURUSER['username']) ?>
+								</a>
+							</b>
+							<?= $medaldon ?><?= $warn ?>
+							&nbsp; [<a href="bookmarks.php">Закладки</a>] [<a href="mybonus.php">Мой бонус</a>] [<a href="logout.php">Выйти</a>]
+							<br/>
 
-<!-- clock hack -->
-<script type="text/javascript">
-function refrClock() {
-	var d=new Date();
-	var s=d.getSeconds();
-	var m=d.getMinutes();
-	var h=d.getHours();
-	var day=d.getDay();
-	var date=d.getDate();
-	var month=d.getMonth();
-	var year=d.getFullYear();
-	var am_pm;
-	if (s < 10) {s="0" + s}
-	if (m < 10) {m="0" + m}
-	if (h <= 12) {
-		am_pm = "AM"
-	} else {
-		h -= 12;
-		am_pm = "PM"
-	}
-	if (h < 10) {h="0" + h}
-	document.getElementById("clock").innerHTML=h + ":" + m + ":" + s + " " + am_pm;
-	setTimeout("refrClock()",1000);
-}
-refrClock();
-</script>
-<!-- / clock hack -->
+							<font color="1900D1"><?= $tracker_lang['ratio']; ?>:</font> <?= $ratio ?>&nbsp;&nbsp;
+							<font color="green"><?= $tracker_lang['uploaded']; ?>:</font> <font color="black"><?= $uped ?></font>&nbsp;&nbsp;
+							<font color="darkred"><?= $tracker_lang['downloaded']; ?>:</font> <font color="black"><?= $downed ?></font>&nbsp;&nbsp;
+							<font color="darkblue"><?= $tracker_lang['bonus']; ?>:</font>
+							<a href="mybonus.php" class="online"><font color="black"><?= (int)$CURUSER['bonus'] ?></font></a>&nbsp;&nbsp;
+							<font color="1900D1"><?= $tracker_lang['torrents']; ?>:&nbsp;</font>
 
-<?
-if ($messages) {
-	print("<span class=smallfont><a href=message.php>$inboxpic</a> $messages ($unread �����)</span>");
-	if ($outmessages)
-		print("<span class=smallfont>&nbsp;&nbsp;<a href=message.php?action=viewmailbox&box=-1><img height=16px style=border:none alt=����������� title=����������� src={$pic_base_url}/pn_sentbox.gif></a> $outmessages</span>");
-	else
-		print("<span class=smallfont>&nbsp;&nbsp;<a href=message.php?action=viewmailbox&box=-1><img height=16px style=border:none alt=����������� title=����������� src={$pic_base_url}/pn_sentbox.gif></a> 0</span>");
-} else {
-	print("<span class=smallfont><a href=message.php><img height=16px style=border:none alt=���������� title=���������� src={$pic_base_url}/pn_inbox.gif></a> 0</span>");
-	if ($outmessages)
-		print("<span class=smallfont>&nbsp;&nbsp;<a href=message.php?action=viewmailbox&box=-1><img height=16px style=border:none alt=����������� title=����������� src={$pic_base_url}/pn_sentbox.gif></a> $outmessages</span>");
-	else
-		print("<span class=smallfont>&nbsp;&nbsp;<a href=message.php?action=viewmailbox&box=-1><img height=16px style=border:none alt=����������� title=����������� src={$pic_base_url}/pn_sentbox.gif></a> 0</span>");
-}
-print("&nbsp;<a href=friends.php><img style=border:none alt=������ title=������ src={$pic_base_url}/buddylist.gif></a>");
-print("&nbsp;<a href=getrss.php><img style=border:none alt=RSS title=RSS src={$pic_base_url}/rss.gif></a>");
-?>
-</span></td>
+							<img alt="<?= $tracker_lang['seeding']; ?>" title="<?= $tracker_lang['seeding']; ?>" src="./themes/<?= htmlspecialchars($ss_uri, ENT_QUOTES, 'UTF-8'); ?>/images/arrowup.gif">
+							&nbsp;<font color="black"><span class="smallfont"><?= $activeseed ?></span></font>&nbsp;&nbsp;
 
-</tr>
-</table></table>
+							<img alt="<?= $tracker_lang['leeching']; ?>" title="<?= $tracker_lang['leeching']; ?>" src="./themes/<?= htmlspecialchars($ss_uri, ENT_QUOTES, 'UTF-8'); ?>/images/arrowdown.gif">
+							&nbsp;<font color="black"><span class="smallfont"><?= $activeleech ?></span></font>
+						</span>
+					</td>
+
+					<td class="bottom" align="right">
+						<span class="smallfont">
+							<?= $tracker_lang['clock']; ?>:
+							<span id="clock"><?= $tracker_lang['loading']; ?>...</span>
+
+							<script type="text/javascript">
+							(function () {
+								const el = document.getElementById('clock');
+								if (!el) return;
+
+								function pad(n){ return (n < 10 ? '0' : '') + n; }
+								function tick(){
+									const d = new Date();
+									let h = d.getHours();
+									const m = pad(d.getMinutes());
+									const s = pad(d.getSeconds());
+									const ampm = (h >= 12) ? 'PM' : 'AM';
+									h = h % 12; if (h === 0) h = 12;
+									el.textContent = pad(h) + ':' + m + ':' + s + ' ' + ampm;
+								}
+								tick();
+								setInterval(tick, 1000);
+							})();
+							</script>
+
+							<?php
+							// сообщения (без дублирования веток)
+							echo "<span class=\"smallfont\"><a href=\"message.php\">{$inboxpic}</a> {$messages}";
+							if ($unread > 0) {
+								echo " ({$unread} новых)";
+							}
+							echo "</span>";
+
+							echo "<span class=\"smallfont\">&nbsp;&nbsp;<a href=\"message.php?action=viewmailbox&amp;box=-1\">{$sentIcon}</a> {$outmessages}</span>";
+
+							echo "&nbsp;<a href=\"friends.php\"><img style=\"border:none\" alt=\"Друзья\" title=\"Друзья\" src=\"{$pic_base_url}/buddylist.gif\"></a>";
+							echo "&nbsp;<a href=\"getrss.php\"><img style=\"border:none\" alt=\"RSS\" title=\"RSS\" src=\"{$pic_base_url}/rss.gif\"></a>";
+							?>
+						</span>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+
 <p>
 
-<? } else {?>
+<?php else: ?>
 
 <br />
 
-<? } ?>
+<?php endif; ?>
 <!-- /////////// here we go, with the menu //////////// -->
+
 
 <?php
 
