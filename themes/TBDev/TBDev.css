@@ -545,3 +545,6 @@ border: solid #FFC58C 1px;
  background-color: #FFC58C;
 
 }
+.topnav, .topnav * { color: #fff; }
+.topnav a, .topnav a:visited { color: #fff; text-decoration: none; }
+.topnav a:hover { color: #fff; text-decoration: underline; }

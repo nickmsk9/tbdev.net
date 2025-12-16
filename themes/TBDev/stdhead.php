@@ -84,47 +84,85 @@ $assetV = (string)($GLOBALS['ASSET_VERSION'] ?? '1');
 
 <body>
 
+<?php
+
+// $h = static fn($v): string => htmlspecialchars((string)$v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+// $u = static fn($v): string => rawurlencode((string)$v);
+
+$theme   = (string)($ss_uri ?? 'default');
+$baseUrl = rtrim((string)($DEFAULTBASEURL ?? ''), '/');
+$site    = (string)($SITENAME ?? 'Torrentside');
+
+$hasUser   = !empty($CURUSER);
+$canUpload = function_exists('get_user_class') && (int)get_user_class() >= (defined('UC_USER') ? (int)UC_USER : 0);
+
+// Хелпер для ссылок (чтобы не писать одно и то же)
+$navLink = static function (string $href, string $label) use ($h): string {
+	$href = $href === '' ? '#' : $href;
+	return '<a class="topnav-link" href="'.$h($href).'">'.$h($label).'</a>';
+};
+
+
+// Фон-картинка (один раз)
+$logoBg = 'themes/'.$u($theme).'/images/logobg.gif';
+$logo   = 'themes/'.$u($theme).'/images/logo.gif';
+?>
 <table width="90%" class="clear" align="center" border="0" cellspacing="0" cellpadding="0" style="background: transparent;">
-<tr>
-<td class="embedded" width="50%" background="./themes/<?=$ss_uri;?>/images/logobg.gif">
-<a href="<?=$DEFAULTBASEURL?>"><img style="border: none" alt="<?=$SITENAME?>" title="<?=$SITENAME?>" src="./themes/<?=$ss_uri;?>/images/logo.gif" /></a>
-</td>
-<td class="embedded" width="50%" align="right" style="text-align: right" background="./themes/<?=$ss_uri;?>/images/logobg.gif">
-</td>
-</tr>
+	<tr>
+		<td class="embedded" width="50%" background="<?= $h($logoBg) ?>">
+			<a href="<?= $h($baseUrl ?: '/') ?>">
+				<img
+					src="<?= $h($logo) ?>"
+					alt="<?= $h($site) ?>"
+					title="<?= $h($site) ?>"
+					style="border:none"
+					loading="eager"
+				>
+			</a>
+		</td>
+		<td class="embedded" width="50%" align="right" style="text-align:right" background="<?= $h($logoBg) ?>">
+			<!-- правая часть шапки (если надо: баннер/поиск/кнопки) -->
+		</td>
+	</tr>
 </table>
 
-<!-- Top Navigation Menu for unregistered-->
-<table width="90%" align="center" border="0" cellspacing="0" cellpadding="2"><tr>
-<td align="center" class="topnav">&nbsp;<a href="<?=$DEFAULTBASEURL;?>/"><font color="#FFFFFF"><?=$tracker_lang['homepage'];?></font></a>
-&nbsp;&#8226;&nbsp;
-<a href="browse.php"><font color="#FFFFFF"><?=$tracker_lang['browse'];?></font></a>
-<? if ($CURUSER) { ?>
-&nbsp;&#8226;&nbsp;
-<a href="bookmarks.php"><font color="#FFFFFF"><?=$tracker_lang['bookmarks'];?></font></a>
-<? } ?>
-<? if (get_user_class() >= UC_USER) { ?>
-&nbsp;&#8226;&nbsp;
-<a href="upload.php"><font color="#FFFFFF"><?=$tracker_lang['upload'];?></font></a>
-<? } ?>
-<? if ($CURUSER) { ?>
-&nbsp;&#8226;&nbsp;
-<a href="log.php"><font color="#FFFFFF"><?=$tracker_lang['logs'];?></font></a>
-<? } ?>
-&nbsp;&#8226;&nbsp;
-<a href="rules.php"><font color="#FFFFFF"><?=$tracker_lang['rules'];?></font></a>
-&nbsp;&#8226;&nbsp;
-<a href="faq.php"><font color="#FFFFFF"><?=$tracker_lang['faq'];?></font></a>
-<? if ($CURUSER) { ?>
-&nbsp;&#8226;&nbsp;
-<!--<a href="helpdesk.php"><font color="#FFFFFF">���. ���������</font></a>
-&nbsp;&#8226;&nbsp;-->
-<a href="staff.php"><font color="#FFFFFF"><?=$tracker_lang['staff'];?></font></a>
-<? } ?>
-&nbsp;&#8226;&nbsp;
-<a href="contactus.php"><font color="#FFFFFF"><?=$tracker_lang['contactus'];?></font></a>
-</td></tr>
+<!-- Top Navigation Menu -->
+<table width="90%" align="center" border="0" cellspacing="0" cellpadding="2">
+	<tr>
+		<td align="center" class="topnav">
+			<?php
+			$items = [];
+
+			$items[] = $navLink($baseUrl.'/', (string)($tracker_lang['homepage'] ?? 'Главная'));
+			$items[] = $navLink('browse.php', (string)($tracker_lang['browse'] ?? 'Торренты'));
+
+			if ($hasUser) {
+				$items[] = $navLink('bookmarks.php', (string)($tracker_lang['bookmarks'] ?? 'Закладки'));
+			}
+
+			if ($canUpload) {
+				$items[] = $navLink('upload.php', (string)($tracker_lang['upload'] ?? 'Загрузить'));
+			}
+
+			if ($hasUser) {
+				$items[] = $navLink('log.php', (string)($tracker_lang['logs'] ?? 'Логи'));
+			}
+
+			$items[] = $navLink('rules.php', (string)($tracker_lang['rules'] ?? 'Правила'));
+			$items[] = $navLink('faq.php', (string)($tracker_lang['faq'] ?? 'FAQ'));
+
+			if ($hasUser) {
+				$items[] = $navLink('staff.php', (string)($tracker_lang['staff'] ?? 'Персонал'));
+			}
+
+			$items[] = $navLink('contactus.php', (string)($tracker_lang['contactus'] ?? 'Контакты'));
+
+			echo '&nbsp;' . implode("\n\t\t\t&nbsp;&#8226;&nbsp;\n\t\t\t", $items);
+			?>
+		</td>
+	</tr>
 </table>
+
 <!-- /////// Top Navigation Menu for unregistered-->
 
 <!-- /////// some vars for the statusbar;o) //////// -->
