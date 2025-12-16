@@ -29,12 +29,11 @@
 require "include/bittorrent.php";
 dbconn(false);
 ob_start();
-stdhead("Ïàíåëü àäìèíèñòðàòîðà");
+stdhead("ÐŸÐ°Ð½ÐµÐ»ÑŒ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ Ð°Ð´Ð¼Ð¸Ð½Ð¸ÑÑ‚Ñ€Ð°Ñ‚Ð¾Ñ€Ð°");
 
 define("ADMIN_FILE", 1);
 $admin_file = "admincp";
 include_once("admin/admin.php");
 
 stdfoot();
-
 ?>
