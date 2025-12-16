@@ -26,334 +26,415 @@
 // +--------------------------------------------------------------------------+
 */
 
+
 require "include/bittorrent.php";
 dbconn();
 loggedinorreturn();
-stdhead("Администрация");
+stdhead("РџРµСЂСЃРѕРЅР°Р» СЃР°Р№С‚Р°");
+
 begin_main_frame();
 begin_frame("");
-?>
 
-
-<?
-$act = $_GET["act"];
-if (!$act) {
-// Get current datetime
-$dt = gmtime() - 300;
-$dt = sqlesc(get_date_time($dt));
-// Search User Database for Moderators and above and display in alphabetical order
-$res = sql_query("SELECT * FROM users WHERE class>=".UC_UPLOADER." AND status='confirmed' ORDER BY username" ) or sqlerr(__FILE__, __LINE__);
-
-while ($arr = mysql_fetch_assoc($res))
-{
-
-$staff_table[$arr['class']]=$staff_table[$arr['class']].
-"<td class=embedded><a class=altlink href=userdetails.php?id=".$arr['id']."><b>".
-get_user_class_color($arr['class'],$arr['username'])."</b></a></td><td class=embedded> ".("'".$arr['last_access']."'">$dt?"<img src=".$pic_base_url."/button_online.gif border=0 alt=\"online\">":"<img src=".$pic_base_url."/button_offline.gif border=0 alt=\"offline\">" )."</td>".
-"<td class=embedded><a href=message.php?action=sendmessage&amp;receiver=".$arr['id'].">".
-"<img src=".$pic_base_url."/button_pm.gif border=0></a></td>".
-" ";
-
-
-
-// Show 3 staff per row, separated by an empty column
-++ $col[$arr['class']];
-if ($col[$arr['class']]<=2)
-$staff_table[$arr['class']]=$staff_table[$arr['class']]."<td class=embedded>&nbsp;</td>";
-else
-{
-$staff_table[$arr['class']]=$staff_table[$arr['class']]."</tr><tr height=15>";
-$col[$arr['class']]=0;
-}
-}
-begin_frame("Администрация");
-?>
-
-<table width=100% cellspacing=0>
-<tr>
-<tr><td class=embedded colspan=11>Вопросы, на которые есть ответы в правилах или FAQ, будут оставлены без внимания.</td></tr>
-<!-- Define table column widths -->
-<td class=embedded width="125">&nbsp;</td>
-<td class=embedded width="25">&nbsp;</td>
-<td class=embedded width="35">&nbsp;</td>
-<td class=embedded width="85">&nbsp;</td>
-<td class=embedded width="125">&nbsp;</td>
-<td class=embedded width="25">&nbsp;</td>
-<td class=embedded width="35">&nbsp;</td>
-<td class=embedded width="85">&nbsp;</td>
-<td class=embedded width="125">&nbsp;</td>
-<td class=embedded width="25">&nbsp;</td>
-<td class=embedded width="35">&nbsp;</td>
-</tr>
-<tr><td class=embedded colspan=11><b>Директорат трекера</b></td></tr>
-<tr><td class=embedded colspan=11><hr color="#4040c0" size=1></td></tr>
-<tr height=15>
-<?=$staff_table[UC_SYSOP]?>
-</tr>
-<tr><td class=embedded colspan=11>&nbsp;</td></tr>
-<tr><td class=embedded colspan=11><b>Администраторы</b></td></tr>
-<tr><td class=embedded colspan=11><hr color="#4040c0" size=1></td></tr>
-<tr height=15>
-<?=$staff_table[UC_ADMINISTRATOR]?>
-</tr>
-<tr><td class=embedded colspan=11>&nbsp;</td></tr>
-<tr><td class=embedded colspan=11><b>Модераторы</b></td></tr>
-<tr><td class=embedded colspan=11><hr color="#4040c0" size=1></td></tr>
-<tr height=15>
-<?=$staff_table[UC_MODERATOR]?>
-</tr>
-<tr><td class=embedded colspan=11>&nbsp;</td></tr>
-<tr><td class=embedded colspan=11><b>Аплоадеры</b></td></tr>
-<tr><td class=embedded colspan=11><hr color="#4040c0" size=1></td></tr>
-<tr height=15>
-<?=$staff_table[UC_UPLOADER]?>
-</tr>
-</table>
-<?
-end_frame();
-}
-?>
-
-<? if (get_user_class() >= UC_SYSOP) { ?>
-<? begin_frame("Инструменты владельца<font color=#FF0000> - Видно сис. администраторам.</font>"); ?>
-<table width=100% cellspacing=10 align=center>
-<tr>
-<td class=embedded><form method=get action=staffmess.php><input type=submit value="Масовое ПМ" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=category.php><input type=submit value="Категории" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=delacct.php><input type=submit value="Удалить юзера" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=bans.php><input type=submit value="Баны" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=status.php><input type=submit value="Статус сервера" style='height: 20px; width: 100px' disabled></form></td>
-</tr>
-</table>
-<? end_frame();
-}
-
-if (get_user_class() >= UC_ADMINISTRATOR) { ?>
-<? begin_frame("Инструменты владельца<font color=#009900> - Видно администраторам.</font>"); ?>
-<table width=100% cellspacing=10 align=center>
-<tr>
-<td class=embedded><form method=get action=unco.php><input type=submit value="Неподтв. юзеры" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=delacctadmin.php><input type=submit value="Удалить юзера" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=agentban.php><input type=submit value="Бан клиентов" style='height: 20px; width: 100px' disabled></form></td>
-</tr>
-<tr>
-<td class=embedded><form method=get action=topten.php><input type=submit value="Top 10" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=findnotconnectable.php><input type=submit value="Юзеры за NAT" style='height: 20px; width: 100px'></form></td>
-</tr>
-</table>
-<? end_frame();
-}
-
-if (get_user_class() >= UC_MODERATOR) { ?>
-<? begin_frame("Средства персонала - <font color=#004E98>Видно модераторам.</font>"); ?>
-
-
-<table width=100% cellspacing=3>
-<tr>
-<? if (get_user_class() >= UC_MODERATOR) { ?>
-</tr>
-<tr>
-<td class=embedded><a class=altlink href=staff.php?act=users>Пользователи с рейтингом ниже 0.20</a></td>
-<td class=embedded>Показать всех пользователей с рейтингом ниже чем 0.20</td>
-</tr>
-<tr>
-<td class=embedded><a class=altlink href=staff.php?act=banned>Отключенные пользователи</a></td>
-<td class=embedded>Показать всех отключенных пользователей</td>
-</tr>
-<tr>
-<td class=embedded><a class=altlink href=staff.php?act=last>Новые пользователи</a></td>
-<td class=embedded>100 самых новых пользователей</td>
-</tr>
-<tr>
-<td class=embedded><a class=altlink href=log.php>Лог сайта</a></td>
-<td class=embedded>Показать что было залито/удалено/итд</td>
-</tr>
-</table>
-
-<? end_frame(); ?>
-<br />
-<? begin_frame("Модераторы и средства - <font color=#004E98>Видно модераторам.</font>"); ?>
-
-<br />
-<table width=100% cellspacing=3>
-<tr>
-<td class=embedded></td>
-
-</tr>
-
-</table>
-<table width=100% cellspacing=10 align=center>
-<tr>
-<td class=embedded><form method=get action=warned.php><input type=submit value="Предупр. юзеры" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=adduser.php><input type=submit value="Добавить юзера" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=makepoll.php><input type=submit value="Создать опрос" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=recover.php><input type=submit value="Востан. юзера" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=uploaders.php><input type=submit value="Аплоадеры" style='height: 20px; width: 100px'></form></td>
-</tr>
-<tr>
-<td class=embedded><form method=get action=polloverview.php><input type=submit value="Обзор опроса" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=users.php><input type=submit value="Список юзеров" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=tags.php><input type=submit value="Теги" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=smilies.php><input type=submit value="Смайлы" style='height: 20px; width: 100px'></form></td>
-</tr>
-<tr>
-<td class=embedded><form method=get action=stats.php><input type=submit value="Статистика" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=testip.php><input type=submit value="Проверка IP" style='height: 20px; width: 100px'></form></td>
-<td class=embedded><form method=get action=reports.php><input type=submit value="Жалобы" style='height: 20px; width: 100px' disabled></form></td>
-<td class=embedded><form method=get action=ipcheck.php><input type=submit value="Повторные IP" style='height: 20px; width: 100px'></form></td>
-</tr>
-</table>
-<br />
-
-<? end_frame(); ?>
-
-<? begin_frame("Искать пользователя - <font color=#004E98>Видно модераторам.</font>"); ?>
-
-
-<table width=100% cellspacing=3>
-<tr>
-<td class=embedded>
-<form method=get action="users.php">
-Поиск: <input type=text size=30 name=search>
-<select name=class>
-<option value='-'>(Выберите)</option>
-<option value=0>Пользователь</option>
-<option value=1>Опытный пользователь</option>
-<option value=2>VIP</option>
-<option value=3>Заливающий</option>
-<option value=4>Модератор</option>
-<option value=5>Администратор</option>
-<option value=6>Владелец</option>
-</select>
-<input type=submit value='Искать'>
-</form>
-</td>
-</tr>
-<tr><td class=embedded><li><a href="usersearch.php">Административный поиск</li></a></td></tr>
-</table>
-
-<? end_frame(); ?>
-<br />
-<? if ($act == "users") {
-begin_frame("Пользователи с рейтингом ниже 0.20");
-
-echo '<table width="100%" border="0" align="center" cellpadding="2" cellspacing="0">';
-echo "<tr><td class=colhead align=left>Пользователь</td><td class=colhead>Рейтинг</td><td class=colhead>IP</td><td class=colhead>Зарегистрирован</td><td class=colhead>Последний раз был на трекере</td><td class=colhead>Скачал</td><td class=colhead>Раздал</td></tr>";
-
-
-$result = sql_query ("SELECT * FROM users WHERE uploaded / downloaded <= 0.20 AND enabled = 'yes' ORDER BY downloaded DESC ");
-if ($row = mysqli_fetch_assoc($result)) {
-do {
-if ($row["uploaded"] == "0") { $ratio = "inf"; }
-elseif ($row["downloaded"] == "0") { $ratio = "inf"; }
-$ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
-echo "<tr><td><a href=userdetails.php?id=".$row["id"]."><b>".$row["username"]."</b></a></td><td><strong>".$ratio."</strong></td><td>".$row["ip"]."</td><td>".$row["added"]."</td><td>".$row["last_access"]."</td><td>".mksize($row["downloaded"])."</td><td>".mksize($row["uploaded"])."</td></tr>";
-
-
-} while($row = mysqli_fetch_assoc($result));
-} else {print "<tr><td colspan=7>Извините, записей не обнаружено!</td></tr>";}
-echo "</table>";
-end_frame(); }?>
-
-<? if ($act == "last") {
-begin_frame("Последние пользователи");
-
-echo '<table width="100%" border="0" align="center" cellpadding="2" cellspacing="0">';
-echo "<tr><td class=colhead align=left>Пользователь</td><td class=colhead>Рейтинг</td><td class=colhead>IP</td><td class=colhead>Зарегистрирован</td><td class=colhead>Последний&nbsp;раз&nbsp;был&nbsp;на&nbsp;трекере</td><td class=colhead>Скачал</td><td class=colhead>Раздал</td></tr>";
-
-$result = sql_query ("SELECT * FROM users WHERE enabled = 'yes' AND status = 'confirmed' ORDER BY added DESC limit 100");
-if ($row = mysqli_fetch_assoc($result)) {
-do {
-if ($row["uploaded"] == "0") { $ratio = "inf"; }
-elseif ($row["downloaded"] == "0") { $ratio = "inf"; }
-else {
-$ratio = number_format($row["uploaded"] / $row["downloaded"], 3);
-$ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
-}
-echo "<tr><td><a href=userdetails.php?id=".$row["id"]."><b>".$row["username"]."</b></a></td><td><strong>".$ratio."</strong></td><td>".$row["ip"]."</td><td>".$row["added"]."</td><td>".$row["last_access"]."</td><td>".mksize($row["downloaded"])."</td><td>".mksize($row["uploaded"])."</td></tr>";
-
-
-} while($row = mysqli_fetch_assoc($result));
-} else {print "<tr><td>Sorry, no records were found!</td></tr>";}
-echo "</table>";
-end_frame(); }?>
-
-
-<? if ($act == "banned") {
-begin_frame("Забаненые пользователи");
-
-echo '<table width="100%" border="0" align="center" cellpadding="2" cellspacing="0">';
-echo "<tr><td class=colhead align=left>Пользователь</td><td class=colhead>Рейтинг</td><td class=colhead>IP</td><td class=colhead>Зарегистрирован</td><td class=colhead>Последний раз был</td><td class=colhead>Скачал</td><td class=colhead>Раздал</td></tr>";
-$result = sql_query ("SELECT * FROM users WHERE enabled = 'no' ORDER BY last_access DESC ");
-if ($row = mysqli_fetch_assoc($result)) {
-do {
-if ($row["uploaded"] == "0") { $ratio = "inf"; }
-elseif ($row["downloaded"] == "0") { $ratio = "inf"; }
-else {
-$ratio = number_format($row["uploaded"] / $row["downloaded"], 3);
-$ratio = "<font color=" . get_ratio_color($ratio) . ">$ratio</font>";
-}
-echo "<tr><td><a href=userdetails.php?id=".$row["id"]."><b>".$row["username"]."</b></a></td><td><strong>".$ratio."</strong></td><td>".$row["ip"]."</td><td>".$row["added"]."</td><td>".$row["last_access"]."</td><td>".mksize($row["downloaded"])."</td><td>".mksize($row["uploaded"])."</td></tr>";
-
-
-} while($row = mysqli_fetch_assoc($result));
-} else {print "<tr><td colspan=7>Извините, записей не обнаружено!</td></tr>";}
-echo "</table>";
-end_frame(); } }
-
-
-
-}
-if (get_user_class() >= UC_USER) {
+$act = $_GET['act'] ?? null;
+$pic_base_url = $GLOBALS['pic_base_url'] ?? '';
 
 if (!$act) {
-$dt = gmtime() - 180;
-$dt = sqlesc(get_date_time($dt));
-// LIST ALL FIRSTLINE SUPPORTERS
-// Search User Database for Firstline Support and display in alphabetical order
-$res = sql_query("SELECT * FROM users WHERE support='yes' AND status='confirmed' ORDER BY username LIMIT 10") or sqlerr(__FILE__, __LINE__);
-while ($arr = mysql_fetch_assoc($res))
-{
-$land = sql_query("SELECT name,flagpic FROM countries WHERE id=$arr[country]") or sqlerr(__FILE__, __LINE__);
-$arr2 = mysql_fetch_assoc($land);
-$firstline .= "<tr height=15><td class=embedded><a class=altlink href=userdetails.php?id=".$arr['id'].">".$arr['username']."</a></td>
-<td class=embedded> ".("'".$arr['last_access']."'">$dt?"<img src=".$pic_base_url."/button_online.gif border=0 alt=\"online\">":"<img src=".$pic_base_url."/button_offline.gif border=0 alt=\"offline\">" )."</td>".
-"<td class=embedded><a href=message.php?action=sendmessage&amp;receiver=".$arr['id'].">"."<img src=".$pic_base_url."/button_pm.gif border=0></a></td>".
-"<td class=embedded><img src=\"".$pic_base_url."/flag/$arr2[flagpic]\" title=$arr2[name] border=0 width=19 height=12></td>".
-"<td class=embedded>".$arr['supportfor']."</td></tr>\n";
-}
+    // Get current datetime for online status check (5 minutes ago)
+    $dt = gmtime() - 300;
+    $dt_escaped = sqlesc(get_date_time($dt));
+    
+    // Search User Database for Moderators and above and display in alphabetical order
+    $res = sql_query("SELECT * FROM users WHERE class >= " . UC_UPLOADER . " AND status = 'confirmed' ORDER BY username") 
+        or sqlerr(__FILE__, __LINE__);
 
-begin_frame("Первая линия поддержки");
+    $staff_table = [];
+    $col = [];
+
+    while ($arr = mysqli_fetch_assoc($res)) {
+        $class = $arr['class'];
+        
+        // Initialize arrays if not set
+        if (!isset($staff_table[$class])) {
+            $staff_table[$class] = '';
+            $col[$class] = 0;
+        }
+
+        // Determine online status
+        $last_access_time = strtotime($arr['last_access']);
+        $online_status = ($last_access_time > $dt) 
+            ? "<img src=\"{$pic_base_url}/button_online.gif\" border=\"0\" alt=\"online\">"
+            : "<img src=\"{$pic_base_url}/button_offline.gif\" border=\"0\" alt=\"offline\">";
+
+        // Get colored username
+        $colored_username = get_user_class_color($class, $arr['username']);
+        
+        // Build staff row
+        $staff_table[$class] .= "<td class=\"embedded\">"
+            . "<a class=\"altlink\" href=\"userdetails.php?id={$arr['id']}\">"
+            . "<b>{$colored_username}</b></a></td>"
+            . "<td class=\"embedded\">{$online_status}</td>"
+            . "<td class=\"embedded\">"
+            . "<a href=\"message.php?action=sendmessage&amp;receiver={$arr['id']}\">"
+            . "<img src=\"{$pic_base_url}/button_pm.gif\" border=\"0\"></a></td>";
+
+        // Show 3 staff per row, separated by an empty column
+        ++$col[$class];
+        if ($col[$class] <= 2) {
+            $staff_table[$class] .= "<td class=\"embedded\">&nbsp;</td>";
+        } else {
+            $staff_table[$class] .= "</tr><tr height=\"15\">";
+            $col[$class] = 0;
+        }
+    }
+
+    // Begin frame for staff display
+    begin_frame("РџРµСЂСЃРѕРЅР°Р» СЃР°Р№С‚Р°");
 ?>
-
-<table width=100% cellspacing=0>
-<tr>
-<td class=embedded colspan=11>Общие вопросы лучше задавать этим пользователям. Учтите что они добровольцы, тратящие свое время и силы на помощь вам.
-Относитесь к ним подобающе.<br /><br /><br /></td></tr>
-<!-- Define table column widths -->
-<tr>
-<td class=embedded width="30"><b>Пользователь&nbsp;</b></td>
-<td class=embedded width="5"><b>Активен&nbsp;</b></td>
-<td class=embedded width="5"><b>Контакт&nbsp;</b></td>
-<td class=embedded width="85"><b>Язык&nbsp;</b></td>
-<td class=embedded width="200"><b>Поддержка для&nbsp;</b></td>
-</tr>
-
-
-<tr>
-<tr><td class=embedded colspan=11><hr color="#4040c0" size=1></td></tr>
-
-<?=$firstline?>
-
-</tr>
+<table width="100%" cellspacing="0">
+    <tr>
+        <td class="embedded" colspan="11">
+            РџРѕРјРЅРё, С‡С‚Рѕ РІСЃС‘ С‡С‚Рѕ РЅСѓР¶РЅРѕ Р·РЅР°С‚СЊ Рѕ СЃР°Р№С‚Рµ РµСЃС‚СЊ РІ РїСЂР°РІРёР»Р°С… Рё FAQ, РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ РѕР·РЅР°РєРѕРјСЊСЃСЏ СЃ СЌС‚РёРјРё РґРѕРєСѓРјРµРЅС‚Р°РјРё.
+        </td>
+    </tr>
+    <!-- Define table column widths -->
+    <tr>
+        <td class="embedded" width="125">&nbsp;</td>
+        <td class="embedded" width="25">&nbsp;</td>
+        <td class="embedded" width="35">&nbsp;</td>
+        <td class="embedded" width="85">&nbsp;</td>
+        <td class="embedded" width="125">&nbsp;</td>
+        <td class="embedded" width="25">&nbsp;</td>
+        <td class="embedded" width="35">&nbsp;</td>
+        <td class="embedded" width="85">&nbsp;</td>
+        <td class="embedded" width="125">&nbsp;</td>
+        <td class="embedded" width="25">&nbsp;</td>
+        <td class="embedded" width="35">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="embedded" colspan="11"><b>Р’С‹СЃС€РµРµ СЂСѓРєРѕРІРѕРґСЃС‚РІРѕ</b></td>
+    </tr>
+    <tr>
+        <td class="embedded" colspan="11"><hr color="#4040c0" size="1"></td>
+    </tr>
+    <tr height="15">
+        <?php echo $staff_table[UC_SYSOP] ?? ''; ?>
+    </tr>
+    <tr>
+        <td class="embedded" colspan="11">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="embedded" colspan="11"><b>РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂС‹</b></td>
+    </tr>
+    <tr>
+        <td class="embedded" colspan="11"><hr color="#4040c0" size="1"></td>
+    </tr>
+    <tr height="15">
+        <?php echo $staff_table[UC_ADMINISTRATOR] ?? ''; ?>
+    </tr>
+    <tr>
+        <td class="embedded" colspan="11">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="embedded" colspan="11"><b>РњРѕРґРµСЂР°С‚РѕСЂС‹</b></td>
+    </tr>
+    <tr>
+        <td class="embedded" colspan="11"><hr color="#4040c0" size="1"></td>
+    </tr>
+    <tr height="15">
+        <?php echo $staff_table[UC_MODERATOR] ?? ''; ?>
+    </tr>
+    <tr>
+        <td class="embedded" colspan="11">&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="embedded" colspan="11"><b>Р—Р°РіСЂСѓР·С‡РёРєРё</b></td>
+    </tr>
+    <tr>
+        <td class="embedded" colspan="11"><hr color="#4040c0" size="1"></td>
+    </tr>
+    <tr height="15">
+        <?php echo $staff_table[UC_UPLOADER] ?? ''; ?>
+    </tr>
 </table>
-<?
-end_frame();
+<?php
+    end_frame();
 }
 
+// Sysop tools
+if (get_user_class() >= UC_SYSOP) { 
+    begin_frame("РЎРёСЃС‚РµРјРЅС‹Рµ РёРЅСЃС‚СЂСѓРјРµРЅС‚С‹<font color=\"#FF0000\"> - С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ.</font>"); 
 ?>
-<?
+<table width="100%" cellspacing="10" align="center">
+    <tr>
+        <td class="embedded"><form method="get" action="staffmess.php"><input type="submit" value="РќР°РїРёСЃР°С‚СЊ РІСЃРµРј" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="category.php"><input type="submit" value="РљР°С‚РµРіРѕСЂРёРё" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="delacct.php"><input type="submit" value="РЈРґР°Р»РёС‚СЊ Р°РєРєР°СѓРЅС‚" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="bans.php"><input type="submit" value="Р‘Р°РЅ" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="status.php"><input type="submit" value="РЎС‚Р°С‚СѓСЃ С‚СЂРµРєРµСЂР°" style="height: 20px; width: 100px" disabled></form></td>
+    </tr>
+</table>
+<?php 
+    end_frame();
 }
+
+// Administrator tools
+if (get_user_class() >= UC_ADMINISTRATOR) { 
+    begin_frame("РРЅСЃС‚СЂСѓРјРµРЅС‚С‹ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°<font color=\"#009900\"> - С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ.</font>"); 
+?>
+<table width="100%" cellspacing="10" align="center">
+    <tr>
+        <td class="embedded"><form method="get" action="unco.php"><input type="submit" value="РќРµРїРѕРґРєР». СЋР·РµСЂС‹" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="delacctadmin.php"><input type="submit" value="РЈРґР°Р»РёС‚СЊ Р°РєРєР°СѓРЅС‚" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="agentban.php"><input type="submit" value="Р‘Р°РЅ РєР»РёРµРЅС‚РѕРІ" style="height: 20px; width: 100px" disabled></form></td>
+    </tr>
+    <tr>
+        <td class="embedded"><form method="get" action="topten.php"><input type="submit" value="Top 10" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="findnotconnectable.php"><input type="submit" value="Р®Р·РµСЂС‹ Р±РµР· NAT" style="height: 20px; width: 100px"></form></td>
+    </tr>
+</table>
+<?php 
+    end_frame();
+}
+
+// Moderator tools
+if (get_user_class() >= UC_MODERATOR) { 
+    begin_frame("РРЅСЃС‚СЂСѓРјРµРЅС‚С‹ РјРѕРґРµСЂР°С‚РѕСЂР° - <font color=\"#004E98\">С‚РѕР»СЊРєРѕ РґР»СЏ РјРѕРґРµСЂР°С‚РѕСЂРѕРІ.</font>"); 
+?>
+<table width="100%" cellspacing="3">
+    <tr>
+        <td class="embedded"><a class="altlink" href="staff.php?act=users">РџРѕР»СЊР·РѕРІР°С‚РµР»Рё СЃ СЃРѕРѕС‚РЅРѕС€РµРЅРёРµРј 0.20</a></td>
+        <td class="embedded">РџСЂРѕСЃРјРѕС‚СЂ СЃРїРёСЃРєР° РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ СЃ СЃРѕРѕС‚РЅРѕС€РµРЅРёРµРј РЅРёР¶Рµ 0.20</td>
+    </tr>
+    <tr>
+        <td class="embedded"><a class="altlink" href="staff.php?act=banned">Р—Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»Рё</a></td>
+        <td class="embedded">РџСЂРѕСЃРјРѕС‚СЂ СЃРїРёСЃРєР° Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№</td>
+    </tr>
+    <tr>
+        <td class="embedded"><a class="altlink" href="staff.php?act=last">РџРѕСЃР»РµРґРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»Рё</a></td>
+        <td class="embedded">100 РїРѕСЃР»РµРґРЅРёС… Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№</td>
+    </tr>
+    <tr>
+        <td class="embedded"><a class="altlink" href="log.php">Р–СѓСЂРЅР°Р» СЃРѕР±С‹С‚РёР№</a></td>
+        <td class="embedded">РџСЂРѕСЃРјРѕС‚СЂ Р»РѕРіР° СЂРµРіРёСЃС‚СЂР°С†РёР№/РІС…РѕРґРѕРІ/РІС‹С…РѕРґРѕРІ</td>
+    </tr>
+</table>
+<?php 
+    end_frame(); 
+?>
+<br />
+<?php 
+    begin_frame("РЈРїСЂР°РІР»РµРЅРёРµ Рё СЃС‚Р°С‚РёСЃС‚РёРєР° - <font color=\"#004E98\">С‚РѕР»СЊРєРѕ РґР»СЏ РјРѕРґРµСЂР°С‚РѕСЂРѕРІ.</font>"); 
+?>
+<br />
+<table width="100%" cellspacing="10" align="center">
+    <tr>
+        <td class="embedded"><form method="get" action="warned.php"><input type="submit" value="РџСЂРµРґСѓРїСЂ. СЋР·РµСЂС‹" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="adduser.php"><input type="submit" value="Р”РѕР±Р°РІРёС‚СЊ СЋР·РµСЂР°" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="makepoll.php"><input type="submit" value="РЎРѕР·РґР°С‚СЊ РѕРїСЂРѕСЃ" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="recover.php"><input type="submit" value="Р’РѕСЃСЃС‚. Р»РѕРіРёРЅ" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="uploaders.php"><input type="submit" value="Р—Р°РіСЂСѓР·С‡РёРєРё" style="height: 20px; width: 100px"></form></td>
+    </tr>
+    <tr>
+        <td class="embedded"><form method="get" action="polloverview.php"><input type="submit" value="РћР±Р·РѕСЂ РѕРїСЂРѕСЃРѕРІ" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="users.php"><input type="submit" value="РџРѕРёСЃРє СЋР·РµСЂР°" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="tags.php"><input type="submit" value="РўРµРіРё" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="smilies.php"><input type="submit" value="РЎРјР°Р№Р»С‹" style="height: 20px; width: 100px"></form></td>
+    </tr>
+    <tr>
+        <td class="embedded"><form method="get" action="stats.php"><input type="submit" value="РЎС‚Р°С‚РёСЃС‚РёРєР°" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="testip.php"><input type="submit" value="РџСЂРѕРІРµСЂРёС‚СЊ IP" style="height: 20px; width: 100px"></form></td>
+        <td class="embedded"><form method="get" action="reports.php"><input type="submit" value="Р–Р°Р»РѕР±С‹" style="height: 20px; width: 100px" disabled></form></td>
+        <td class="embedded"><form method="get" action="ipcheck.php"><input type="submit" value="РџСЂРѕРІРµСЂРёС‚СЊ IP" style="height: 20px; width: 100px"></form></td>
+    </tr>
+</table>
+<br />
+<?php 
+    end_frame(); 
+?>
+
+<?php 
+    begin_frame("РџРѕРёСЃРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ - <font color=\"#004E98\">С‚РѕР»СЊРєРѕ РґР»СЏ РјРѕРґРµСЂР°С‚РѕСЂРѕРІ.</font>"); 
+?>
+<table width="100%" cellspacing="3">
+    <tr>
+        <td class="embedded">
+            <form method="get" action="users.php">
+                Р›РѕРіРёРЅ: <input type="text" size="30" name="search">
+                <select name="class">
+                    <option value='-'>(Р»СЋР±РѕР№)</option>
+                    <option value="0">РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ</option>
+                    <option value="1">Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ</option>
+                    <option value="2">VIP</option>
+                    <option value="3">Р—Р°РіСЂСѓР·С‡РёРє</option>
+                    <option value="4">РњРѕРґРµСЂР°С‚РѕСЂ</option>
+                    <option value="5">РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ</option>
+                    <option value="6">РЎРёСЃС‚РµРјРЅС‹Р№ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ</option>
+                </select>
+                <input type="submit" value="РСЃРєР°С‚СЊ">
+            </form>
+        </td>
+    </tr>
+    <tr><td class="embedded"><li><a href="usersearch.php">Р Р°СЃС€РёСЂРµРЅРЅС‹Р№ РїРѕРёСЃРє</a></li></td></tr>
+</table>
+<?php 
+    end_frame(); 
+?>
+<br />
+<?php 
+    // Users with ratio <= 0.20
+    if ($act == "users") {
+        begin_frame("РџРѕР»СЊР·РѕРІР°С‚РµР»Рё СЃ СЃРѕРѕС‚РЅРѕС€РµРЅРёРµРј 0.20");
+        
+        echo '<table width="100%" border="0" align="center" cellpadding="2" cellspacing="0">';
+        echo "<tr><td class=\"colhead\" align=\"left\">РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ</td><td class=\"colhead\">РЎРѕРѕС‚РЅРѕС€РµРЅРёРµ</td><td class=\"colhead\">IP</td><td class=\"colhead\">Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ</td><td class=\"colhead\">РџРѕСЃР»РµРґРЅРёР№ РІРёР·РёС‚</td><td class=\"colhead\">РЎРєР°С‡Р°РЅРѕ</td><td class=\"colhead\">Р—Р°РіСЂСѓР¶РµРЅРѕ</td></tr>";
+        
+        $result = sql_query("SELECT * FROM users WHERE uploaded / downloaded <= 0.20 AND enabled = 'yes' ORDER BY downloaded DESC");
+        if (mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                if ($row["uploaded"] == "0" || $row["downloaded"] == "0") {
+                    $ratio = "inf";
+                } else {
+                    $ratio = number_format($row["uploaded"] / $row["downloaded"], 3);
+                }
+                $ratio_color = get_ratio_color($ratio);
+                $ratio_display = ($ratio == "inf") ? $ratio : "<font color=\"{$ratio_color}\">{$ratio}</font>";
+                
+                echo "<tr><td><a href=\"userdetails.php?id={$row['id']}\"><b>{$row['username']}</b></a></td>"
+                    . "<td><strong>{$ratio_display}</strong></td>"
+                    . "<td>{$row['ip']}</td>"
+                    . "<td>{$row['added']}</td>"
+                    . "<td>{$row['last_access']}</td>"
+                    . "<td>" . mksize($row['downloaded']) . "</td>"
+                    . "<td>" . mksize($row['uploaded']) . "</td></tr>";
+            }
+        } else {
+            echo "<tr><td colspan=\"7\">РР·РІРёРЅРёС‚Рµ, Р·Р°РїРёСЃРё РЅРµ РЅР°Р№РґРµРЅС‹!</td></tr>";
+        }
+        echo "</table>";
+        end_frame();
+    }
+    
+    // Last registered users
+    if ($act == "last") {
+        begin_frame("РџРѕСЃР»РµРґРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»Рё");
+        
+        echo '<table width="100%" border="0" align="center" cellpadding="2" cellspacing="0">';
+        echo "<tr><td class=\"colhead\" align=\"left\">РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ</td><td class=\"colhead\">РЎРѕРѕС‚РЅРѕС€РµРЅРёРµ</td><td class=\"colhead\">IP</td><td class=\"colhead\">Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ</td><td class=\"colhead\">РџРѕСЃР»РµРґРЅРёР№ РІРёР·РёС‚</td><td class=\"colhead\">РЎРєР°С‡Р°РЅРѕ</td><td class=\"colhead\">Р—Р°РіСЂСѓР¶РµРЅРѕ</td></tr>";
+        
+        $result = sql_query("SELECT * FROM users WHERE enabled = 'yes' AND status = 'confirmed' ORDER BY added DESC LIMIT 100");
+        if (mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                if ($row["uploaded"] == "0" || $row["downloaded"] == "0") {
+                    $ratio = "inf";
+                } else {
+                    $ratio = number_format($row["uploaded"] / $row["downloaded"], 3);
+                }
+                $ratio_color = get_ratio_color($ratio);
+                $ratio_display = ($ratio == "inf") ? $ratio : "<font color=\"{$ratio_color}\">{$ratio}</font>";
+                
+                echo "<tr><td><a href=\"userdetails.php?id={$row['id']}\"><b>{$row['username']}</b></a></td>"
+                    . "<td><strong>{$ratio_display}</strong></td>"
+                    . "<td>{$row['ip']}</td>"
+                    . "<td>{$row['added']}</td>"
+                    . "<td>{$row['last_access']}</td>"
+                    . "<td>" . mksize($row['downloaded']) . "</td>"
+                    . "<td>" . mksize($row['uploaded']) . "</td></tr>";
+            }
+        } else {
+            echo "<tr><td colspan=\"7\">РР·РІРёРЅРёС‚Рµ, Р·Р°РїРёСЃРё РЅРµ РЅР°Р№РґРµРЅС‹!</td></tr>";
+        }
+        echo "</table>";
+        end_frame();
+    }
+    
+    // Banned users
+    if ($act == "banned") {
+        begin_frame("Р—Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»Рё");
+        
+        echo '<table width="100%" border="0" align="center" cellpadding="2" cellspacing="0">';
+        echo "<tr><td class=\"colhead\" align=\"left\">РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ</td><td class=\"colhead\">РЎРѕРѕС‚РЅРѕС€РµРЅРёРµ</td><td class=\"colhead\">IP</td><td class=\"colhead\">Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ</td><td class=\"colhead\">РџРѕСЃР»РµРґРЅРёР№ РІРёР·РёС‚</td><td class=\"colhead\">РЎРєР°С‡Р°РЅРѕ</td><td class=\"colhead\">Р—Р°РіСЂСѓР¶РµРЅРѕ</td></tr>";
+        
+        $result = sql_query("SELECT * FROM users WHERE enabled = 'no' ORDER BY last_access DESC");
+        if (mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                if ($row["uploaded"] == "0" || $row["downloaded"] == "0") {
+                    $ratio = "inf";
+                } else {
+                    $ratio = number_format($row["uploaded"] / $row["downloaded"], 3);
+                }
+                $ratio_color = get_ratio_color($ratio);
+                $ratio_display = ($ratio == "inf") ? $ratio : "<font color=\"{$ratio_color}\">{$ratio}</font>";
+                
+                echo "<tr><td><a href=\"userdetails.php?id={$row['id']}\"><b>{$row['username']}</b></a></td>"
+                    . "<td><strong>{$ratio_display}</strong></td>"
+                    . "<td>{$row['ip']}</td>"
+                    . "<td>{$row['added']}</td>"
+                    . "<td>{$row['last_access']}</td>"
+                    . "<td>" . mksize($row['downloaded']) . "</td>"
+                    . "<td>" . mksize($row['uploaded']) . "</td></tr>";
+            }
+        } else {
+            echo "<tr><td colspan=\"7\">РР·РІРёРЅРёС‚Рµ, Р·Р°РїРёСЃРё РЅРµ РЅР°Р№РґРµРЅС‹!</td></tr>";
+        }
+        echo "</table>";
+        end_frame();
+    }
+}
+
+// Firstline supporters for regular users
+if (get_user_class() >= UC_USER && !$act) {
+    $dt = gmtime() - 180;
+    $dt_escaped = sqlesc(get_date_time($dt));
+    
+    // LIST ALL FIRSTLINE SUPPORTERS
+    $firstline = '';
+    $res = sql_query("SELECT * FROM users WHERE support='yes' AND status='confirmed' ORDER BY username LIMIT 10") 
+        or sqlerr(__FILE__, __LINE__);
+    
+    while ($arr = mysqli_fetch_assoc($res)) {
+        $land = sql_query("SELECT name, flagpic FROM countries WHERE id={$arr['country']}") 
+            or sqlerr(__FILE__, __LINE__);
+        $arr2 = mysqli_fetch_assoc($land);
+        
+        $last_access_time = strtotime($arr['last_access']);
+        $online_status = ($last_access_time > $dt) 
+            ? "<img src=\"{$pic_base_url}/button_online.gif\" border=\"0\" alt=\"online\">"
+            : "<img src=\"{$pic_base_url}/button_offline.gif\" border=\"0\" alt=\"offline\">";
+        
+        $firstline .= "<tr height=\"15\">"
+            . "<td class=\"embedded\"><a class=\"altlink\" href=\"userdetails.php?id={$arr['id']}\">{$arr['username']}</a></td>"
+            . "<td class=\"embedded\">{$online_status}</td>"
+            . "<td class=\"embedded\"><a href=\"message.php?action=sendmessage&amp;receiver={$arr['id']}\">"
+            . "<img src=\"{$pic_base_url}/button_pm.gif\" border=\"0\"></a></td>"
+            . "<td class=\"embedded\"><img src=\"{$pic_base_url}/flag/{$arr2['flagpic']}\" title=\"{$arr2['name']}\" border=\"0\" width=\"19\" height=\"12\"></td>"
+            . "<td class=\"embedded\">{$arr['supportfor']}</td></tr>\n";
+    }
+
+    begin_frame("Р›РёРЅРёСЏ РїРµСЂРІРѕР№ РїРѕРґРґРµСЂР¶РєРё");
+?>
+<table width="100%" cellspacing="0">
+    <tr>
+        <td class="embedded" colspan="5">
+            Р—РґРµСЃСЊ РЅР°С…РѕРґРёС‚СЃСЏ СЃРїРёСЃРѕРє Р»РёС† РїРµСЂРІРѕР№ Р»РёРЅРёРё РїРѕРґРґРµСЂР¶РєРё. Р•СЃР»Рё Сѓ РІР°СЃ РІРѕР·РЅРёРєР»Рё РїСЂРѕР±Р»РµРјС‹, СЃРЅР°С‡Р°Р»Р° РїРѕСЃРјРѕС‚СЂРёС‚Рµ FAQ Рё РїСЂР°РІРёР»Р°.
+            РўРѕР»СЊРєРѕ РїРѕС‚РѕРј РїРёС€РёС‚Рµ РёРј.<br /><br /><br />
+        </td>
+    </tr>
+    <tr>
+        <td class="embedded" width="30"><b>РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ&nbsp;</b></td>
+        <td class="embedded" width="5"><b>РЎС‚Р°С‚СѓСЃ&nbsp;</b></td>
+        <td class="embedded" width="5"><b>РЎРѕРѕР±С‰РµРЅРёРµ&nbsp;</b></td>
+        <td class="embedded" width="85"><b>РЎС‚СЂР°РЅР°&nbsp;</b></td>
+        <td class="embedded" width="200"><b>РџРѕРґРґРµСЂР¶РёРІР°РµС‚&nbsp;</b></td>
+    </tr>
+    <tr>
+        <td class="embedded" colspan="5"><hr color="#4040c0" size="1"></td>
+    </tr>
+    <?php echo $firstline; ?>
+</table>
+<?php
+    end_frame();
+}
+
 end_frame();
 end_main_frame();
 stdfoot();
