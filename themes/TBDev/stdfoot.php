@@ -1,30 +1,56 @@
 <?php
+declare(strict_types=1);
 
-if (!defined('UC_SYSOP'))
-	die('Direct access denied.');
+if (!defined('UC_SYSOP')) {
+	http_response_code(403);
+	exit('Direct access denied.');
+}
 
-	show_blocks('d');
+// центральные/нижние блоки 
+show_blocks('d');
 ?>
 <td valign="top" width="155">
-<?
-	show_blocks('r');
+<?php
+show_blocks('r');
 ?>
 </td>
-<?
-	print("</td></tr></table>\n");
+<?php
 
-// Variables for End Time
-$seconds = (timer() - $tstart);
+echo "</td></tr></table>\n";
+echo "</td></tr></table>\n";
 
-$phptime = 		$seconds - $querytime;
-$query_time = 	$querytime;
-$percentphp = 	number_format(($phptime/$seconds) * 100, 2);
-$percentsql = 	number_format(($query_time/$seconds) * 100, 2);
-$seconds = 		substr($seconds, 0, 8);
-//КОПИРАЙТ
-	print("</td></tr></table>\n");
-	print("<table class=\"bottom\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr valign=\"top\">\n");
-	print("<td width=\"49%\" class=\"bottom\"><div align=\"center\"><br /><b>".TBVERSION.(BETA?BETA_NOTICE:"")."<br />".sprintf($tracker_lang["page_generated"], $seconds, $queries, $percentphp, $percentsql)."</b></div></td>\n");
-	print("</tr></table>\n");
-	print("</body></html>\n");
-?>
+
+// --- Тайминги (без notice/деления на ноль) ---
+$seconds = (float)(timer() - (float)$tstart);
+$query_time = (float)($querytime ?? 0.0);
+$queries = (int)($queries ?? 0);
+
+if ($seconds <= 0.0) {
+	$seconds = 0.000001; // чтобы не делить на ноль
+}
+
+$phptime = $seconds - $query_time;
+if ($phptime < 0) {
+	$phptime = 0.0;
+}
+
+$percentphp = number_format(($phptime / $seconds) * 100, 2, '.', '');
+$percentsql = number_format(($query_time / $seconds) * 100, 2, '.', '');
+
+$secondsStr = substr((string)$seconds, 0, 8);
+
+// версия
+$ver = (string)(TBVERSION ?? '');
+if (defined('BETA') && BETA && defined('BETA_NOTICE')) {
+	$ver .= (string)BETA_NOTICE;
+}
+
+// футер (вид сохраняем)
+echo "<table class=\"bottom\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr valign=\"top\">\n";
+echo "<td width=\"49%\" class=\"bottom\"><div align=\"center\"><br /><b>"
+	.$ver
+	."<br />"
+	.sprintf((string)($tracker_lang['page_generated'] ?? 'Страница сгенерирована за %s сек. (%d запросов) PHP %s%% / SQL %s%%'), $secondsStr, $queries, $percentphp, $percentsql)
+	."</b></div></td>\n";
+echo "</tr></table>\n";
+echo "</body></html>\n";
