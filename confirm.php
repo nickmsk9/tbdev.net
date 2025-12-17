@@ -39,7 +39,7 @@ dbconn();
 
 
 $res = sql_query("SELECT passhash, editsecret, status FROM users WHERE id = $id");
-$row = mysql_fetch_array($res);
+$row = mysqli_fetch_array($res);
 
 if (!$row)
 	httperr();

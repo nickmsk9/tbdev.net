@@ -14,7 +14,7 @@ $content .= "<script language=\"javascript\" type=\"text/javascript\" src=\"js/s
 //<a href=\"javascript: show_hide('s1')\"><img border=\"0\" src=\"pic/plus.gif\" id=\"pics1\" title=\"��������\"></a>
 if (mysqli_num_rows($resource)) {
     $content .= "<table width=\"100%\" border=\"1\" cellspacing=\"0\" cellpadding=\"10\"><tr><td class=\"text\">\n<ul>";
-    while($array = mysql_fetch_array($resource)) {
+    while($array = mysqli_fetch_array($resource)) {
 		if ($news_flag == 0) {
 			$content .=
 			"<span style=\"cursor: pointer;\" onclick=\"javascript: show_hide('s".$array["id"]."')\"><img border=\"0\" src=\"pic/minus.gif\" id=\"pics".$array["id"]."\" title=\"������\"></span>&nbsp;"

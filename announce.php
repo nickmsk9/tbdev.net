@@ -114,7 +114,7 @@ if (mysql_affected_rows() == 0)
 	err('Invalid passkey! Re-download the .torrent from '.$DEFAULTBASEURL);
 $hash = bin2hex($info_hash);
 $res = mysql_query('SELECT id, visible, banned, free, seeders + leechers AS numpeers, UNIX_TIMESTAMP(added) AS ts FROM torrents WHERE info_hash = "'.$hash.'"') or err('Torrents error 1 (select)');
-$torrent = mysql_fetch_array($res);
+$torrent = mysqli_fetch_array($res);
 if (!$torrent)
 	err('Torrent not registered with this tracker.');
 $torrentid = $torrent['id'];
@@ -127,7 +127,7 @@ $res = mysql_query('SELECT '.$fields.' FROM peers WHERE torrent = '.$torrentid.'
 $resp = 'd' . benc_str('interval') . 'i' . $announce_interval . 'e' . benc_str('peers') . (($compact = ($_GET['compact'] == 1)) ? '' : 'l');
 $no_peer_id = ($_GET['no_peer_id'] == 1);
 unset($self);
-while ($row = mysql_fetch_array($res)) {
+while ($row = mysqli_fetch_array($res)) {
 	if ($row['peer_id'] == $peer_id) {
 		$userid = $row['userid'];
 		$self = $row;
@@ -147,7 +147,7 @@ $resp .= ($compact ? benc_str($plist) : '') . (substr($peer_id, 0, 4) == '-BC0' 
 $selfwhere = 'torrent = '.$torrentid.' AND peer_id = '.sqlesc($peer_id);
 if (!isset($self)) {
 	$res = mysql_query('SELECT '.$fields.' FROM peers WHERE '.$selfwhere) or err('Peers error 2 (select)');
-	$row = mysql_fetch_array($res);
+	$row = mysqli_fetch_array($res);
 	if ($row) {
 		$userid = $row['userid'];
 		$self = $row;
@@ -165,7 +165,7 @@ if (!isset($self)) {
 	$rz = mysql_query('SELECT id, uploaded, downloaded, enabled, parked, class, passkey_ip FROM users WHERE passkey = '.sqlesc($passkey).' ORDER BY last_access DESC LIMIT 1') or err('Users error 1 (select)');
 	if (mysqli_num_rows($rz) == 0)
 		err('Unknown passkey. Please redownload the torrent from '.$BASEURL.' - READ THE FAQ!');
-	$az = mysql_fetch_array($rz);
+	$az = mysqli_fetch_array($rz);
 	if ($az['enabled'] == 'no')
 		err('This account is disabled.');
 	$userid = $az['id'];
@@ -208,7 +208,7 @@ if (!isset($self)) {
     }
 
     $res = mysql_query('SELECT torrent, userid FROM snatched WHERE torrent = '.$torrentid.' AND userid = '.$userid) or err(mysql_error());
-    $check = mysql_fetch_array($res);
+    $check = mysqli_fetch_array($res);
     if (!$check)
         mysql_query("INSERT LOW_PRIORITY INTO snatched (torrent, userid, port, startdat, last_action) VALUES ($torrentid, $userid, $port, $dt, $dt)");
     $ret = mysql_query("INSERT LOW_PRIORITY INTO peers (connectable, torrent, peer_id, ip, port, uploaded, downloaded, to_go, started, last_action, seeder, userid, agent, uploadoffset, downloadoffset, passkey) VALUES ('$connectable', $torrentid, " . sqlesc($peer_id) . ", " . sqlesc($ip) . ", $port, $uploaded, $downloaded, $left, NOW(), NOW(), '$seeder', $userid, " . sqlesc($agent) . ", $uploaded, $downloaded, " . sqlesc($passkey) . ")") or err('Peers error 4 (insert)');
