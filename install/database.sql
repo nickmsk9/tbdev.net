@@ -314,8 +314,10 @@ CREATE TABLE `notconnectablepmlog` (
 # Structure for the `orbital_blocks` table :
 #
 
+-- Удаляем старую таблицу, если она существует
 DROP TABLE IF EXISTS `orbital_blocks`;
 
+-- Создаем таблицу с правильной структурой
 CREATE TABLE `orbital_blocks` (
   `bid` int(10) NOT NULL auto_increment,
   `bkey` varchar(15) NOT NULL default '',
@@ -335,7 +337,7 @@ CREATE TABLE `orbital_blocks` (
   KEY `title` (`title`),
   KEY `weight` (`weight`),
   KEY `active` (`active`)
-) ENGINE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
 
 #
 # Structure for the `peers` table :
@@ -970,8 +972,9 @@ COMMIT;
 # Data for the `orbital_blocks` table  (LIMIT 0,100)
 #
 
-INSERT INTO `orbital_blocks` (`bid`, `bkey`, `title`, `content`, `bposition`, `weight`, `active`, `time`, `blockfile`, `view`, `expire`, `action`, `which`) VALUES
-  (1, '', 'Администрация', '<table border="0"><tr>
+-- Вставляем данные с ВСЕМИ полями, включая 'time'
+INSERT INTO `orbital_blocks` (`bid`, `bkey`, `title`, `content`, `bposition`, `weight`, `active`, `time`, `blockfile`, `view`, `expire`, `action`, `which`, `allow_hide`) VALUES
+(1, '', 'Администрация', '<table border="0"><tr>
 <td class="block"><a href="admincp.php">Админпанель</a></td>
 </tr><tr>
 <td class="block"><a href="users.php">Список пользователей</a></td>
@@ -981,15 +984,15 @@ INSERT INTO `orbital_blocks` (`bid`, `bkey`, `title`, `content`, `bposition`, `w
 <td class="block"><a href="ipcheck.php">Поиск по IP</a></td>
 </tr><tr>
 <td class="block"><a href="logout.php">Выход</a></td>
-</tr></table>', 'r', 1, 1, '', '', 2, '0', 'd', 'all'),
-  (8, '', 'Статистика', '', 'c', 7, 1, '', 'block-stats.php', 0, '0', 'd', 'ihome,'),
-  (9, '', 'Помощь, как качать торренты', '', 'c', 6, 1, '', 'block-helpseed.php', 0, '0', 'd', 'ihome,'),
-  (10, '', 'Общие правила', '<p align="justify">Приветствуем вас на нашем трекере - частном торрент-трекере высокого уровня, где главное - качество и скорость, поэтому мы работаем только с проверенными раздачами и требуем от пользователей поддержания высокого соотношения раздачи к скачке. Основное правило нашего трекера - не только получать, но и отдавать, поддерживайте соотношение раздачи не ниже 1, а лучше стремитесь к показателям 2-3 и выше. И помните, что свободное скачивание без отдачи недопустимо! (Правило)</p>', 'c', 1, 1, '', '', 0, '0', 'd', 'rules,'),
-  (2, '', 'Новости', '', 'c', 3, 1, '', 'block-news.php', 0, '0', 'd', 'ihome,'),
-  (3, '', 'Онлайн пользователи', '', 'r', 2, 1, '', 'block-online.php', 0, '0', 'd', 'all'),
-  (4, '', 'Поиск', '', 'r', 3, 1, '', 'block-search.php', 0, '0', 'd', 'all'),
-  (5, '', 'Опрос', '', 'c', 4, 1, '', 'block-polls.php', 1, '0', 'd', 'ihome,'),
-  (6, '', 'Последние раздачи', '', 'c', 5, 1, '', 'block-releases.php', 0, '0', 'd', 'ihome,'),
-  (11, '', 'Загрузка сервера', '', 'c', 8, 1, '', 'block-server_load.php', 0, '0', 'd', 'ihome,');
+</tr></table>', 'r', 1, 1, '', '', 2, '0', 'd', 'all', 'yes'),
+(8, '', 'Статистика', '', 'c', 7, 1, '', 'block-stats.php', 0, '0', 'd', 'ihome,', 'yes'),
+(9, '', 'Помощь, как качать торренты', '', 'c', 6, 1, '', 'block-helpseed.php', 0, '0', 'd', 'ihome,', 'yes'),
+(10, '', 'Общие правила', '<p align="justify">Приветствуем вас на нашем трекере - частном торрент-трекере высокого уровня, где главное - качество и скорость, поэтому мы работаем только с проверенными раздачами и требуем от пользователей поддержания высокого соотношения раздачи к скачке. Основное правило нашего трекера - не только получать, но и отдавать, поддерживайте соотношение раздачи не ниже 1, а лучше стремитесь к показателям 2-3 и выше. И помните, что свободное скачивание без отдачи недопустимо! (Правило)</p>', 'c', 1, 1, '', '', 0, '0', 'd', 'rules,', 'yes'),
+(2, '', 'Новости', '', 'c', 3, 1, '', 'block-news.php', 0, '0', 'd', 'ihome,', 'yes'),
+(3, '', 'Онлайн пользователи', '', 'r', 2, 1, '', 'block-online.php', 0, '0', 'd', 'all', 'yes'),
+(4, '', 'Поиск', '', 'r', 3, 1, '', 'block-search.php', 0, '0', 'd', 'all', 'yes'),
+(5, '', 'Опрос', '', 'c', 4, 1, '', 'block-polls.php', 1, '0', 'd', 'ihome,', 'yes'),
+(6, '', 'Последние раздачи', '', 'c', 5, 1, '', 'block-releases.php', 0, '0', 'd', 'ihome,', 'yes'),
+(11, '', 'Загрузка сервера', '', 'c', 8, 1, '', 'block-server_load.php', 0, '0', 'd', 'ihome,', 'yes');
 
 COMMIT;
