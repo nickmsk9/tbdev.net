@@ -34,10 +34,12 @@ loggedinorreturn();
 
 stdhead("Мои торренты");
 
+// Исправляем ошибку - используем ассоциативный ключ вместо числового индекса
 $where = "WHERE owner = " . $CURUSER["id"] . " AND banned != 'yes'";
 $res = sql_query("SELECT COUNT(*) FROM torrents $where");
 $row = mysqli_fetch_assoc($res);
-$count = $row[0];
+// Исправлено: используем '0' как строковый ключ или первый элемент массива
+$count = $row['COUNT(*)'] ?? 0;
 
 if (!$count) {
 	stdmsg($tracker_lang['error'], "Вы не загружали торренты на этот трекер.");
