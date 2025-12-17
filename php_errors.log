@@ -861,3 +861,9 @@ Stack trace:
 [16-Dec-2025 10:09:07 Europe/Moscow] PHP Warning:  Trying to access array offset on value of type null in C:\OSPanel\domains\tbdev.net\blocks\block-search.php on line 17
 [16-Dec-2025 10:19:52 Europe/Moscow] PHP Fatal error:  Cannot redeclare deadtime() (previously declared in C:\OSPanel\domains\tbdev.net\include\functions.php:877) in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 450
 [16-Dec-2025 11:49:39 Europe/Moscow] PHP Fatal error:  Cannot redeclare deadtime() (previously declared in C:\OSPanel\domains\tbdev.net\include\functions.php:877) in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 450
+[17-Dec-2025 09:07:21 Europe/Moscow] PHP Fatal error:  Uncaught mysqli_sql_exception: Подключение не установлено, т.к. конечный компьютер отверг запрос на подключение in C:\OSPanel\domains\tbdev.net\include\functions.php:264
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(264): mysqli_real_connect()
+#1 C:\OSPanel\domains\tbdev.net\index.php(37): dbconn()
+#2 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 264
