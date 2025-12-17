@@ -108,9 +108,13 @@ if (!$description)
     $description = '';
 //SEO mods
 
-$info = $dict['info'];
-list($dname, $plen, $pieces, $totallen) = array($info['name'], $info['piece length'], $info['pieces'], $info['length']);
-
+$info = $dict['info'] ?? [];
+list($dname, $plen, $pieces, $totallen) = [
+    $info['name'] ?? '',
+    $info['piece length'] ?? 0,
+    $info['pieces'] ?? '',
+    $info['length'] ?? ($info['files'] ? array_sum(array_column($info['files'], 'length')) : 0)
+];
 /*if (!in_array($ann, $announce_urls, 1))
 	bark("Неверный Announce URL! Должен быть ".$announce_urls[0]);*/
 
@@ -264,13 +268,53 @@ if (!($_FILES['image'.$x]['name'] == "")) {
 
 $torrent = htmlspecialchars_uni(str_replace("_", " ", $torrent));
 
-$ret = sql_query("INSERT INTO torrents (filename, owner, visible, not_sticky, info_hash, name, keywords, description, size, numfiles, type, descr, ori_descr, free, image1, image2, image3, image4, image5, category, save_as, added, last_action, multitracker) VALUES (" . implode(",", array_map("sqlesc", array($fname, $CURUSER["id"], "no", $not_sticky, $infohash, $torrent, $keywords, $description, $totallen, count($filelist), $type, $descr, $descr, $free, $inames[0], $inames[1], $inames[2], $inames[3], $inames[4], $catid, $dname))) . ", '" . get_date_time() . "', '" . get_date_time() . "', ".sqlesc($multi_torrent).")");
-if (!$ret) {
-	if (mysql_errno() == 1062)
-		bark("torrent already uploaded!");
-	bark("mysql puked: ".mysql_error());
+// Создаем массив с 5 элементами (по умолчанию NULL)
+$image_fields = array_fill(0, 5, 'NULL');
+for ($i = 0; $i < min(5, count($inames ?? [])); $i++) {
+    if (!empty($inames[$i])) {
+        $image_fields[$i] = sqlesc($inames[$i]);
+    }
 }
-$id = mysql_insert_id();
+
+$ret = sql_query("INSERT INTO torrents 
+    (filename, owner, visible, not_sticky, info_hash, name, keywords, description, 
+     size, numfiles, type, descr, ori_descr, free, 
+     image1, image2, image3, image4, image5, 
+     category, save_as, added, last_action, multitracker) 
+    VALUES (" 
+    . implode(",", array_map("sqlesc", [
+        $fname, 
+        $CURUSER["id"] ?? 0, 
+        "no", 
+        $not_sticky ?? "no",
+        $infohash, 
+        $torrent ?? '', 
+        $keywords ?? '', 
+        $description ?? '',
+        $totallen ?? 0, 
+        count($filelist ?? []), 
+        $type ?? 0, 
+        $descr ?? '', 
+        $descr ?? '', 
+        $free ?? 'no'
+    ])) 
+    . ", " 
+    . implode(",", $image_fields) 
+    . ", " 
+    . sqlesc($catid ?? 0) 
+    . ", " 
+    . sqlesc($dname ?? '') 
+    . ", '" . get_date_time() . "', '" . get_date_time() . "', " 
+    . sqlesc($multi_torrent ?? 'no') 
+    . ")");
+
+if (!$ret) {
+    if (mysqli_errno($GLOBALS["___mysqli_ston"]) == 1062) {
+        bark("Торрент уже загружен!");
+    }
+    bark("Ошибка MySQL: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+}
+$id = mysqli_insert_id($GLOBALS["___mysqli_ston"]);
 
 sql_query('INSERT INTO torrents_descr (tid, descr_hash, descr_parsed) VALUES ('.implode(', ', array_map('sqlesc', array($id, md5($descr), format_comment($descr)))).')') or sqlerr(__FILE__,__LINE__);
 

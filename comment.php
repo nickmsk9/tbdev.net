@@ -55,7 +55,7 @@ if ($action == "add")
 	      $CURUSER["id"] . ",$torrentid, '" . get_date_time() . "', " . sqlesc($text) .
 	       "," . sqlesc($text) . "," . sqlesc(getip()) . ")");
 
-	  $newid = mysql_insert_id();
+	  $newid = mysqli_insert_id();
 
 	sql_query('INSERT INTO comments_parsed (cid, text_hash, text_parsed) VALUES ('.implode(', ', array_map('sqlesc', array($newid, md5($text), format_comment($text)))).')') or sqlerr(__FILE__,__LINE__);
 
@@ -279,10 +279,10 @@ elseif ($action == "delete")
 		$torrentid = $arr["torrent"];
 
 	sql_query("DELETE FROM comments WHERE id=$commentid") or sqlerr(__FILE__,__LINE__);
-	if ($torrentid && mysql_affected_rows() > 0)
+	if ($torrentid && mysqli_affected_rows() > 0)
 		sql_query("UPDATE torrents SET comments = comments - 1 WHERE id = $torrentid");
 
-	list($commentid) = mysql_fetch_row(sql_query("SELECT id FROM comments WHERE torrent = $torrentid ORDER BY added DESC LIMIT 1"));
+	list($commentid) = mysqli_fetch_row(sql_query("SELECT id FROM comments WHERE torrent = $torrentid ORDER BY added DESC LIMIT 1"));
 
 	$returnto = "details.php?id=$torrentid&viewcomm=$commentid#comm$commentid";
 
