@@ -333,8 +333,9 @@ if ($user["mirc"])
 }
 if ($user["website"])
 	print("<tr><td class=\"rowhead\">Сайт</td><td align=\"left\"><a href=\"$user[website]\" target=\"_blank\">$user[website]</a></td></tr>\n");
-//if ($user['donated'] > 0 && (get_user_class() >= UC_MODERATOR || $CURUSER["id"] == $user["id"]))
-//  print("<tr><td class=rowhead>Donated</td><td align=left>$$user[donated]</td></tr>\n");
+if (isset($user['donated']) && $user['donated'] > 0 && (get_user_class() >= UC_MODERATOR || $CURUSER["id"] == $user["id"])) {
+    print("<tr><td class=rowhead>Donated</td><td align=left>$" . htmlspecialchars($user['donated']) . "</td></tr>\n");
+}
 if ($user["avatar"])
 	print("<tr><td class=\"rowhead\">Аватар</td><td align=left><img src=\"" . htmlspecialchars_uni($user["avatar"]) . "\"></td></tr>\n");
 print("<tr><td class=\"rowhead\">Класс</td><td align=\"left\"><b>" . get_user_class_color($user["class"], get_user_class_name($user["class"])) . ($user["title"] != "" ? " / <span style=\"color: purple;\">{$user["title"]}</span>" : "") . "</b></td></tr>\n");
