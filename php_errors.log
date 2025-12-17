@@ -1,4 +1,4 @@
-[11-Dec-2025 11:23:23 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_fetch_assoc() in C:\OSPanel\domains\tbdev.net\include\cleanup.php:114
+[11-Dec-2025 11:23:23 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysqli_fetch_assoc() in C:\OSPanel\domains\tbdev.net\include\cleanup.php:114
 Stack trace:
 #0 C:\OSPanel\domains\tbdev.net\include\functions.php(686): docleanup()
 #1 [internal function]: autoclean()

@@ -48,7 +48,7 @@ if (get_user_class() >= UC_MODERATOR)
  <td class=colhead width=125>IP</td>
  <td class=colhead width=40>���</td></tr>\n");
  $uc = 0;
-  while($ras = mysql_fetch_assoc($res)) {
+  while($ras = mysqli_fetch_assoc($res)) {
         if ($ras["dupl"] <= 1)
           break;
         if ($ip <> $ras['ip']) {
@@ -56,7 +56,7 @@ if (get_user_class() >= UC_MODERATOR)
           $num2 = mysqli_num_rows($ros);
           if ($num2 > 1) {
                 $uc++;
-            while($arr = mysql_fetch_assoc($ros)) {
+            while($arr = mysqli_fetch_assoc($ros)) {
                   if ($arr['added'] == '0000-00-00 00:00:00')
                         $arr['added'] = '-';
                   if ($arr['last_access'] == '0000-00-00 00:00:00')

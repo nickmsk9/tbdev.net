@@ -204,7 +204,7 @@ if ((get_user_class() >= UC_MODERATOR) && $variant == "index")
 	if ($variant == "bookmarks")
 		print ("<form method=\"post\" action=\"takedelbookmark.php\">");
 
-	while ($row = mysql_fetch_assoc($res)) {
+	while ($row = mysqli_fetch_assoc($res)) {
 		$id = $row["id"];
 		print("<tr".($row["not_sticky"] == "no" ? " class=\"highlight\"" : "").">\n");
 

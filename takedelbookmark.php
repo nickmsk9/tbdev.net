@@ -37,15 +37,15 @@ dbconn();
 loggedinorreturn();
 
 if (!isset($_POST[delbookmark]))
-       bark("Ничего не выбрано");
+       bark("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
 
 $res2 = sql_query("SELECT id, userid FROM bookmarks WHERE id IN (" . implode(", ", array_map("sqlesc", $_POST[delbookmark])) . ")") or sqlerr(__FILE__, __LINE__);
 
-while ($arr = mysql_fetch_assoc($res2)) {
+while ($arr = mysqli_fetch_assoc($res2)) {
        if (($arr[userid] == $CURUSER[id]) || (get_user_class() > 3))
 sql_query("DELETE FROM bookmarks WHERE id = $arr[id]") or sqlerr(__FILE__, __LINE__);
        else
-bark("Вы пытаетесь удалить не свою закладку!");
+bark("пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
 }
 
 header("Refresh: 0; url=" . $_SERVER['HTTP_REFERER']);

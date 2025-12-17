@@ -1333,7 +1333,7 @@ function downloaderdata($res) {
     $ids = array();
     $peerdata = array();
     
-    // Заменяем mysql_fetch_assoc на mysqli_fetch_assoc
+    // Заменяем mysqli_fetch_assoc на mysqli_fetch_assoc
     while ($row = mysqli_fetch_assoc($res)) {
         $rows[] = $row;
         $id = $row["id"];

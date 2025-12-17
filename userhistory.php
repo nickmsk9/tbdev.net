@@ -78,7 +78,7 @@ if ($action == "viewcomments")
 
 	if (mysqli_num_rows($res) == 1)
 	{
-		$arr = mysql_fetch_assoc($res);
+		$arr = mysqli_fetch_assoc($res);
 
 	  $subject = "<a href=userdetails.php?id=$userid><b>$arr[username]</b></a>" . get_user_icons($arr, true);
 	}
@@ -107,7 +107,7 @@ if ($action == "viewcomments")
 
 	begin_frame();
 
-	while ($arr = mysql_fetch_assoc($res))
+	while ($arr = mysqli_fetch_assoc($res))
 	{
 
 		$commentid = $arr["id"];

@@ -296,7 +296,7 @@ write_log("Торрент номер $id ($torrent) был залит польз
 /*******************
 
 $res = sql_query("SELECT name FROM categories WHERE id=$catid") or sqlerr(__FILE__, __LINE__);
-$arr = mysql_fetch_assoc($res);
+$arr = mysqli_fetch_assoc($res);
 $cat = $arr["name"];
 $res = sql_query("SELECT email FROM users WHERE enabled='yes' AND notifs LIKE '%[cat$catid]%'") or sqlerr(__FILE__, __LINE__);
 $uploader = $CURUSER['username'];

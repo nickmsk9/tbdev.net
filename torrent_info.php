@@ -93,7 +93,7 @@ if (!$id)
 	httperr();
 
 $res = sql_query("SELECT name FROM torrents WHERE id = $id") or sqlerr(__FILE__, __LINE__);
-$row = mysql_fetch_assoc($res);
+$row = mysqli_fetch_assoc($res);
 
 $fn = "$torrent_dir/$id.torrent";
 

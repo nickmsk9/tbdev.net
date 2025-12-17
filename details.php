@@ -547,7 +547,7 @@ if ($row["times_completed"] > 0) {
 	$snatched_full = "<table width=\"100%\" class=\"main\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n";
 	$snatched_full .= "<tr><td class=colhead>Юзер</td><td class=colhead>Раздал</td><td class=colhead>Скачал</td><td class=colhead>Рейтинг</td><td class=colhead align=center>Начал / Закончил</td><td class=colhead align=center>Действие</td><td class=colhead align=center>Сидирует</td><td class=colhead align=center>ЛС</td></tr>";
 
-	while ($arr = mysql_fetch_assoc($res)) {
+	while ($arr = mysqli_fetch_assoc($res)) {
 		//start Global
 		if ($arr["downloaded"] > 0) {
 		        $ratio = number_format($arr["uploaded"] / $arr["downloaded"], 2);
@@ -603,7 +603,7 @@ if ($count == 0) {
 } else {
 	//$thanked_sql = sql_query("SELECT thanks.userid, users.username FROM thanks INNER JOIN users ON thanks.userid = users.id WHERE thanks.torrentid = $torrentid");
 	$thanksby = array();
-	while ($thanked_row = mysql_fetch_assoc($thanked_sql)) {
+	while ($thanked_row = mysqli_fetch_assoc($thanked_sql)) {
 		if ($thanked_row["userid"] == $CURUSER["id"])
 			$can_not_thanks = true;
 		$userid = $thanked_row["userid"];

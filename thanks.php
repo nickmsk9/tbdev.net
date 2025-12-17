@@ -50,7 +50,7 @@ if ($ajax == "yes") {
 		$thanksby = $tracker_lang['none_yet'];
 	} else {
 		$thanked_sql = sql_query("SELECT thanks.userid, users.username, users.class FROM thanks INNER JOIN users ON thanks.userid = users.id WHERE thanks.torrentid = $torrentid");
-		while ($thanked_row = mysql_fetch_assoc($thanked_sql)) {
+		while ($thanked_row = mysqli_fetch_assoc($thanked_sql)) {
 			if (($thanked_row["userid"] == $CURUSER["id"]) || ($thanked_row["userid"] == $row["owner"]))
 			$can_not_thanks = true;
 			//list($userid, $username) = $thanked_row;

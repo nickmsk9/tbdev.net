@@ -68,7 +68,7 @@ if (mysqli_num_rows($sql) == 0) {
  exit;
  }
  
-while ($poll = mysql_fetch_assoc($sql))
+while ($poll = mysqli_fetch_assoc($sql))
 {
  $added = date("Y-m-d h-i-s",strtotime($poll['added'])) . " GMT (" . (get_elapsed_time(sql_timestamp_to_unix_timestamp($poll["added"]))) . " �����)";
  print("<tr><td align=center><a href=\"polloverview.php?id={$poll['id']}\">{$poll['id']}</a></td><td>{$added}</td><td><a href=\"polloverview.php?id={$poll['id']}\">{$poll['question']}</a></td></tr>\n");
@@ -96,7 +96,7 @@ if (mysqli_num_rows($sql) == 0) {
  exit;
  }
  
-while ($poll = mysql_fetch_assoc($sql))
+while ($poll = mysqli_fetch_assoc($sql))
 {
  $o = array($poll["option0"], $poll["option1"], $poll["option2"], $poll["option3"], $poll["option4"],
   $poll["option5"], $poll["option6"], $poll["option7"], $poll["option8"], $poll["option9"],
@@ -132,7 +132,7 @@ if (mysqli_num_rows($sql2) == 0) {
  exit;
  }
  
-while ($useras = mysql_fetch_assoc($sql2))
+while ($useras = mysqli_fetch_assoc($sql2))
 {
  $username  = ($useras['username'] ? $useras['username'] : "����������");
  //$useras['selection']--;

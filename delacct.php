@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
   " AND passhash=md5(concat(secret,concat(" . sqlesc($password) . ",secret)))") or sqlerr(__FILE__, __LINE__);
   if (mysqli_num_rows($res) != 1)
     stderr($tracker_lang['error'], "Неверное имя пользователя или пароль. Проверьте введеную информацию.");
-  $arr = mysql_fetch_assoc($res);
+  $arr = mysqli_fetch_assoc($res);
 
   $id = $arr['id'];
   $res = sql_query("DELETE FROM users WHERE id = $id") or sqlerr(__FILE__, __LINE__);

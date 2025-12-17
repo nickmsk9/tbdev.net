@@ -49,7 +49,7 @@ else {
 
 $res = mysql_query($query) or err(mysql_error());
 
-while ($row = mysql_fetch_assoc($res)) {
+while ($row = mysqli_fetch_assoc($res)) {
 	$r .= "20:" . pack("H*", ($row["info_hash"])) . "d" .
 		benc_str("complete") . "i" . $row["seeders"] . "e" .
 		benc_str("downloaded") . "i" . $row["times_completed"] . "e" .

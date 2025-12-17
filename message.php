@@ -116,7 +116,7 @@ if ($action == "viewmailbox") {
         }
         else
         {
-                while ($row = mysql_fetch_assoc($res))
+                while ($row = mysqli_fetch_assoc($res))
                 {
                         // Get Sender Username
                         if ($row['sender'] != 0) {
@@ -201,7 +201,7 @@ if ($action == "viewmessage") {
                 stderr($tracker_lang['error'],"������ ��������� �� ����������.");
         }
         // Prepare for displaying message
-        $message = mysql_fetch_assoc($res);
+        $message = mysqli_fetch_assoc($res);
         if ($message['sender'] == $CURUSER['id'])
         {
                 // Display to
@@ -286,7 +286,7 @@ if ($action == "sendmessage") {
                 stderr($tracker_lang['error'], $tracker_lang['access_denied']);
 
         $res = sql_query("SELECT * FROM users WHERE id=$receiver") or die(mysql_error());
-        $user = mysql_fetch_assoc($res);
+        $user = mysqli_fetch_assoc($res);
         if (!$user)
                 stderr($tracker_lang['error'], "������������ � ����� ID �� ����������.");
         if ($auto)
@@ -296,12 +296,12 @@ if ($action == "sendmessage") {
 
         if ($replyto) {
                 $res = sql_query("SELECT * FROM messages WHERE id=$replyto") or sqlerr(__FILE__, __LINE__);
-                $msga = mysql_fetch_assoc($res);
+                $msga = mysqli_fetch_assoc($res);
                 if ($msga["receiver"] != $CURUSER["id"])
                         stderr($tracker_lang['error'], "�� ��������� �������� �� �� ���� ���������!");
 
                 $res = sql_query("SELECT username FROM users WHERE id=" . $msga["sender"]) or sqlerr(__FILE__, __LINE__);
-                $usra = mysql_fetch_assoc($res);
+                $usra = mysqli_fetch_assoc($res);
                 $body .= "\n\n\n-------- $usra[username] �����(�): --------\n".htmlspecialchars_uni($msga['msg'])."\n";
                 // Change
                 $subject = "Re: " . htmlspecialchars_uni($msga['subject']);
@@ -360,7 +360,7 @@ if ($action == 'takemessage') {
         $save = ($save == 'yes') ? "yes" : "no";
         // End of Change
         $res = sql_query("SELECT email, acceptpms, notifs, parked, UNIX_TIMESTAMP(last_access) as la FROM users WHERE id=$receiver") or sqlerr(__FILE__, __LINE__);
-        $user = mysql_fetch_assoc($res);
+        $user = mysqli_fetch_assoc($res);
         if (!$user)
                 stderr($tracker_lang['error'], "��� ������������ � ����� ID $receiver.");
         //Make sure recipient wants this message
@@ -412,7 +412,7 @@ EOD;
                         $res = sql_query("SELECT * FROM messages WHERE id=$origmsg") or sqlerr(__FILE__, __LINE__);
                         if (mysqli_num_rows($res) == 1)
                         {
-                                $arr = mysql_fetch_assoc($res);
+                                $arr = mysqli_fetch_assoc($res);
                                 if ($arr["receiver"] != $CURUSER["id"])
                                         stderr($tracker_lang['error'],"�� ��������� ������� �� ���� ���������!");
                                 if ($arr["saved"] == "no")
@@ -572,7 +572,7 @@ if ($action == "moveordel") {
                 if ($pm_id) {
                         // Delete a single message
                         $res = sql_query("SELECT * FROM messages WHERE id=" . sqlesc($pm_id)) or sqlerr(__FILE__,__LINE__);
-                        $message = mysql_fetch_assoc($res);
+                        $message = mysqli_fetch_assoc($res);
                         if ($message['receiver'] == $CURUSER['id'] && $message['saved'] == 'no') {
                                 sql_query("DELETE FROM messages WHERE id=" . sqlesc($pm_id)) or sqlerr(__FILE__,__LINE__);
                         }
@@ -590,7 +590,7 @@ if ($action == "moveordel") {
                         if (is_array($pm_messages))
                         foreach ($pm_messages as $id) {
                                 $res = sql_query("SELECT * FROM messages WHERE id=" . sqlesc((int) $id));
-                                $message = mysql_fetch_assoc($res);
+                                $message = mysqli_fetch_assoc($res);
                                 if ($message['receiver'] == $CURUSER['id'] && $message['saved'] == 'no') {
                                         sql_query("DELETE FROM messages WHERE id=" . sqlesc((int) $id)) or sqlerr(__FILE__,__LINE__);
                                 }
@@ -624,7 +624,7 @@ if ($action == "moveordel") {
                 		if (is_array($pm_messages))
                         foreach ($pm_messages as $id) {
                                 $res = sql_query("SELECT * FROM messages WHERE id=" . sqlesc((int) $id));
-                                $message = mysql_fetch_assoc($res);
+                                $message = mysqli_fetch_assoc($res);
                                 sql_query("UPDATE messages SET unread='no' WHERE id = " . sqlesc((int) $id)) or sqlerr(__FILE__,__LINE__);
                         }
                 }
@@ -658,7 +658,7 @@ if ($action == "forward") {
                 if (mysqli_num_rows($res) == 0) {
                         stderr($tracker_lang['error'], "� ��� ��� ���������� ���������� ��� ���������.");
                 }
-                $message = mysql_fetch_assoc($res);
+                $message = mysqli_fetch_assoc($res);
 
                 // Prepare variables
                 $subject = "Fwd: " . htmlspecialchars_uni($message['subject']);
@@ -667,7 +667,7 @@ if ($action == "forward") {
 
                 $res = sql_query("SELECT username FROM users WHERE id=" . sqlesc($orig) . " OR id=" . sqlesc($from)) or sqlerr(__FILE__,__LINE__);
 
-                $orig2 = mysql_fetch_assoc($res);
+                $orig2 = mysqli_fetch_assoc($res);
                 $orig_name = "<A href=\"userdetails.php?id=" . $from . "\">" . $orig2['username'] . "</A>";
                 if ($from == 0) {
                         $from_name = "���������";
@@ -730,7 +730,7 @@ if ($action == "forward") {
                         stderr($tracker_lang['error'], "� ��� ��� ���������� ���������� ��� ���������.");
                 }
 
-                $message = mysql_fetch_assoc($res);
+                $message = mysqli_fetch_assoc($res);
                 $subject = (string) $_POST['subject'];
                 $username = strip_tags($_POST['to']);
 
@@ -753,7 +753,7 @@ if ($action == "forward") {
                 }
                 else {
                         $res = sql_query("SELECT * FROM users WHERE id=" . sqlesc($message['sender'])) or sqlerr(__FILE__,__LINE__);
-                        $from = mysql_fetch_assoc($res);
+                        $from = mysqli_fetch_assoc($res);
                         $from = $from['username'];
                 }
                 $body = (string) $_POST['msg'];
@@ -801,7 +801,7 @@ if ($action == "deletemessage") {
         if (mysqli_num_rows($res) == 0) {
                 stderr($tracker_lang['error'],"��������� � ����� ID �� ����������.");
         }
-        $message = mysql_fetch_assoc($res);
+        $message = mysqli_fetch_assoc($res);
         if ($message['receiver'] == $CURUSER['id'] && $message['saved'] == 'no') {
                 $res2 = sql_query("DELETE FROM messages WHERE id = " . sqlesc($pm_id)) or sqlerr(__FILE__,__LINE__);
         }

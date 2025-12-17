@@ -42,20 +42,20 @@ elseif (get_user_class() >= UC_MODERATOR || $_GET["id"] == $CURUSER["id"])
 if (!is_valid_id($userid))
         stderr($tracker_lang['error'], $tracker_lang['invalid_id']);
 
-stdhead("Мои респекты");
+stdhead("пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
 
         $count_res = sql_query("SELECT COUNT(*) FROM simpaty WHERE touserid = $userid");
 		$count_row = mysqli_fetch_assoc($count_res);
 		$count = $count_row[0];
 
 if (!$count) {
-stdmsg("Извините", "У этого пользователя нет респектов.");
+stdmsg("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
 stdfoot();
 die();
 } else {
 ?>
 <table class="embedded" cellspacing="0" cellpadding="5" width="100%">
-<tr><td class="colhead" align="center" colspan="12">Список респектов</td></tr>
+<tr><td class="colhead" align="center" colspan="12">пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</td></tr>
 <?
         unset ($admin);
         if (get_user_class()>=UC_ADMINISTRATOR) {
@@ -68,11 +68,11 @@ die();
 ?>
 <tr>
 <td width=10 class=colhead>#</td>
-<td width=20 class=colhead>Тип</td>
-<td class=colhead>От кого</td>
-<td class=colhead>За что</td>
-<td class=colhead>Причина</td>
-<td class=colhead align=center width="10%">Дата</td>
+<td width=20 class=colhead>пїЅпїЅпїЅ</td>
+<td class=colhead>пїЅпїЅ пїЅпїЅпїЅпїЅ</td>
+<td class=colhead>пїЅпїЅ пїЅпїЅпїЅ</td>
+<td class=colhead>пїЅпїЅпїЅпїЅпїЅпїЅпїЅ</td>
+<td class=colhead align=center width="10%">пїЅпїЅпїЅпїЅ</td>
 <?
 if ($admin)
 	print("<td class=colhead width=5></td>");
@@ -80,13 +80,13 @@ if ($admin)
 </tr>
 <?
         $res = sql_query("SELECT * FROM simpaty WHERE touserid = $userid ORDER BY respect_time DESC $limit");
-        while ($arr = mysql_fetch_assoc($res)) {
+        while ($arr = mysqli_fetch_assoc($res)) {
                 $respect_id = $arr["id"];
                 $touserid = $arr["touserid"];
                 $respect_type = ($arr["bad"]==1?"bad":"good");
                 $i++;
                 if (substr($arr["type"],0,7) == 'torrent') {
-                        $from_what = '<a href="details.php?id=' . substr($arr["type"],7,strlen($arr["type"])) . '&hit=1">' . "Торрент" . '</a>';
+                        $from_what = '<a href="details.php?id=' . substr($arr["type"],7,strlen($arr["type"])) . '&hit=1">' . "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ" . '</a>';
                 }
                 elseif (substr($arr["type"],0,7) == 'comment') {
                         preg_match("/comment[a-z]{0,3}([0-9]*)_id([0-9]*)/", $arr["type"], $matches);
@@ -95,18 +95,18 @@ if ($admin)
                         if (substr($arr["type"],0,10)=="commentreq") $filename = "requests.php";
                         elseif (substr($arr["type"],0,10)=="commentoff") $filename = "offers.php";
                         else $filename = "details.php";
-                        $from_what = '<a href="' . $filename . '?id=' . $id . '&page=' . $page . '&viewcomm=' . $comment_id . '#comm' . $comment_id . '">' . "Комментарий" . '</a>';
+                        $from_what = '<a href="' . $filename . '?id=' . $id . '&page=' . $page . '&viewcomm=' . $comment_id . '#comm' . $comment_id . '">' . "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" . '</a>';
                 }
                 elseif (substr($arr["type"],0,7) == 'request')
-                        $from_what = '<a href="requests.php?id=' . substr($arr["type"],7,strlen($arr["type"])) . '">' . "Запрос" . '</a>';
+                        $from_what = '<a href="requests.php?id=' . substr($arr["type"],7,strlen($arr["type"])) . '">' . "пїЅпїЅпїЅпїЅпїЅпїЅ" . '</a>';
                 elseif (substr($arr["type"],0,5) == 'offer')
-                        $from_what = '<a href="offers.php?id=' . substr($arr["type"],5,strlen($arr["type"])) . '">' . "Предложение" . '</a>';
+                        $from_what = '<a href="offers.php?id=' . substr($arr["type"],5,strlen($arr["type"])) . '">' . "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" . '</a>';
                 /*$tracker_template->assign_block_vars('simpaty_section.switch_count.simpaty_row', array(
                         'TOUSERID' => $touserid,
                         'RESPECT_ID' => $respect_id,
                         'RESPECT_TYPE' => $respect_type,
                         'NUMBER' => $i + (30 * (int)$_GET["page"]),
-                        'TYPE' => $arr["good"]==1?'<img src="pic/thum_good.gif" alt="' . "Респект" . '" title="' . "Респект" . '">':'<img src="pic/thum_bad.gif" alt="' . "Антиреспект" . '" title="' . "Антиреспект" . '">',
+                        'TYPE' => $arr["good"]==1?'<img src="pic/thum_good.gif" alt="' . "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ" . '" title="' . "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ" . '">':'<img src="pic/thum_bad.gif" alt="' . "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" . '" title="' . "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" . '">',
                         'FROM_USERID' => $arr["fromuserid"],
                         'FROM_USERNAME' => $arr["fromusername"],
                         'FROM_WHAT' => $from_what,
@@ -114,7 +114,7 @@ if ($admin)
                         'DATE' => str_replace("\" \"", "<br />", display_date_time(strtotime($arr["respect_time"]), $CURUSER["tzoffset"])))
                 );*/
                 $number = $i + (30 * (int)$_GET["page"]);
-                $type = $arr["good"]==1?'<img src="pic/thum_good.gif" alt="' . "Респект" . '" title="' . "Респект" . '">':'<img src="pic/thum_bad.gif" alt="' . "Антиреспект" . '" title="' . "Антиреспект" . '">';
+                $type = $arr["good"]==1?'<img src="pic/thum_good.gif" alt="' . "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ" . '" title="' . "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ" . '">':'<img src="pic/thum_bad.gif" alt="' . "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" . '" title="' . "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" . '">';
                 $fromuserid = $arr["fromuserid"];
                 $fromusername = $arr["fromusername"];
                 $description = $arr["description"];

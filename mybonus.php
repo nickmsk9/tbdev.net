@@ -33,7 +33,7 @@ loggedinorreturn();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	header("Content-Type: text/html; charset=".$tracker_lang['language_charset']);
 	if (empty($_POST["bonus_id"])) {
-		stdmsg($tracker_lang['error'], "Вы не выбрали тип бонуса!");
+		stdmsg($tracker_lang['error'], "пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ!");
 		die();
 	}
 	$id = (int) $_POST["bonus_id"];
@@ -46,25 +46,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	$points = $arr["points"];
 	$type = $arr["type"];
 	if ($CURUSER["bonus"] < $points) {
-		stdmsg($tracker_lang['error'], "У вас недостаточно бонусов!");
+		stdmsg($tracker_lang['error'], "пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
 		die();
 	}
 	switch ($type) {
 		case "traffic":
 			$traffic = $arr["quanity"];
 			if (!sql_query("UPDATE users SET bonus = bonus - $points, uploaded = uploaded + $traffic WHERE id = ".sqlesc($CURUSER["id"]))) {
-				stdmsg($tracker_lang['error'], "Не могу обновить бонус!");
+				stdmsg($tracker_lang['error'], "пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ!");
 				die();
 			}
-			stdmsg($tracker_lang['success'], "Бонус обменян на траффик!");
+			stdmsg($tracker_lang['success'], "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
 			break;
 		case "invite":
 			$invites = $arr["quanity"];
 			if (!sql_query("UPDATE users SET bonus = bonus - $points, invites = invites + $invites WHERE id = ".sqlesc($CURUSER["id"]))) {
-				stdmsg($tracker_lang['error'], "Не могу обновить бонус!");
+				stdmsg($tracker_lang['error'], "пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ!");
 				die();
 			}
-			stdmsg($tracker_lang['success'], "Бонус обменян на приглашения!");
+			stdmsg($tracker_lang['success'], "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
 			break;
 		default:
 			stdmsg($tracker_lang['error'], "Unknown bonus type!");
@@ -105,7 +105,7 @@ function send(){
 <?
 	$my_points = $CURUSER["bonus"];
 	$res = sql_query("SELECT * FROM bonus") or sqlerr(__FILE__,__LINE__);
-	while ($arr = mysql_fetch_assoc($res)) {
+	while ($arr = mysqli_fetch_assoc($res)) {
 		$id = $arr["id"];
 		$bonus = $arr["name"];
 		$points = $arr["points"];
@@ -116,11 +116,11 @@ function send(){
 		$output .= "<tr><td><b>$bonus</b><br />$descr</td><td><center><font style=\"color: $color\">$points&nbsp;/&nbsp;$my_points</font></center></td><td><center><input type=\"radio\" name=\"bonus_id\" value=\"$id\"".($color == 'red' ? ' disabled' : '')." /></center></td></tr>\n";
 	}
 ?>
-	<tr><td class="colhead" colspan="3">Мой бонус (<?=$CURUSER["bonus"];?> бонусов в наличии / <?=$points_per_hour;?> бонусов в час)</td></tr>
-	<tr><td class="colhead">Тип бонуса</td><td class="colhead">Очки</td><td class="colhead">Выбор</td></tr>
+	<tr><td class="colhead" colspan="3">пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (<?=$CURUSER["bonus"];?> пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ / <?=$points_per_hour;?> пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ)</td></tr>
+	<tr><td class="colhead">пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ</td><td class="colhead">пїЅпїЅпїЅпїЅ</td><td class="colhead">пїЅпїЅпїЅпїЅпїЅ</td></tr>
 	<form action="mybonus.php" name="mybonus" method="post">
 <?=$output;?>
-		<tr><td colspan="3"><input type="submit" onClick="send(); return false;" value="Обменять" /></td></tr>
+		<tr><td colspan="3"><input type="submit" onClick="send(); return false;" value="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" /></td></tr>
 	</form>
 </table>
 </div>

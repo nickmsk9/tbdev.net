@@ -147,7 +147,7 @@ else
 {
 	// Warn if current poll is less than 3 days old
 	$res = sql_query("SELECT question,added FROM polls ORDER BY added DESC LIMIT 1") or sqlerr(__FILE__, __LINE__);
-	$arr = mysql_fetch_assoc($res);
+	$arr = mysqli_fetch_assoc($res);
 	if ($arr)
 	{
 	  $hours = floor((gmtime() - sql_timestamp_to_unix_timestamp($arr["added"])) / 3600);

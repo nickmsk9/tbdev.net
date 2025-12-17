@@ -47,7 +47,7 @@ print'<td class=rowhead><center>Зарегистрирован</center></td>';
 print'<td class=rowhead><center>Статус</center></td>';
 print'<td class=rowhead><center>Подтвердить</center></td>';
 print'</tr>';
-while( $row = mysql_fetch_assoc($res) )
+while( $row = mysqli_fetch_assoc($res) )
 {
 $id = $row['id'];
 print'<tr><form method=post action=modtask.php>';

@@ -53,7 +53,7 @@ if (!$_POST['clases'])
 
 /*$query = sql_query("SELECT id FROM users WHERE class IN (".implode(", ", array_map("sqlesc", $clases)).")");
 
-while ($dat=mysql_fetch_assoc($query)) {
+while ($dat=mysqli_fetch_assoc($query)) {
 	sql_query("INSERT INTO messages (sender, receiver, added, msg, subject) VALUES ($sender_id, $dat[id], '" . get_date_time() . "', " . sqlesc($msg) .", " . sqlesc($subject) .")") or sqlerr(__FILE__,__LINE__);
 }*/
 

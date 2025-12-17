@@ -47,7 +47,7 @@ if ($ip)
 	{
 	  $banstable = "<table class=main border=0 cellspacing=0 cellpadding=5>\n" .
 	    "<tr><td class=colhead>Первый</td><td class=colhead>Последний</td><td class=colhead>Комментарий</td></tr>\n";
-	  while ($arr = mysql_fetch_assoc($res))
+	  while ($arr = mysqli_fetch_assoc($res))
 	  {
 	    $first = long2ip($arr["first"]);
 	    $last = long2ip($arr["last"]);

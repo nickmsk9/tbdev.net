@@ -54,7 +54,7 @@ if (!$id || !is_valid_id($id)) {
 
 $res = sql_query("SELECT invites FROM users WHERE id = $id") or sqlerr(__FILE__, __LINE__);
 
-// Используем mysqli_fetch_assoc вместо mysql_fetch_assoc
+// Используем mysqli_fetch_assoc вместо mysqli_fetch_assoc
 $inv = mysqli_fetch_assoc($res);
 
 if (!$inv) {

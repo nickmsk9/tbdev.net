@@ -46,7 +46,7 @@ function maketable($res)
   $ret = "<table class=main border=1 cellspacing=0 cellpadding=5>" .
     "<tr><td class=colhead align=left>".$tracker_lang['type']."</td><td class=colhead>".$tracker_lang['name']."</td>".($use_ttl ? "<td class=colhead align=center>".$tracker_lang['ttl']."</td>" : "")."<td class=colhead align=center>".$tracker_lang['size']."</td><td class=colhead align=right>".$tracker_lang['details_seeding']."</td><td class=colhead align=right>".$tracker_lang['details_leeching']."</td><td class=colhead align=center>".$tracker_lang['uploaded']."</td>\n" .
     "<td class=colhead align=center>".$tracker_lang['downloaded']."</td><td class=colhead align=center>".$tracker_lang['ratio']."</td></tr>\n";
-  while ($arr = mysql_fetch_assoc($res))
+  while ($arr = mysqli_fetch_assoc($res))
   {
     if ($arr["downloaded"] > 0)
     {
@@ -89,11 +89,11 @@ $r = sql_query("SELECT torrents.id, torrents.name, torrents.seeders, torrents.ad
 if (mysqli_num_rows($r) > 0) {
   $torrents = "<table class=main border=1 cellspacing=0 cellpadding=5>\n" .
     "<tr><td class=colhead>".$tracker_lang['type']."</td><td class=colhead>".$tracker_lang['name']."</td>".($use_ttl ? "<td class=colhead align=center>".$tracker_lang['ttl']."</td>" : "")."<td class=colhead>".$tracker_lang['tracker_seeders']."</td><td class=colhead>".$tracker_lang['tracker_leechers']."</td></tr>\n";
-  while ($a = mysql_fetch_assoc($r)) {
+  while ($a = mysqli_fetch_assoc($r)) {
 	$ttl = ($ttl_days*24) - floor((gmtime() - sql_timestamp_to_unix_timestamp($a["added"])) / 3600);
 	if ($ttl == 1) $ttl .= "&nbsp;час"; else $ttl .= "&nbsp;часов";
 		//$r2 = sql_query("SELECT name, image FROM categories WHERE id=$a[category]") or sqlerr(__FILE__, __LINE__);
-		//$a2 = mysql_fetch_assoc($r2);
+		//$a2 = mysqli_fetch_assoc($r2);
 		$cat = "<a href=\"browse.php?cat=$a[catid]\"><img src=\"pic/cats/$a[catimage]\" alt=\"$a[catname]\" border=\"0\" /></a>";
       $torrents .= "<tr><td style='padding: 0px'>$cat</td><td><a href=\"details.php?id=" . $a["id"] . "&hit=1\"><b>" . $a["name"] . "</b></a></td>"
       	.($use_ttl ? "<td align=center>$ttl</td>" : "")

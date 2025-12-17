@@ -44,7 +44,7 @@ if ($HTTP_SERVER_VARS["REQUEST_METHOD"] == "POST")
     if (mysqli_num_rows($res) != 1)
         stderr($tracker_lang['error'], "Неверное имя пользователя. Проверьте введеные данные.");
 
-    $arr = mysql_fetch_assoc($res);
+    $arr = mysqli_fetch_assoc($res);
 
     $id = $arr['id'];
     $res = sql_query("DELETE FROM users WHERE id = $id") or sqlerr(__FILE__, __LINE__);

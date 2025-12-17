@@ -34,7 +34,7 @@ if (!$id)
 	stderr($tracker_lang['error'], $tracker_lang['invalid_id']);
 
 $res = sql_query("SELECT username, class, email FROM users WHERE id=$id");
-$arr = mysql_fetch_assoc($res) or stderr($tracker_lang['error'], "Нет такого пользователя.");
+$arr = mysqli_fetch_assoc($res) or stderr($tracker_lang['error'], "Нет такого пользователя.");
 $username = $arr["username"];
 if ($arr["class"] < UC_MODERATOR)
 	stderr($tracker_lang['error'], $tracker_lang['access_denied']);

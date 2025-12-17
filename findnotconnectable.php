@@ -56,10 +56,10 @@ else
 {
 print("<table border=1 cellspacing=0 cellpadding=5>\n");
 print("<tr><td class=colhead>Пользователь</td><td class=colhead>Торрент</td><td class=colhead>Клиент</td></tr>\n");
-while($arr2 = mysql_fetch_assoc($res2))
+while($arr2 = mysqli_fetch_assoc($res2))
 {
 $r2 = sql_query("SELECT username FROM users WHERE id=$arr2[userid]") or sqlerr(__FILE__, __LINE__);
-$a2 = mysql_fetch_assoc($r2);
+$a2 = mysqli_fetch_assoc($r2);
 print("<tr><td><a href=userdetails.php?id=$arr2[userid]>$a2[username]</a></td><td align=left><a href=details.php?id=$arr2[torrent]&dllist=1#seeders>$arr2[torrent]");
 if ($arr2[seeder] == 'yes')
 print("<font color=red>*</font>");
@@ -76,7 +76,7 @@ if (!$msg)
 stderr($tracker_lang['error'],"Введите текст сообщения");
 
 $query = sql_query("SELECT distinct userid FROM peers WHERE connectable='no'");
-while($dat=mysql_fetch_assoc($query)){
+while($dat=mysqli_fetch_assoc($query)){
 $subject = sqlesc("Трекер определил вас несоединябельного");
 send_pm(0, $dat['userid'], get_date_time(), $subject, $msg);
 //sql_query("INSERT INTO messages (sender, receiver, added, msg, subject) VALUES (0,$dat[userid] , '" . get_date_time() . "', " . sqlesc($msg) . ", " . $subject .")") or sqlerr(__FILE__,__LINE__);
@@ -136,9 +136,9 @@ print("<br />Пожалуста не отправляйте ЛС слишком 
 print("<br />Каждую неделю будет нормально.<p>");
 print("<table border=1 cellspacing=0 cellpadding=5>\n");
 print("<tr><td class=colhead>Пользователь</td><td class=colhead>Дата</td><td class=colhead>Прошло</td></tr>");
-while($arr2 = mysql_fetch_assoc($getlog)){
+while($arr2 = mysqli_fetch_assoc($getlog)){
 $r2 = sql_query("SELECT username FROM users WHERE id=$arr2[user]") or sqlerr(__FILE__, __LINE__);
-$a2 = mysql_fetch_assoc($r2);
+$a2 = mysqli_fetch_assoc($r2);
 $elapsed = get_elapsed_time(sql_timestamp_to_unix_timestamp($arr2[date]));
 print("<tr><td class=colhead><a href=userdetails.php?id=$arr2[user]>$a2[username]</a></td><td class=colhead>$arr2[date]</td><td>$elapsed назад</td></tr>");
 }

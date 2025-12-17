@@ -50,7 +50,7 @@ if (!$id)
 	httperr();*/
 
 $res = sql_query("SELECT name, filename, owner, banned FROM torrents WHERE id = ".sqlesc($id)) or sqlerr(__FILE__, __LINE__);
-$row = mysql_fetch_assoc($res);
+$row = mysqli_fetch_assoc($res);
 if (!$row)
 	stderr($tracker_lang['error'], $tracker_lang['invalid_id']);
 
