@@ -47,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $arr = mysqli_fetch_assoc($res);
     if ($arr) die("Двойной голос");
     sql_query("INSERT INTO pollanswers VALUES(0, $pollid, $userid, $choice)") or sqlerr(__FILE__, __LINE__);
-    if (mysql_affected_rows() != 1)
+    if (mysqli_affected_rows() != 1)
       stderr($tracker_lang['error'], "Произошла ошибка. Ваш голос не был принят.");
     header("Location: $DEFAULTBASEURL/");
     die;
@@ -57,7 +57,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 stdhead($tracker_lang['homepage']);
 
-//print("<table width=\"100%\" class=\"main\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr><td class=\"embedded\">");
 
 ?>
 

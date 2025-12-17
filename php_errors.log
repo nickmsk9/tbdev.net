@@ -6,3 +6,7 @@ Stack trace:
 #3 [internal function]: autoclean()
 #4 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 223
+[17-Dec-2025 14:40:26 Europe/Moscow] PHP Fatal error:  Uncaught Error: Call to undefined function mysql_affected_rows() in C:\OSPanel\domains\tbdev.net\index.php:50
+Stack trace:
+#0 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\index.php on line 50
