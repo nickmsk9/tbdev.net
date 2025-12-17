@@ -55,7 +55,7 @@ function StatusDB(): void
 
     echo '
     <table border="0" cellspacing="0" cellpadding="3" align="center">
-      <form method="post" action="' . $e($admin_file) . '.php">
+      <form method="post" action="' . $e($admin_file) . '.php?op=StatusDB">
         <tr>
           <td>
             <select name="datatable[]" size="12" multiple="multiple" style="width:400px">
@@ -235,7 +235,9 @@ function StatusDB(): void
     }
 }
 
-switch ($op ?? '') {
+$op = (string)($_REQUEST['op'] ?? ($op ?? ''));
+
+switch ($op) {
     case 'StatusDB':
         StatusDB();
         break;
