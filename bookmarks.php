@@ -27,160 +27,104 @@
 */
 
 require_once("include/bittorrent.php");
-
-dbconn(false);
+dbconn();
 loggedinorreturn();
 
-// Проверяем, это AJAX-запрос?
-if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
-    // Только для AJAX - выводим только таблицу
-    ajax_content();
+function bark($msg, $error = true) {
+    global $tracker_lang;
+    stdhead(($error ? ($tracker_lang['error'] ?? 'Ошибка') : ($tracker_lang['torrent'] ?? 'Торрент') . " " . ($tracker_lang['bookmarked'] ?? 'в закладках')));
+    stdmsg(($error ? ($tracker_lang['error'] ?? 'Ошибка') : ($tracker_lang['success'] ?? 'Успешно')), $msg, ($error ? 'error' : 'success'));
+    stdfoot();
     exit;
 }
 
-// Обычный запрос - выводим полную страницу
-stdhead('Мои закладки');
-?>
+// Проверяем наличие GET-параметра torrent
+$id = isset($_GET["torrent"]) ? (int) $_GET["torrent"] : 0;
 
-<div id="bookmarks-container">
-    <h2>Мои закладки</h2>
-    <div id="bookmarks-loading" style="text-align: center; padding: 20px;">
-        <img src="pic/loading.gif" alt="Загрузка..." /><br />
-        Загрузка закладок...
-    </div>
-    <div id="bookmarks-content"></div>
-</div>
-
-<script type="text/javascript">
-$(document).ready(function() {
-    loadBookmarks(1);
-});
-
-function loadBookmarks(page) {
-    $('#bookmarks-loading').show();
-    $('#bookmarks-content').hide();
-    
-    $.get('bookmarks.php?ajax=1&page=' + page, function(data) {
-        $('#bookmarks-content').html(data).show();
-        $('#bookmarks-loading').hide();
-        
-        // Вешаем обработчики на новые элементы
-        $('#bookmarks-content .pager-link').click(function(e) {
-            e.preventDefault();
-            var page = $(this).data('page');
-            loadBookmarks(page);
-        });
-        
-        $('#bookmarks-content .remove-bookmark').click(function(e) {
-            e.preventDefault();
-            var id = $(this).data('id');
-            var name = $(this).data('name');
-            if (confirm('Удалить "' + name + '" из закладок?')) {
-                removeBookmark(id);
-            }
-        });
-    });
+// Если параметр не передан, показываем страницу закладок
+if ($id == 0) {
+    showBookmarksPage();
+    exit;
 }
 
-function removeBookmark(id) {
-    $.post('remove_bookmark.php', {
-        id: id,
-        token: '<?php echo md5($CURUSER["id"] . $CURUSER["secret"]); ?>'
-    }, function(response) {
-        if (response.success) {
-            alert(response.message);
-            // Перезагружаем текущую страницу
-            var currentPage = $('#bookmarks-content .pager-link.current').data('page') || 1;
-            loadBookmarks(currentPage);
-        } else {
-            alert('Ошибка: ' + response.message);
-        }
-    }, 'json');
+if (!is_valid_id($id)) {
+    bark($tracker_lang['torrent_not_selected'] ?? 'Торрент не был выбран');
 }
-</script>
 
-<?php
-stdfoot();
+$res = sql_query("SELECT name FROM torrents WHERE id = $id") or sqlerr(__FILE__, __LINE__);
+$arr = mysqli_fetch_array($res);
 
-// Функция для AJAX-контента
-function ajax_content() {
-    global $CURUSER, $minvotes;
+if (!$arr) {
+    bark($tracker_lang['torrent_not_found'] ?? 'Торрент не найден');
+}
+
+if ((get_row_count("bookmarks", "WHERE userid = $CURUSER[id] AND torrentid = $id")) > 0) {
+    bark(($tracker_lang['torrent'] ?? 'Торрент') . " \"" . $arr['name'] . "\" " . ($tracker_lang['already_bookmarked'] ?? 'уже в закладках'));
+}
+
+sql_query("INSERT INTO bookmarks (userid, torrentid) VALUES ($CURUSER[id], $id)") or sqlerr(__FILE__, __LINE__);
+
+header("Refresh: 3; url=browse.php");
+bark(($tracker_lang['torrent'] ?? 'Торрент') . " \"" . $arr['name'] . "\" " . ($tracker_lang['bookmarked'] ?? 'добавлен в закладки'), false);
+
+// Функция для отображения страницы закладок
+function showBookmarksPage() {
+    global $CURUSER, $tracker_lang;
     
-    $page = (int)($_GET['page'] ?? 1);
-    $perpage = 25;
+    stdhead(($tracker_lang['my_bookmarks'] ?? 'Мои закладки'));
     
-    // Получаем количество закладок
-    $res = sql_query("SELECT COUNT(id) FROM bookmarks WHERE userid = " . sqlesc($CURUSER["id"]));
-    $row = mysqli_fetch_array($res);
-    $count = $row[0];
+    echo "<h2>" . ($tracker_lang['my_bookmarks'] ?? 'Мои закладки') . "</h2>\n";
     
-    if ($count == 0) {
-        echo '<div style="text-align: center; padding: 20px;">У вас нет закладок</div>';
+    // Получаем закладки пользователя
+    $res = sql_query("SELECT b.torrentid, t.name, t.seeders, t.leechers, t.times_completed, t.size, t.added, t.category 
+                      FROM bookmarks AS b 
+                      LEFT JOIN torrents AS t ON b.torrentid = t.id 
+                      WHERE b.userid = " . $CURUSER['id'] . " 
+                      ORDER BY t.name") or sqlerr(__FILE__, __LINE__);
+    
+    $bookmarks_count = mysqli_num_rows($res);
+    
+    if ($bookmarks_count == 0) {
+        echo "<p><i>" . ($tracker_lang['no_bookmarks'] ?? 'У вас пока нет закладок') . "</i></p>\n";
+        echo "<p><a href='browse.php'>" . ($tracker_lang['browse_torrents'] ?? 'Перейти к поиску торрентов') . "</a></p>\n";
+        stdfoot();
         return;
     }
     
-    // Пагинация
-    list($pagertop, $pagerbottom, $limit) = pager($perpage, $count, "bookmarks.php?page=");
+    echo "<p>У вас " . $bookmarks_count . " закладок</p>\n";
     
-    // Запрос закладок
-    $res = sql_query("
-        SELECT bookmarks.id AS bookmarkid, torrents.*, 
-               categories.name AS cat_name, categories.image AS cat_pic,
-               users.username
-        FROM bookmarks 
-        INNER JOIN torrents ON bookmarks.torrentid = torrents.id 
-        LEFT JOIN categories ON torrents.category = categories.id 
-        LEFT JOIN users ON torrents.owner = users.id 
-        WHERE bookmarks.userid = " . sqlesc($CURUSER["id"]) . " 
-        ORDER BY torrents.id DESC 
-        $limit
-    ");
+    echo "<table border='1' cellspacing='0' cellpadding='5' width='100%'>\n";
+    echo "<tr class='colhead'>\n";
+    echo "<td><b>" . ($tracker_lang['torrent'] ?? 'Торрент') . "</b></td>\n";
+    echo "<td><b>" . ($tracker_lang['size'] ?? 'Размер') . "</b></td>\n";
+    echo "<td><b>" . ($tracker_lang['added'] ?? 'Добавлен') . "</b></td>\n";
+    echo "<td><b>S/L</b></td>\n";
+    echo "<td><b>" . ($tracker_lang['times_completed'] ?? 'Завершено') . "</b></td>\n";
+    echo "<td><b>" . ($tracker_lang['action'] ?? 'Действие') . "</b></td>\n";
+    echo "</tr>\n";
     
-    // Выводим таблицу
-    echo '<table class="embedded" width="100%" cellspacing="0" cellpadding="5">';
-    echo '<tr><td class="colhead" colspan="10">Мои закладки</td></tr>';
-    
-    if ($count > $perpage) {
-        echo '<tr><td class="index" colspan="10">' . 
-             str_replace('href="bookmarks.php?page=', 'class="pager-link" data-page="', $pagertop) . 
-             '</td></tr>';
+    while ($arr = mysqli_fetch_assoc($res)) {
+        $torrent_id = $arr['torrentid'];
+        $name = htmlspecialchars($arr['name']);
+        $size = mksize($arr['size']);
+        $added = $arr['added'];
+        $seeders = $arr['seeders'];
+        $leechers = $arr['leechers'];
+        $times_completed = $arr['times_completed'];
+        
+        echo "<tr>\n";
+        echo "<td><a href='details.php?id=$torrent_id'>$name</a></td>\n";
+        echo "<td>$size</td>\n";
+        echo "<td>$added</td>\n";
+        echo "<td>$seeders / $leechers</td>\n";
+        echo "<td>$times_completed</td>\n";
+        echo "<td><a href='bookmarks.php?torrent=$torrent_id&remove=1'>" . ($tracker_lang['remove'] ?? 'Удалить') . "</a></td>\n";
+        echo "</tr>\n";
     }
     
-    // Заголовок таблицы
-    echo '<tr>
-        <td class="colhead">Торрент</td>
-        <td class="colhead">Категория</td>
-        <td class="colhead">Размер</td>
-        <td class="colhead">Сиды</td>
-        <td class="colhead">Личи</td>
-        <td class="colhead">Загрузок</td>
-        <td class="colhead">Добавлен</td>
-        <td class="colhead">Автор</td>
-        <td class="colhead">Рейтинг</td>
-        <td class="colhead">Действие</td>
-    </tr>';
+    echo "</table>\n";
+    echo "<p><a href='browse.php'>" . ($tracker_lang['browse_torrents'] ?? 'Перейти к поиску торрентов') . "</a></p>\n";
     
-    while ($row = mysqli_fetch_assoc($res)) {
-        echo '<tr>';
-        echo '<td><a href="details.php?id=' . $row['id'] . '">' . htmlspecialchars($row['name']) . '</a></td>';
-        echo '<td>' . htmlspecialchars($row['cat_name']) . '</td>';
-        echo '<td>' . mksize($row['size']) . '</td>';
-        echo '<td>' . ($row['seeders'] + $row['remote_seeders']) . '</td>';
-        echo '<td>' . ($row['leechers'] + $row['remote_leechers']) . '</td>';
-        echo '<td>' . $row['times_completed'] . '</td>';
-        echo '<td>' . get_elapsed_time(sql_timestamp_to_unix_timestamp($row['added'])) . '</td>';
-        echo '<td><a href="userdetails.php?id=' . $row['owner'] . '">' . htmlspecialchars($row['username']) . '</a></td>';
-        echo '<td>' . ($row['rating'] ? sprintf("%.1f", $row['rating']) : '—') . '</td>';
-        echo '<td><a href="#" class="remove-bookmark" data-id="' . $row['bookmarkid'] . '" data-name="' . htmlspecialchars($row['name']) . '">Удалить</a></td>';
-        echo '</tr>';
-    }
-    
-    if ($count > $perpage) {
-        echo '<tr><td class="index" colspan="10">' . 
-             str_replace('href="bookmarks.php?page=', 'class="pager-link" data-page="', $pagerbottom) . 
-             '</td></tr>';
-    }
-    
-    echo '</table>';
+    stdfoot();
 }
 ?>
