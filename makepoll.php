@@ -102,10 +102,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fields[] = 'sort';
         $values[] = sqlesc($sort);
 
-        sql_query("INSERT INTO polls (" . implode(',', $fields) . ") VALUES (" . implode(',', $values) . ")")
-            or sqlerr(__FILE__, __LINE__);
-        $pollid = (int)mysqli_insert_id($GLOBALS['GLOBALS']['___mysqli_ston'] ?? $GLOBALS['mysqli'] ?? null);
-        // если у тебя есть функция/хелпер для last insert id — лучше использовать её
+        // INSERT
+sql_query("INSERT INTO polls (" . implode(',', $fields) . ") VALUES (" . implode(',', $values) . ")")
+    or sqlerr(__FILE__, __LINE__);
+
+// получаем id без mysqli-линка
+$r = sql_query("SELECT LAST_INSERT_ID() AS id") or sqlerr(__FILE__, __LINE__);
+$a = mysqli_fetch_assoc($r);
+$pollid = (int)($a['id'] ?? 0);
+
     }
 
     if ($returnto === 'main') {
