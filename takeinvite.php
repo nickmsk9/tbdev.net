@@ -31,32 +31,59 @@ dbconn();
 loggedinorreturn();
 
 function bark($msg) {
-	stdhead();
-	stdmsg("������", $msg);
-	stdfoot();
-	die;
+    stdhead();
+    stdmsg("Ошибка", $msg);
+    stdfoot();
+    die();
 }
 
-$id = intval($_GET["id"]);
+// Безопасный доступ к GET параметру
+$id = isset($_GET["id"]) ? intval($_GET["id"]) : 0;
 
-if ($id == 0) {
-	$id = $CURUSER["id"];
+// Если ID не указан, используем ID текущего пользователя
+if ($id == 0 && isset($CURUSER["id"])) {
+    $id = $CURUSER["id"];
 }
 
-if (get_user_class() <= UC_MODERATOR)
-	$id = $CURUSER["id"];
+// Проверяем, что ID валиден
+if (!$id || !is_valid_id($id)) {
+    bark("Неверный ID пользователя.");
+}
 
-$re = sql_query("SELECT invites FROM users WHERE id = $id") or sqlerr(__FILE__,__LINE__);
-$tes = mysql_fetch_assoc($re);
+// Ограничение прав доступа
+if (get_user_class() <= UC_MODERATOR) {
+    $id = $CURUSER["id"];
+}
 
-if ($tes[invites] <= 0)
-	bark("� ��� ������ �� �������� �����������!");
+// Проверяем наличие приглашений у пользователя
+$re = sql_query("SELECT invites FROM users WHERE id = $id") or sqlerr(__FILE__, __LINE__);
+$tes = mysqli_fetch_assoc($re);
 
-$hash  = md5(mt_rand(1, 1000000));
+// Проверяем, что данные получены
+if (!$tes) {
+    bark("Пользователь не найден.");
+}
 
-sql_query("INSERT INTO invites (inviter, invite, time_invited) VALUES (" . implode(", ", array_map("sqlesc", array($id, $hash, get_date_time()))) . ")") or sqlerr(__FILE__,__LINE__);
+// Проверяем количество приглашений
+if (!isset($tes['invites']) || $tes['invites'] <= 0) {
+    bark("У вас нет доступных приглашений!");
+}
+
+// Генерируем уникальный хэш для приглашения
+$hash = md5(mt_rand(1, 1000000) . microtime() . uniqid());
+
+// Получаем текущее время
+$current_time = get_date_time();
+
+// Создаем приглашение в базе данных
+sql_query("INSERT INTO invites (inviter, invite, time_invited) VALUES (" . 
+          implode(", ", array_map("sqlesc", array($id, $hash, $current_time))) . ")") 
+          or sqlerr(__FILE__, __LINE__);
+
+// Уменьшаем количество доступных приглашений
 sql_query("UPDATE users SET invites = invites - 1 WHERE id = $id") or sqlerr(__FILE__, __LINE__);
 
+// Перенаправляем на страницу приглашений
 header("Refresh: 0; url=invite.php?id=$id");
-
+exit();
 ?>
