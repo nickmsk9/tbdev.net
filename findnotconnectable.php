@@ -200,7 +200,7 @@ switch ($action) {
 						<table cellspacing="0" cellpadding="5">
 							<tr>
 								<td>
-									Send Mass Messege To All Non Connectable Users<br />
+									Отправить массовое сообщение всем недоступным пользователям<br />
 									<table style="border: 0" width="100%" cellpadding="0" cellspacing="0">
 										<tr><td style="border: 0">&nbsp;</td><td style="border: 0">&nbsp;</td></tr>
 									</table>
