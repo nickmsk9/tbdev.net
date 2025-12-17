@@ -68,37 +68,82 @@ if ($email != $CURUSER["email"]) {
 	$changedemail = 1;
 }
 
-$acceptpms = $_POST["acceptpms"];
-$deletepms = ($_POST["deletepms"] != "" ? "yes" : "no");
-$savepms = ($_POST["savepms"] != "" ? "yes" : "no");
-$pmnotif = $_POST["pmnotif"];
-$emailnotif = $_POST["emailnotif"];
+$acceptpms = isset($_POST["acceptpms"]) ? $_POST["acceptpms"] : '';
+$deletepms = (isset($_POST["deletepms"]) && $_POST["deletepms"] != "") ? "yes" : "no";
+$savepms = (isset($_POST["savepms"]) && $_POST["savepms"] != "") ? "yes" : "no";
+$pmnotif = isset($_POST["pmnotif"]) ? $_POST["pmnotif"] : '';
+$emailnotif = isset($_POST["emailnotif"]) ? $_POST["emailnotif"] : '';
 $notifs = ($pmnotif == 'yes' ? "[pm]" : "");
 $notifs .= ($emailnotif == 'yes' ? "[email]" : "");
 $r = sql_query("SELECT id FROM categories") or sqlerr(__FILE__, __LINE__);
 $rows = mysqli_num_rows($r);
+$notifs = "";
+
 for ($i = 0; $i < $rows; ++$i)
 {
-	$a = mysqli_fetch_assoc($r);
-	if ($_POST["cat$a[id]"] == 'yes')
-	  $notifs .= "[cat$a[id]]";
+    $a = mysqli_fetch_assoc($r);
+    $cat_key = "cat" . $a['id'];
+    
+    // Проверяем существование ключа в массиве $_POST
+    if (isset($_POST[$cat_key]) && $_POST[$cat_key] == 'yes') {
+        $notifs .= "[cat" . $a['id'] . "]";
+    }
 }
-$avatar = $_POST["avatar"];
-// Check remote avatar size
-        if ($avatar) {
-                if (!preg_match('#^((http)|(ftp):\/\/[a-zA-Z0-9\-]+?\.([a-zA-Z0-9\-]+\.)+[a-zA-Z]+(:[0-9]+)*\/.*?\.(gif|jpg|jpeg|png)$)#is', $avatar))
-                        stderr($tracker_lang['error'], $tracker_lang['avatar_adress_invalid']);
-                if(!(list($width, $height) = getimagesize($avatar)))
-                        stderr($tracker_lang['error'], $tracker_lang['avatar_adress_invalid']);
-                if ($width > $avatar_max_width || $height > $avatar_max_height)
-                        stderr($tracker_lang['error'], sprintf($tracker_lang['avatar_is_too_big'], $avatar_max_width, $avatar_max_height));
+// Безопасное получение аватара с проверкой существования ключа
+$avatar = isset($_POST["avatar"]) ? trim($_POST["avatar"]) : '';
+
+// Проверка удаленного аватара
+if ($avatar) {
+    // ОБРЕЗАЕМ URL до максимальной длины (обычно 255 символов для VARCHAR)
+    $max_avatar_length = 200; // Оставляем запас
+    if (strlen($avatar) > $max_avatar_length) {
+        $avatar = substr($avatar, 0, $max_avatar_length);
+    }
+    
+    // Проверяем формат URL аватара
+    if (!preg_match('#^((http|https|ftp)://[a-zA-Z0-9\-]+?\.([a-zA-Z0-9\-]+\.)*[a-zA-Z]+(:[0-9]+)*/.*?\.(gif|jpg|jpeg|png|webp))$#is', $avatar)) {
+        stderr($tracker_lang['error'] ?? 'Ошибка', $tracker_lang['avatar_adress_invalid'] ?? 'Неверный адрес аватара');
+    }
+    
+    // Проверяем размеры изображения
+    if(!(list($width, $height) = @getimagesize($avatar))) {
+        // Добавляем @ чтобы подавить предупреждения
+        // Пытаемся получить другими способами или используем cURL
+        $image_info = @get_headers($avatar, 1);
+        if (strpos($image_info[0] ?? '', '200') === false) {
+            stderr($tracker_lang['error'] ?? 'Ошибка', $tracker_lang['avatar_adress_invalid'] ?? 'Неверный адрес аватара');
         }
-// Check remote avatar size
-$avatars = ($_POST["avatars"] != "" ? "yes" : "no");
-$parked = $_POST["parked"];
+    }
+    
+    if (isset($width) && isset($height)) {
+        if ($width > ($avatar_max_width ?? 150) || $height > ($avatar_max_height ?? 150)) {
+            stderr(
+                $tracker_lang['error'] ?? 'Ошибка', 
+                sprintf(
+                    $tracker_lang['avatar_is_too_big'] ?? 'Аватар слишком большой (макс. %dx%d)', 
+                    $avatar_max_width ?? 150, 
+                    $avatar_max_height ?? 150
+                )
+            );
+        }
+    }
+    
+    // Если все проверки пройдены, добавляем в updateset
+    $updateset[] = "avatar = " . sqlesc($avatar);
+} else {
+    // Если аватар пустой, можно установить пустую строку
+    $updateset[] = "avatar = ''";
+}
+
+// Безопасное получение других полей
+$avatars = (isset($_POST["avatars"]) && $_POST["avatars"] != "") ? "yes" : "no";
+$updateset[] = "avatars = " . sqlesc($avatars);
+
+$parked = isset($_POST["parked"]) ? $_POST["parked"] : 'no';
 $updateset[] = "parked = " . sqlesc($parked);
-$gender = $_POST["gender"];
-$updateset[] = "gender =  " . sqlesc($gender);
+
+$gender = isset($_POST["gender"]) ? $_POST["gender"] : '';
+$updateset[] = "gender = " . sqlesc($gender);
 
 ///////////////// BIRTHDAY MOD /////////////////////
 $year = $_POST["year"];
@@ -108,10 +153,17 @@ $birthday = date("$year.$month.$day");
 ///////////////// BIRTHDAY MOD /////////////////////
 $updateset[] = "birthday = " . sqlesc($birthday);
 
-if ($_POST['resetpasskey'])
-	$updateset[] = "passkey=''";
+if (isset($_POST['resetpasskey']) && $_POST['resetpasskey']) {
+    $updateset[] = "passkey=''";
+}
 
-$updateset[] = "passkey_ip = ".($_POST["passkey_ip"] != "" ? sqlesc(getip()) : "''");
+// Проверяем наличие ключа 'passkey_ip' в массиве $_POST
+if (isset($_POST["passkey_ip"])) {
+    $updateset[] = "passkey_ip = " . ($_POST["passkey_ip"] != "" ? sqlesc(getip()) : "''");
+} else {
+    // Если ключ не существует, устанавливаем пустое значение или что-то другое по умолчанию
+    $updateset[] = "passkey_ip = ''";
+}
 
 // $ircnick = $_POST["ircnick"];
 // $ircpass = $_POST["ircpass"];
