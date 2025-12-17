@@ -872,3 +872,7 @@ Stack trace:
 [17-Dec-2025 10:40:16 Europe/Moscow] PHP Fatal error:  Cannot redeclare deadtime() (previously declared in C:\OSPanel\domains\tbdev.net\include\functions.php:877) in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 450
 [17-Dec-2025 12:56:31 Europe/Moscow] PHP Fatal error:  Cannot redeclare deadtime() (previously declared in C:\OSPanel\domains\tbdev.net\include\functions.php:877) in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 450
 [17-Dec-2025 13:13:54 Europe/Moscow] PHP Fatal error:  Cannot redeclare deadtime() (previously declared in C:\OSPanel\domains\tbdev.net\include\functions.php:877) in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 450
+[17-Dec-2025 14:10:25 Europe/Moscow] PHP Warning:  Undefined array key "theme" in C:\OSPanel\domains\tbdev.net\include\functions.php on line 120
+[17-Dec-2025 14:10:25 Europe/Moscow] PHP Warning:  Undefined array key "uploaded" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 175
+[17-Dec-2025 14:10:25 Europe/Moscow] PHP Warning:  Undefined array key "downloaded" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 176
+[17-Dec-2025 14:10:25 Europe/Moscow] PHP Warning:  Undefined array key "bonus" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 276

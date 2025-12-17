@@ -26,48 +26,82 @@
 // +--------------------------------------------------------------------------+
 */
 
-require_once("include/bittorrent.php");
 
-if (!mkglobal("username:password"))
-	die();
+declare(strict_types=1);
 
-dbconn();
+require_once __DIR__ . "/include/bittorrent.php";
 
-function bark($text = "Имя пользователя или пароль неверны")
+if (!mkglobal("username:password")) {
+    die();
+}
+
+dbconn(false);
+
+function bark(string $text = "РќРµРІРµСЂРЅРѕРµ РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёР»Рё РїР°СЂРѕР»СЊ."): void
 {
-  stderr("Ошибка входа", $text);
+    stderr("РћС€РёР±РєР° РІС…РѕРґР°", $text);
+    exit;
 }
 
-function is_password_correct($password, $secret, $hash) {
-	return ($hash == md5($secret . $password . $secret) || $hash == md5($secret . trim($password) . $secret)); // А нахуя вторая часть? Дебилы вводят из писем пароли с пробелом в конце/начале
+function is_password_correct(string $password, string $secret, string $hash): bool
+{
+    // TBDev-СЃС‚РёР»СЊ: md5(secret . pass . secret)
+    return $hash === md5($secret . $password . $secret)
+        || $hash === md5($secret . trim($password) . $secret);
 }
 
-$res = sql_query("SELECT id, passhash, secret, enabled, status FROM users WHERE username = " . sqlesc($username));
-$row = mysqli_fetch_assoc($res);
+$username = (string)($username ?? '');
+$password = (string)($password ?? '');
 
-if (!$row)
-	bark("Вы не зарегистрированы в системе.");
+if ($username === '' || $password === '') {
+    bark("Р—Р°РїРѕР»РЅРёС‚Рµ Р»РѕРіРёРЅ Рё РїР°СЂРѕР»СЊ.");
+}
 
-if ($row["status"] == 'pending')
-	bark("Вы еще не активировали свой аккаунт! Активируйте ваш аккаунт и попробуйте снова.");
+$res = sql_query(
+    "SELECT id, passhash, secret, enabled, status, ip
+     FROM users
+     WHERE username = " . sqlesc($username) . " LIMIT 1"
+);
 
-if (!is_password_correct($password, $row['secret'], $row['passhash']))
-	bark();
+$row = $res ? mysqli_fetch_assoc($res) : false;
+if (!$row) {
+    bark("РќРµРІРµСЂРЅРѕРµ РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёР»Рё РїР°СЂРѕР»СЊ.");
+}
 
-if ($row["enabled"] == "no")
-	bark("Этот аккаунт отключен.");
+if (($row['status'] ?? '') === 'pending') {
+    bark("Р’Р°С€ Р°РєРєР°СѓРЅС‚ РµС‰С‘ РЅРµ Р°РєС‚РёРІРёСЂРѕРІР°РЅ. РџСЂРѕРІРµСЂСЊС‚Рµ РїРёСЃСЊРјРѕ Рё Р·Р°РІРµСЂС€РёС‚Рµ Р°РєС‚РёРІР°С†РёСЋ.");
+}
 
-$peers = sql_query("SELECT COUNT(id) FROM peers WHERE userid = $row[id]");
-$num = mysql_fetch_row($peers);
+if (!is_password_correct($password, (string)$row['secret'], (string)$row['passhash'])) {
+    bark(); // РґРµС„РѕР»С‚РЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ
+}
+
+if (($row['enabled'] ?? '') === 'no') {
+    bark("Р’Р°С€ Р°РєРєР°СѓРЅС‚ РѕС‚РєР»СЋС‡С‘РЅ.");
+}
+
+$uid = (int)$row['id'];
+
+$peersRes = sql_query("SELECT COUNT(id) AS c FROM peers WHERE userid = $uid");
+$peersRow = $peersRes ? mysqli_fetch_assoc($peersRes) : ['c' => 0];
+$numPeers = (int)($peersRow['c'] ?? 0);
+
 $ip = getip();
-if ($num[0] > 0 && $row[ip] != $ip && $row[ip])
-	bark("Этот пользователь на данный момент активен с другого IP. Вход невозможен.");
+$storedIp = (string)($row['ip'] ?? '');
 
-logincookie($row["id"], $row["passhash"]);
+if ($numPeers > 0 && $storedIp !== '' && $storedIp !== $ip) {
+    bark("Р­С‚РѕС‚ Р°РєРєР°СѓРЅС‚ СѓР¶Рµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РЅР° РґСЂСѓРіРѕРј IP. Р”РѕСЃС‚СѓРї Р·Р°РїСЂРµС‰С‘РЅ.");
+}
 
-if (!empty($_POST["returnto"]))
-	header("Location: $DEFAULTBASEURL/$_POST[returnto]");
-else
-	header("Location: $DEFAULTBASEURL/");
+logincookie($uid, (string)$row['passhash']);
 
-?>
+$returnTo = (string)($_POST['returnto'] ?? '');
+if ($returnTo !== '') {
+    // РїСЂРѕСЃС‚Р°СЏ Р·Р°С‰РёС‚Р° РѕС‚ СЂРµРґРёСЂРµРєС‚Р° вЂњРєСѓРґР° СѓРіРѕРґРЅРѕвЂќ
+    $returnTo = ltrim($returnTo, "/");
+    header("Location: {$DEFAULTBASEURL}/{$returnTo}");
+    exit;
+}
+
+header("Location: {$DEFAULTBASEURL}/");
+exit;
