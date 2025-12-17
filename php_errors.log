@@ -867,3 +867,4 @@ Stack trace:
 #1 C:\OSPanel\domains\tbdev.net\index.php(37): dbconn()
 #2 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 264
+[17-Dec-2025 09:10:42 Europe/Moscow] PHP Fatal error:  Cannot redeclare deadtime() (previously declared in C:\OSPanel\domains\tbdev.net\include\functions.php:877) in C:\OSPanel\domains\tbdev.net\include\cleanup.php on line 450
