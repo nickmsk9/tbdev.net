@@ -114,16 +114,23 @@ function theme_selector($sel_theme = "", $use_fsw = false) {
 	return $content;
 }
 
-function select_theme() {
-	global $CURUSER, $default_theme;
-	if ($CURUSER)
-		$theme = $CURUSER["theme"];
-	else
-		$theme = $default_theme;
-	if (!is_theme($theme))
-		$theme = $default_theme;
-	return $theme;
+function select_theme(): string
+{
+    global $CURUSER, $default_theme;
+
+    $theme = $default_theme;
+
+    if (is_array($CURUSER) && !empty($CURUSER)) {
+        $theme = (string)($CURUSER['theme'] ?? $default_theme);
+    }
+
+    if ($theme === '' || !is_theme($theme)) {
+        $theme = (string)$default_theme;
+    }
+
+    return $theme;
 }
+
 
 function decode_to_utf8($int = 0) {
 	$t = '';

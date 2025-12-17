@@ -886,3 +886,10 @@ Stack trace:
 #3 [internal function]: autoclean()
 #4 {main}
   thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 216
+[17-Dec-2025 14:16:43 Europe/Moscow] PHP Warning:  Undefined array key "bonus" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 280
+[17-Dec-2025 14:16:44 Europe/Moscow] PHP Warning:  Undefined array key "bonus" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 280
+[17-Dec-2025 14:16:44 Europe/Moscow] PHP Warning:  Undefined array key "bonus" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 280
+[17-Dec-2025 14:16:44 Europe/Moscow] PHP Warning:  Undefined array key "bonus" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 280
+[17-Dec-2025 14:16:44 Europe/Moscow] PHP Warning:  Undefined array key "bonus" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 280
+[17-Dec-2025 14:16:45 Europe/Moscow] PHP Warning:  Undefined array key "bonus" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 280
+[17-Dec-2025 14:16:45 Europe/Moscow] PHP Warning:  Undefined array key "bonus" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 280
