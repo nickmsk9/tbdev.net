@@ -277,7 +277,7 @@ $sentIcon = "<img height=\"16\" style=\"border:none\" alt=\"Исходящие\"
 							<font color="green"><?= $tracker_lang['uploaded']; ?>:</font> <font color="black"><?= $uped ?></font>&nbsp;&nbsp;
 							<font color="darkred"><?= $tracker_lang['downloaded']; ?>:</font> <font color="black"><?= $downed ?></font>&nbsp;&nbsp;
 							<font color="darkblue"><?= htmlspecialchars($tracker_lang['bonus'] ?? 'Бонус', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>:</font>
-							<a href="mybonus.php" class="online"><font color="black"><?= (int)$CURUSER['bonus'] ?></font></a>&nbsp;&nbsp;
+							<a href="mybonus.php" class="online"><font color="black"><?= (int)($CURUSER['bonus'] ?? 0) ?></font></a>&nbsp;&nbsp;
 							<font color="1900D1"><?= $tracker_lang['torrents']; ?>:&nbsp;</font>
 
 							<img alt="<?= $tracker_lang['seeding']; ?>" title="<?= $tracker_lang['seeding']; ?>" src="./themes/<?= htmlspecialchars($ss_uri, ENT_QUOTES, 'UTF-8'); ?>/images/arrowup.gif">
