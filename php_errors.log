@@ -876,3 +876,13 @@ Stack trace:
 [17-Dec-2025 14:10:25 Europe/Moscow] PHP Warning:  Undefined array key "uploaded" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 175
 [17-Dec-2025 14:10:25 Europe/Moscow] PHP Warning:  Undefined array key "downloaded" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 176
 [17-Dec-2025 14:10:25 Europe/Moscow] PHP Warning:  Undefined array key "bonus" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 276
+[17-Dec-2025 14:15:39 Europe/Moscow] PHP Warning:  Undefined array key "theme" in C:\OSPanel\domains\tbdev.net\include\functions.php on line 120
+[17-Dec-2025 14:15:39 Europe/Moscow] PHP Warning:  Undefined array key "bonus" in C:\OSPanel\domains\tbdev.net\themes\TBDev\stdhead.php on line 280
+[17-Dec-2025 14:15:39 Europe/Moscow] PHP Fatal error:  Uncaught mysqli_sql_exception: Data too long for column 'type' at row 1 in C:\OSPanel\domains\tbdev.net\include\functions.php:216
+Stack trace:
+#0 C:\OSPanel\domains\tbdev.net\include\functions.php(216): mysqli_query()
+#1 C:\OSPanel\domains\tbdev.net\include\functions_global.php(1098): sql_query()
+#2 C:\OSPanel\domains\tbdev.net\include\functions.php(748): write_log()
+#3 [internal function]: autoclean()
+#4 {main}
+  thrown in C:\OSPanel\domains\tbdev.net\include\functions.php on line 216

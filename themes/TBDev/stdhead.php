@@ -172,8 +172,12 @@ $logo   = 'themes/'.$u($theme).'/images/logo.gif';
 $uid = (int)$CURUSER['id'];
 
 // sizes
-$uped   = mksize((float)$CURUSER['uploaded']);
-$downed = mksize((float)$CURUSER['downloaded']);
+$uploaded   = (float)($CURUSER['uploaded']   ?? 0);
+$downloaded = (float)($CURUSER['downloaded'] ?? 0);
+
+$uped   = mksize($uploaded);
+$downed = mksize($downloaded);
+
 
 // ratio (как у тебя, но аккуратнее)
 if (!empty($CURUSER['downloaded']) && (float)$CURUSER['downloaded'] > 0) {
@@ -272,7 +276,7 @@ $sentIcon = "<img height=\"16\" style=\"border:none\" alt=\"Исходящие\"
 							<font color="1900D1"><?= $tracker_lang['ratio']; ?>:</font> <?= $ratio ?>&nbsp;&nbsp;
 							<font color="green"><?= $tracker_lang['uploaded']; ?>:</font> <font color="black"><?= $uped ?></font>&nbsp;&nbsp;
 							<font color="darkred"><?= $tracker_lang['downloaded']; ?>:</font> <font color="black"><?= $downed ?></font>&nbsp;&nbsp;
-							<font color="darkblue"><?= $tracker_lang['bonus']; ?>:</font>
+							<font color="darkblue"><?= htmlspecialchars($tracker_lang['bonus'] ?? 'Бонус', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>:</font>
 							<a href="mybonus.php" class="online"><font color="black"><?= (int)$CURUSER['bonus'] ?></font></a>&nbsp;&nbsp;
 							<font color="1900D1"><?= $tracker_lang['torrents']; ?>:&nbsp;</font>
 
