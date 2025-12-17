@@ -288,159 +288,147 @@ function dbconn(bool $autoclean = false, bool $lightmode = false): void
 
 function userlogin(bool $lightmode = false): void
 {
-	global $SITE_ONLINE, $default_language, $tracker_lang, $use_lang, $use_ipbans, $_COOKIE_SALT;
-	global $mysql_link; // Добавляем глобальное соединение с БД
-	
-	// Сбрасываем текущего пользователя
-	unset($GLOBALS["CURUSER"]);
+    global $SITE_ONLINE, $default_language, $tracker_lang, $use_lang, $use_ipbans, $_COOKIE_SALT;
 
-	// Проверка безопасности: нельзя использовать дефолтную соль на продакшене
-	if ($_COOKIE_SALT == 'default' && 
-		$_SERVER['SERVER_ADDR'] != '127.0.0.1' && 
-		$_SERVER['SERVER_ADDR'] != $_SERVER['REMOTE_ADDR']) {
-		die('Ошибка безопасности! Пожалуйста, измените значение $_COOKIE_SALT в файле include/config.local.php на уникальное.');
-	}
+    unset($GLOBALS['CURUSER']);
 
-	// Проверка наличия соли для кук
-	if (empty($_COOKIE_SALT) || !isset($_COOKIE_SALT)) {
-		die('Ошибка в настройках <a href="http://www.php.net">PHP</a>... Пожалуйста, убедитесь что все настройки корректны!');
-	}
+    // --- Security checks ---
+    if ($_COOKIE_SALT === 'default'
+        && ($_SERVER['SERVER_ADDR'] ?? '') !== '127.0.0.1'
+        && ($_SERVER['SERVER_ADDR'] ?? '') !== ($_SERVER['REMOTE_ADDR'] ?? '')
+    ) {
+        die('Ошибка безопасности! Пожалуйста, измените значение $_COOKIE_SALT в файле include/config.local.php на уникальное.');
+    }
 
-	// Получаем IP пользователя
-	$ip = getip();
-	$nip = ip2long($ip);
+    if (empty($_COOKIE_SALT)) {
+        die('Ошибка в настройках <a href="http://www.php.net">PHP</a>... Пожалуйста, убедитесь что все настройки корректны!');
+    }
 
-	// Проверка бана по IP
-	if ($use_ipbans && !$lightmode) {
-		$res = sql_query("SELECT * FROM bans WHERE $nip >= first AND $nip <= last") or sqlerr(__FILE__, __LINE__);
-		if (mysqli_num_rows($res) > 0) {
-			$ban_info = mysqli_fetch_assoc($res);
-			$comment = $ban_info["comment"] ?? 'Без комментария';
-			
-			header("HTTP/1.0 403 Forbidden");
-			print("<html><body><h1>403 Запрещено</h1>Ваш IP адрес заблокирован.<br>Причина: " . htmlspecialchars($comment) . "</body></html>\n");
-			die;
-		}
-	}
+    $ip  = getip();
+    $nip = ip2long($ip);
+    if ($nip === false) {
+        // если вдруг кривой IP — считаем гостем
+        goto guest;
+    }
 
-	// Получаем данные из кук
-	$c_uid = $_COOKIE[COOKIE_UID] ?? null;
-	$c_pass = $_COOKIE[COOKIE_PASSHASH] ?? null;
+    // --- IP bans: 1 быстрый запрос, только нужное поле, LIMIT 1 ---
+    if (!empty($use_ipbans) && !$lightmode) {
+        $res = sql_query("SELECT comment FROM bans WHERE $nip >= first AND $nip <= last LIMIT 1") or sqlerr(__FILE__, __LINE__);
+        if (mysqli_num_rows($res) > 0) {
+            $ban = mysqli_fetch_assoc($res);
+            $comment = $ban['comment'] ?? 'Без комментария';
 
-	// Если сайт выключен или нет кук - создаем сессию гостя
-	if (!$SITE_ONLINE || empty($c_uid) || empty($c_pass)) {
-		if ($use_lang) {
-			include_once('languages/lang_' . $default_language . '/lang_main.php');
-		}
-		user_session();
-		return;
-	}
+            header('HTTP/1.0 403 Forbidden');
+            print("<html><body><h1>403 Запрещено</h1>Ваш IP адрес заблокирован.<br>Причина: " . htmlspecialchars($comment) . "</body></html>\n");
+            die;
+        }
+    }
 
-	// Проверяем корректность ID из куки
-	$id = intval($c_uid);
-	if (!$id || strlen($c_pass) != 32) {
-		// Невалидные куки - создаем сессию гостя
-		if ($use_lang) {
-			include_once('languages/lang_' . $default_language . '/lang_main.php');
-		}
-		user_session();
-		return;
-	}
+    $c_uid  = $_COOKIE[COOKIE_UID] ?? '';
+    $c_pass = $_COOKIE[COOKIE_PASSHASH] ?? '';
 
-	// Ищем пользователя в базе данных
-	$res = sql_query("SELECT * FROM users WHERE id = $id");
-	if (!$res) {
-		// Ошибка запроса - создаем сессию гостя
-		if ($use_lang) {
-			include_once('languages/lang_' . $default_language . '/lang_main.php');
-		}
-		user_session();
-		return;
-	}
-	
-	$row = mysqli_fetch_assoc($res);
-	if (!$row) {
-		// Пользователь не найден - создаем сессию гостя
-		if ($use_lang) {
-			include_once('languages/lang_' . $default_language . '/lang_main.php');
-		}
-		user_session();
-		return;
-	}
+    // Если сайт выключен или нет кук — гость
+    if (empty($SITE_ONLINE) || $c_uid === '' || $c_pass === '') {
+        goto guest;
+    }
 
-	// Проверяем хэш пароля с учетом подсети
-	$subnet = explode('.', $ip);
-	$subnet[2] = $subnet[3] = 0;
-	$subnet = implode('.', $subnet); // Формат: 255.255.0.0
-	
-	$expected_hash = md5($row["passhash"] . COOKIE_SALT . $subnet);
-	if ($c_pass !== $expected_hash) {
-		// Неверный хэш - создаем сессию гостя
-		if ($use_lang) {
-			include_once('languages/lang_' . $default_language . '/lang_main.php');
-		}
-		user_session();
-		return;
-	}
+    $id = (int)$c_uid;
+    // TBDev обычно хранит md5 = 32 hex. Проверим строго.
+    if ($id <= 0 || strlen($c_pass) !== 32 || !ctype_xdigit($c_pass)) {
+        goto guest;
+    }
 
-	// Обновляем информацию о пользователе
-	$updates = [];
+    // --- Load user: НЕ SELECT * (меньше данных, быстрее) ---
+    $sql = "
+        SELECT id, username, class, override_class, ip, passhash, language, enabled
+        FROM users
+        WHERE id = $id
+        LIMIT 1
+    ";
+    $res = sql_query($sql);
+    if (!$res) {
+        goto guest;
+    }
 
-	if ($ip != $row['ip']) {
-		$updates[] = 'ip = ' . sqlesc($ip);
-		$row['ip'] = $ip;
-	}
-	
-	$updates[] = 'last_access = ' . sqlesc(get_date_time());
+    $row = mysqli_fetch_assoc($res);
+    if (!$row) {
+        goto guest;
+    }
 
-	if (!empty($updates)) {
-		sql_query('UPDATE users SET ' . implode(', ', $updates) . ' WHERE id = ' . $row['id']) or sqlerr(__FILE__, __LINE__);
-	}
+    // --- subnet быстрее чем explode/implode ---
+    // было: A.B.C.D -> A.B.0.0
+    $p2 = strrpos($ip, '.');
+    if ($p2 === false) goto guest;
+    $p1 = strrpos($ip, '.', - (strlen($ip) - $p2 + 1)); // точка перед последней
+    if ($p1 === false) goto guest;
+    $subnet = substr($ip, 0, $p1) . '.0.0';
 
-	// Проверяем временное повышение класса
-	if ($row['override_class'] < $row['class']) {
-		$row['class'] = $row['override_class'];
-	}
+    $expected_hash = md5($row['passhash'] . COOKIE_SALT . $subnet);
+    if (!hash_equals($expected_hash, $c_pass)) {
+        goto guest;
+    }
 
-	// Сохраняем пользователя в глобальной переменной
-	$GLOBALS["CURUSER"] = $row;
-	
-	// Подключаем языковой файл пользователя
-	if ($use_lang) {
-		include_once('languages/lang_' . $row['language'] . '/lang_main.php');
-	}
+    // --- Update user only if needed ---
+    $updates = [];
+    if ($ip !== ($row['ip'] ?? '')) {
+        $updates[] = 'ip = ' . sqlesc($ip);
+        $row['ip'] = $ip;
+    }
+    // сохраняем твою логику: last_access обновлять всегда
+    $updates[] = 'last_access = ' . sqlesc(get_date_time());
 
-	// Проверка блокировки пользователя
-	if ($row['enabled'] == 'no') {
-		$GLOBALS['use_blocks'] = 0;
-		
-		// Получаем информацию о бане
-		$ban_res = sql_query('SELECT reason, disuntil FROM users_ban WHERE userid = ' . $row['id']);
-		if ($ban_res && mysqli_num_rows($ban_res) > 0) {
-			$ban_info = mysqli_fetch_row($ban_res);
-			$reason = $ban_info[0] ?? 'Не указана';
-			$disuntil = $ban_info[1] ?? '0000-00-00 00:00:00';
-		} else {
-			$reason = 'Не указана';
-			$disuntil = '0000-00-00 00:00:00';
-		}
-		
-		// Формируем сообщение о блокировке
-		$message = 'Вы заблокированы.';
-		if ($disuntil != '0000-00-00 00:00:00') {
-			$message .= '<br />Дата разблокировки: ' . htmlspecialchars($disuntil);
-		} else {
-			$message .= '<br />Дата разблокировки: бессрочно';
-		}
-		$message .= '<br />Причина: ' . htmlspecialchars($reason);
-		
-		stderr($tracker_lang['error'] ?? 'Ошибка', $message);
-	}
+    if ($updates) {
+        sql_query('UPDATE users SET ' . implode(', ', $updates) . ' WHERE id = ' . (int)$row['id']) or sqlerr(__FILE__, __LINE__);
+    }
 
-	// Создаем сессию пользователя (если не lightmode)
-	if (!$lightmode) {
-		user_session();
-	}
+    // --- override class ---
+    if (isset($row['override_class'], $row['class']) && (int)$row['override_class'] < (int)$row['class']) {
+        $row['class'] = $row['override_class'];
+    }
+
+    $GLOBALS['CURUSER'] = $row;
+
+    // --- language include ---
+    if (!empty($use_lang)) {
+        $lang = $row['language'] ?? $default_language;
+        include_once('languages/lang_' . $lang . '/lang_main.php');
+    }
+
+    // --- blocked user check (доп. запрос только если надо) ---
+    if (($row['enabled'] ?? 'yes') === 'no') {
+        $GLOBALS['use_blocks'] = 0;
+
+        $ban_res = sql_query('SELECT reason, disuntil FROM users_ban WHERE userid = ' . (int)$row['id'] . ' LIMIT 1');
+        if ($ban_res && mysqli_num_rows($ban_res) > 0) {
+            $ban_info = mysqli_fetch_assoc($ban_res);
+            $reason   = $ban_info['reason']   ?? 'Не указана';
+            $disuntil = $ban_info['disuntil'] ?? '0000-00-00 00:00:00';
+        } else {
+            $reason = 'Не указана';
+            $disuntil = '0000-00-00 00:00:00';
+        }
+
+        $message = 'Вы заблокированы.';
+        if ($disuntil !== '0000-00-00 00:00:00') {
+            $message .= '<br />Дата разблокировки: ' . htmlspecialchars($disuntil);
+        } else {
+            $message .= '<br />Дата разблокировки: бессрочно';
+        }
+        $message .= '<br />Причина: ' . htmlspecialchars($reason);
+
+        stderr($tracker_lang['error'] ?? 'Ошибка', $message);
+    }
+
+    if (!$lightmode) {
+        user_session();
+    }
+    return;
+
+guest:
+    if (!empty($use_lang)) {
+        include_once('languages/lang_' . $default_language . '/lang_main.php');
+    }
+    user_session();
 }
 
 function get_server_load() {
@@ -493,52 +481,80 @@ function get_server_load() {
     return $returnload;
 }
 
-function user_session() {
-	global $CURUSER, $use_sessions;
+function user_session(): void
+{
+    global $CURUSER, $use_sessions;
 
-	if (!$use_sessions)
-		return;
+    if (empty($use_sessions)) {
+        return;
+    }
 
-	$ip = getip();
-	$url = getenv("REQUEST_URI");
+    $ip  = getip();
+    $url = $_SERVER['REQUEST_URI'] ?? (getenv('REQUEST_URI') ?: '');
+    $sid = session_id();
 
-	if (!$CURUSER) {
-		$uid = -1;
-		$username = '';
-		$class = -1;
-	} else {
-		$uid = $CURUSER['id'];
-		$username = $CURUSER['username'];
-		$class = $CURUSER['class'];
-	}
+    if (!empty($CURUSER)) {
+        $uid      = (int)($CURUSER['id'] ?? 0);
+        $username = (string)($CURUSER['username'] ?? '');
+        $class    = (int)($CURUSER['class'] ?? 0);
+    } else {
+        $uid      = 0;      // важно: 0, а не -1
+        $username = '';
+        $class    = 0;
+    }
 
-	$past = time() - 300;
-	$sid = session_id();
-	$where = array();
-	$updateset = array();
-	if ($sid)
-		$where[] = "sid = ".sqlesc($sid);
-	elseif ($uid)
-		$where[] = "uid = $uid";
-	else
-		$where[] = "ip = ".sqlesc($ip);
-	//sql_query("DELETE FROM sessions WHERE ".implode(" AND ", $where));
-	$ctime = time();
-	$agent = $_SERVER["HTTP_USER_AGENT"];
-	$updateset[] = "sid = ".sqlesc($sid);
-	$updateset[] = "uid = ".sqlesc($uid);
-	$updateset[] = "username = ".sqlesc($username);
-	$updateset[] = "class = ".sqlesc($class);
-	$updateset[] = "ip = ".sqlesc($ip);
-	$updateset[] = "time = ".sqlesc($ctime);
-	$updateset[] = "url = ".sqlesc($url);
-	$updateset[] = "useragent = ".sqlesc($agent);
-	session_write_close();
-	if (count($updateset))
-		sql_query("UPDATE sessions SET ".implode(", ", $updateset)." WHERE ".implode(" AND ", $where)) or sqlerr(__FILE__,__LINE__);
-	if (mysql_modified_rows() < 1)
-		sql_query("INSERT INTO sessions (sid, uid, username, class, ip, time, url, useragent) VALUES (".implode(", ", array_map("sqlesc",
-									array($sid, $uid, $username, $class, $ip, $ctime, $url, $agent))).")") or sqlerr(__FILE__,__LINE__);
+    $ctime = time();
+    $agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
+    // Быстрее освобождаем lock сессии (если она реально активна)
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
+
+    // Корректный WHERE:
+    // 1) sid если есть
+    // 2) иначе uid только если это реальный юзер (>0)
+    // 3) иначе ip (гость)
+    if ($sid !== '') {
+        $where = 'sid = ' . sqlesc($sid);
+    } elseif ($uid > 0) {
+        $where = 'uid = ' . $uid;
+    } else {
+        $where = 'ip = ' . sqlesc($ip);
+    }
+
+    // Один набор значений — без массивов/implode/array_map
+    $sqlUpdate = "
+        UPDATE sessions SET
+            sid = " . sqlesc($sid) . ",
+            uid = " . $uid . ",
+            username = " . sqlesc($username) . ",
+            class = " . $class . ",
+            ip = " . sqlesc($ip) . ",
+            time = " . $ctime . ",
+            url = " . sqlesc($url) . ",
+            useragent = " . sqlesc($agent) . "
+        WHERE $where
+    ";
+    sql_query($sqlUpdate) or sqlerr(__FILE__, __LINE__);
+
+    // Если UPDATE ничего не затронул — вставляем
+    if (mysql_modified_rows() < 1) {
+        $sqlInsert = "
+            INSERT INTO sessions (sid, uid, username, class, ip, time, url, useragent)
+            VALUES (
+                " . sqlesc($sid) . ",
+                " . $uid . ",
+                " . sqlesc($username) . ",
+                " . $class . ",
+                " . sqlesc($ip) . ",
+                " . $ctime . ",
+                " . sqlesc($url) . ",
+                " . sqlesc($agent) . "
+            )
+        ";
+        sql_query($sqlInsert) or sqlerr(__FILE__, __LINE__);
+    }
 }
 
 function unesc($x) {
@@ -1119,7 +1135,7 @@ function stdhead($title = "", $msgalert = true) {
         die('Site is down for maintenance, please check back again later... thanks<br />');
 
     header('Content-Type: text/html; charset=' . $tracker_lang['language_charset']);
-    header('X-Powered-by: TBDev nickmsk9 Yuna Scatari Edition - https://github.com/nickmsk9/tbdev.net');
+    header('X-Powered-by: TBDev nickmsk9 Edition - https://github.com/nickmsk9/tbdev.net');
     header('X-Chocolate-to: github nickmsk9');
     header('Cache-Control: no-cache');
     header('Pragma: no-cache');
