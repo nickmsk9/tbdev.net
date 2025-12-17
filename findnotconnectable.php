@@ -156,11 +156,27 @@ switch ($action) {
 		stdhead("Пиры с которыми нельзя соединиться");
 
 		// default message
-		$body = "The tracker has determined that you are firewalled or NATed and cannot accept incoming connections. \n\n"
-			  . "This means that other peers in the swarm will be unable to connect to you, only you to them. Even worse, if two peers are both in this state they will not be able to connect at all. This has obviously a detrimental effect on the overall speed. \n\n"
-			  . "The way to solve the problem involves opening the ports used for incoming connections (the same range you defined in your client) on the firewall and/or configuring your NAT server to use a basic form of NAT for that range instead of NAPT (the actual process differs widely between different router models. Check your router documentation and/or support forum. You will also find lots of information on the subject at PortForward). \n\n"
-			  . "Also if you need help please come into our IRC chat room or post in the forums your problems. We are always glad to help out.\n\n"
-			  . "Thank You";
+	$body = "Уважаемый пользователь,\n\n"
+      . "Система трекера обнаружила, что ваш клиент находится за файрволом или использует NAT, что препятствует установке входящих соединений.\n\n"
+      . "Последствия данной проблемы:\n"
+      . "• Другие участники раздачи не могут подключиться к вашему клиенту\n"
+      . "• Вы можете подключаться только к ним (односторонние соединения)\n"
+      . "• Если два пользователя имеют одинаковую проблему, они вообще не смогут обмениваться данными\n"
+      . "• Это значительно снижает общую скорость раздачи и вашу эффективность\n\n"
+      . "Решение проблемы:\n"
+      . "1. Настройте проброс портов в вашем роутере/файрволе\n"
+      . "2. Убедитесь, что порт, указанный в клиенте, открыт для входящих соединений\n"
+      . "3. Включите UPnP в настройках клиента (если поддерживается)\n"
+      . "4. Используйте порт в диапазоне 49152-65535\n"
+      . "5. Настройте исключение в антивирусе/файрволе\n\n"
+      . "Рекомендации:\n"
+      . "• Проверьте документацию к вашему роутеру\n"
+      . "• Посетите наш форум в разделе технической поддержки\n"
+      . "• Обратитесь к администрации за помощью\n"
+      . "• Используйте сайт portforward.com для инструкций по конкретным моделям роутеров\n\n"
+      . "Для поддержания здоровой сети важно, чтобы как можно больше пользователей были доступны для входящих соединений.\n\n"
+      . "С уважением,\n"
+      . "Администрация трекера";
 
 		$returnto = '';
 		if (!empty($_GET['returnto'])) {
