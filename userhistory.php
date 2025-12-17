@@ -76,7 +76,7 @@ if ($action == "viewcomments")
 
 	$res = sql_query("SELECT username, donor, warned, enabled FROM users WHERE id=$userid") or sqlerr(__FILE__, __LINE__);
 
-	if (mysql_num_rows($res) == 1)
+	if (mysqli_num_rows($res) == 1)
 	{
 		$arr = mysql_fetch_assoc($res);
 
@@ -93,7 +93,7 @@ if ($action == "viewcomments")
 
 	$res = sql_query($query) or sqlerr(__FILE__, __LINE__);
 
-	if (mysql_num_rows($res) == 0) stderr($tracker_lang['error'], "Комментарии не найдены");
+	if (mysqli_num_rows($res) == 0) stderr($tracker_lang['error'], "Комментарии не найдены");
 
 	stdhead("История комментариев");
 

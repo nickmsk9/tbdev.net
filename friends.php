@@ -65,7 +65,7 @@ if ($action == 'add')
 		stderr($tracker_lang['error'], "Unknown type.");
 
   $r = sql_query("SELECT id FROM $table_is WHERE userid=$userid AND $field_is=$targetid") or sqlerr(__FILE__, __LINE__);
-  if (mysql_num_rows($r) == 1)
+  if (mysqli_num_rows($r) == 1)
 		stderr($tracker_lang['error'], "User ID is already in your ".htmlentities($table_is)." list.");
 
 	sql_query("INSERT INTO $table_is VALUES (0,$userid, $targetid)") or sqlerr(__FILE__, __LINE__);
@@ -122,7 +122,7 @@ print("<tr><td>");
 $i = 0;
 
 $res = sql_query("SELECT f.friendid as id, u.username AS name, u.class, u.avatar, u.title, u.donor, u.warned, u.enabled, u.last_access FROM friends AS f LEFT JOIN users as u ON f.friendid = u.id WHERE userid=$userid ORDER BY name") or sqlerr(__FILE__, __LINE__);
-if(mysql_num_rows($res) == 0)
+if(mysqli_num_rows($res) == 0)
 	$friends = "<em>".$tracker_lang['no_friends'].".</em>";
 else
 	while ($friend = mysqli_fetch_assoc($res))
@@ -163,7 +163,7 @@ print($friends);
 print("</td></tr></table>\n");
 
 $res = sql_query("SELECT b.blockid AS id, u.username AS name, u.class, u.donor, u.warned, u.enabled, u.last_access FROM blocks AS b LEFT JOIN users AS u ON b.blockid = u.id WHERE userid = $userid ORDER BY name") or sqlerr(__FILE__, __LINE__);
-if(mysql_num_rows($res) == 0)
+if(mysqli_num_rows($res) == 0)
 	$blocks = "<em>".$tracker_lang['no_blocked'].".</em>";
 else
 {

@@ -82,7 +82,7 @@ if ($type == 'new') {
 	$number = $arro[0];
 
 	$ret = sql_query("SELECT id, username, class, email, uploaded, downloaded, status, warned, enabled, donor, email FROM users WHERE invitedby = $id") or sqlerr(__FILE__,__LINE__);
-	$num = mysql_num_rows($ret);
+	$num = mysqli_num_rows($ret);
 
 	print("<form method=post action=takeconfirm.php?id=$id><table border=1 width=100% cellspacing=0 cellpadding=5>".
 	"<tr class=tabletitle><td colspan=7><b>Статус приглашенных вами</b> ($number)</td></tr>");
@@ -136,7 +136,7 @@ if ($type == 'new') {
 	$arre = mysql_fetch_row($rul);
 	$number1 = $arre[0];
 	$rer = sql_query("SELECT inviteid, invite, time_invited FROM invites WHERE inviter = $id AND confirmed='no'") or sqlerr(__FILE__,__LINE__);
-	$num1 = mysql_num_rows($rer);
+	$num1 = mysqli_num_rows($rer);
 
 	print("<table border=1 width=100% cellspacing=0 cellpadding=5>".
 	"<tr class=tabletitle><td colspan=6><b>Статус созданых приглашений</b> ($number1)</td></tr>");

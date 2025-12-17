@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
     stderr($tracker_lang['error'], "Заполните форму корректно.");
   $res = sql_query("SELECT * FROM users WHERE username=" . sqlesc($username) .
   " AND passhash=md5(concat(secret,concat(" . sqlesc($password) . ",secret)))") or sqlerr(__FILE__, __LINE__);
-  if (mysql_num_rows($res) != 1)
+  if (mysqli_num_rows($res) != 1)
     stderr($tracker_lang['error'], "Неверное имя пользователя или пароль. Проверьте введеную информацию.");
   $arr = mysql_fetch_assoc($res);
 

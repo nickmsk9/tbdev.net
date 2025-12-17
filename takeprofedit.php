@@ -63,7 +63,7 @@ if ($email != $CURUSER["email"]) {
 	if (!validemail($email))
 		bark("��� �� ������ �� ��������� E-Mail.");
   $r = sql_query("SELECT id FROM users WHERE email=" . sqlesc($email)) or sqlerr(__FILE__, __LINE__);
-	if (mysql_num_rows($r) > 0)
+	if (mysqli_num_rows($r) > 0)
 		bark("���� e-mail ����� ��� ������������ ����� �� ������������� �������. (<b>$email</b>)");
 	$changedemail = 1;
 }
@@ -76,7 +76,7 @@ $emailnotif = $_POST["emailnotif"];
 $notifs = ($pmnotif == 'yes' ? "[pm]" : "");
 $notifs .= ($emailnotif == 'yes' ? "[email]" : "");
 $r = sql_query("SELECT id FROM categories") or sqlerr(__FILE__, __LINE__);
-$rows = mysql_num_rows($r);
+$rows = mysqli_num_rows($r);
 for ($i = 0; $i < $rows; ++$i)
 {
 	$a = mysql_fetch_assoc($r);

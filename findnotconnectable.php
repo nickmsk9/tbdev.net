@@ -46,11 +46,11 @@ print("Это только те пользователи которые сейч
 
 print("<br /><font color=red>*</font> означает что пользователь сидирует.<p>");
 $result = sql_query("SELECT DISTINCT userid FROM peers WHERE connectable = 'no'");
-$count = mysql_num_rows($result);
+$count = mysqli_num_rows($result);
 print ("$count уникальных пиров с которыми нельзя соединиться.");
 @mysql_free_result($result);
 
-if (mysql_num_rows($res2) == 0)
+if (mysqli_num_rows($res2) == 0)
 print("<p align=center><b>Со всеми пирами можно соединится!</b></p>\n");
 else
 {

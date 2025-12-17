@@ -42,7 +42,7 @@ if ($action == "edit")
 		stderr($tracker_lang['error'],$tracker_lang['invalid_id']);
 	$res = sql_query("SELECT * FROM polls WHERE id = $pollid")
 			or sqlerr(__FILE__, __LINE__);
-	if (mysql_num_rows($res) == 0)
+	if (mysqli_num_rows($res) == 0)
 		stderr($tracker_lang['error'],"No poll found with ID.");
 	$poll = mysqli_fetch_assoc($res);
 }
@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
   $returnto = htmlentities($_POST["returnto"]);
 
   if (!$question || !$option0 || !$option1)
-    stderr($tracker_lang['error'], "Заполните все поля формы!");
+    stderr($tracker_lang['error'], "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ!");
 
   if ($pollid)
 		sql_query("UPDATE polls SET " .
@@ -142,7 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 stdhead();
 
 if ($pollid)
-	print("<h1>Редактировать опрос</h1>");
+	print("<h1>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ</h1>");
 else
 {
 	// Warn if current poll is less than 3 days old
@@ -162,40 +162,40 @@ else
 	    print("<p><font color=red><b>Note: The current poll (<i>" . $arr["question"] . "</i>) is only $t old.</b></font></p>");
 	  }
 	}
-	print("<h1>Создать опрос</h1>");
+	print("<h1>пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ</h1>");
 }
 ?>
 
 <table border=1 cellspacing=0 cellpadding=5>
 <form method=post action=makepoll.php>
-<tr><td class=rowhead>Вопрос <font color=red>*</font></td><td align=left><input name=question size=80 maxlength=255 value="<?=$poll['question']?>"></td></tr>
-<tr><td class=rowhead>Вопрос 1 <font color=red>*</font></td><td align=left><input name=option0 size=80 maxlength=40 value="<?=$poll['option0']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 2 <font color=red>*</font></td><td align=left><input name=option1 size=80 maxlength=40 value="<?=$poll['option1']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 3</td><td align=left><input name=option2 size=80 maxlength=40 value="<?=$poll['option2']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 4</td><td align=left><input name=option3 size=80 maxlength=40 value="<?=$poll['option3']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 5</td><td align=left><input name=option4 size=80 maxlength=40 value="<?=$poll['option4']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 6</td><td align=left><input name=option5 size=80 maxlength=40 value="<?=$poll['option5']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 7</td><td align=left><input name=option6 size=80 maxlength=40 value="<?=$poll['option6']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 8</td><td align=left><input name=option7 size=80 maxlength=40 value="<?=$poll['option7']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 9</td><td align=left><input name=option8 size=80 maxlength=40 value="<?=$poll['option8']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 10</td><td align=left><input name=option9 size=80 maxlength=40 value="<?=$poll['option9']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 11</td><td align=left><input name=option10 size=80 maxlength=40 value="<?=$poll['option10']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 12</td><td align=left><input name=option11 size=80 maxlength=40 value="<?=$poll['option11']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 13</td><td align=left><input name=option12 size=80 maxlength=40 value="<?=$poll['option12']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 14</td><td align=left><input name=option13 size=80 maxlength=40 value="<?=$poll['option13']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 15</td><td align=left><input name=option14 size=80 maxlength=40 value="<?=$poll['option14']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 16</td><td align=left><input name=option15 size=80 maxlength=40 value="<?=$poll['option15']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 17</td><td align=left><input name=option16 size=80 maxlength=40 value="<?=$poll['option16']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 18</td><td align=left><input name=option17 size=80 maxlength=40 value="<?=$poll['option17']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 19</td><td align=left><input name=option18 size=80 maxlength=40 value="<?=$poll['option18']?>"><br /></td></tr>
-<tr><td class=rowhead>Вопрос 20</td><td align=left><input name=option19 size=80 maxlength=40 value="<?=$poll['option19']?>"><br /></td></tr>
-<tr><td class=rowhead>Сортировать</td><td>
-<input type=radio name=sort value=yes <?=$poll["sort"] != "no" ? " checked" : "" ?>>Да
-<input type=radio name=sort value=no <?=$poll["sort"] == "no" ? " checked" : "" ?>> Нет
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ <font color=red>*</font></td><td align=left><input name=question size=80 maxlength=255 value="<?=$poll['question']?>"></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 1 <font color=red>*</font></td><td align=left><input name=option0 size=80 maxlength=40 value="<?=$poll['option0']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 2 <font color=red>*</font></td><td align=left><input name=option1 size=80 maxlength=40 value="<?=$poll['option1']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 3</td><td align=left><input name=option2 size=80 maxlength=40 value="<?=$poll['option2']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 4</td><td align=left><input name=option3 size=80 maxlength=40 value="<?=$poll['option3']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 5</td><td align=left><input name=option4 size=80 maxlength=40 value="<?=$poll['option4']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 6</td><td align=left><input name=option5 size=80 maxlength=40 value="<?=$poll['option5']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 7</td><td align=left><input name=option6 size=80 maxlength=40 value="<?=$poll['option6']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 8</td><td align=left><input name=option7 size=80 maxlength=40 value="<?=$poll['option7']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 9</td><td align=left><input name=option8 size=80 maxlength=40 value="<?=$poll['option8']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 10</td><td align=left><input name=option9 size=80 maxlength=40 value="<?=$poll['option9']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 11</td><td align=left><input name=option10 size=80 maxlength=40 value="<?=$poll['option10']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 12</td><td align=left><input name=option11 size=80 maxlength=40 value="<?=$poll['option11']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 13</td><td align=left><input name=option12 size=80 maxlength=40 value="<?=$poll['option12']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 14</td><td align=left><input name=option13 size=80 maxlength=40 value="<?=$poll['option13']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 15</td><td align=left><input name=option14 size=80 maxlength=40 value="<?=$poll['option14']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 16</td><td align=left><input name=option15 size=80 maxlength=40 value="<?=$poll['option15']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 17</td><td align=left><input name=option16 size=80 maxlength=40 value="<?=$poll['option16']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 18</td><td align=left><input name=option17 size=80 maxlength=40 value="<?=$poll['option17']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 19</td><td align=left><input name=option18 size=80 maxlength=40 value="<?=$poll['option18']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅ 20</td><td align=left><input name=option19 size=80 maxlength=40 value="<?=$poll['option19']?>"><br /></td></tr>
+<tr><td class=rowhead>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</td><td>
+<input type=radio name=sort value=yes <?=$poll["sort"] != "no" ? " checked" : "" ?>>пїЅпїЅ
+<input type=radio name=sort value=no <?=$poll["sort"] == "no" ? " checked" : "" ?>> пїЅпїЅпїЅ
 </td></tr>
-<tr><td colspan=2 align=center><input type=submit value=<?=$pollid?"'Редактировать'":"'Создать'"?> style='height: 20pt'></td></tr>
+<tr><td colspan=2 align=center><input type=submit value=<?=$pollid?"'пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ'":"'пїЅпїЅпїЅпїЅпїЅпїЅпїЅ'"?> style='height: 20pt'></td></tr>
 </table>
-<p><font color=red>*</font> обязательно</p>
+<p><font color=red>*</font> пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</p>
 <input type=hidden name=pollid value=<?=$poll["id"]?>>
 <input type=hidden name=action value=<?=$pollid?'edit':'create'?>
 <input type=hidden name=returnto value=<?=htmlspecialchars_uni($_GET["returnto"]);?>>

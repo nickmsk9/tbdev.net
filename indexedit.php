@@ -39,7 +39,7 @@ if ($action == 'edit') {
 	if (!is_valid_id($id))
 		stderr($tracker_lang["error"], $tracker_lang["invalid_id"]);
 	$res = sql_query("SELECT * FROM indexreleases WHERE id = ".sqlesc($id)) or sqlerr(__FILE__,__LINE__);
-	if (mysql_num_rows($res) != 1)
+	if (mysqli_num_rows($res) != 1)
 		stderr($tracker_lang["error"], $tracker_lang["invalid_id"]);
 	$release = mysqli_fetch_assoc($res);
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {

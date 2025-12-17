@@ -41,7 +41,7 @@ if ($ip)
 	if ($nip == -1)
 	  stderr($tracker_lang['error'], "Bad IP.");
 	$res = sql_query("SELECT * FROM bans WHERE $nip >= first AND $nip <= last") or sqlerr(__FILE__, __LINE__);
-	if (mysql_num_rows($res) == 0)
+	if (mysqli_num_rows($res) == 0)
 	  stderr("Результат", "IP адрес <b>$ip</b> не забанен.");
 	else
 	{

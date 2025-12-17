@@ -88,7 +88,7 @@ if ($action == 'edit')
 
     $res = sql_query("SELECT * FROM news WHERE id=$newsid") or sqlerr(__FILE__, __LINE__);
 
-	if (mysql_num_rows($res) != 1)
+	if (mysqli_num_rows($res) != 1)
 	  stderr($tracker_lang['error'], "������� �� �������.");
 
 	$arr = mysqli_fetch_assoc($res);
@@ -150,7 +150,7 @@ stdhead("�������");
 
 $query = sql_query("SELECT news.*, users.username FROM news LEFT JOIN users ON news.userid = users.id ORDER BY news.added DESC") or sqlerr(__FILE__, __LINE__);
 
-if (mysql_num_rows($query) > 0)
+if (mysqli_num_rows($query) > 0)
 {
  	begin_main_frame();
 	begin_frame();

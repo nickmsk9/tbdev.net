@@ -39,7 +39,7 @@ if ($CURUSER['class'] >= UC_MODERATOR)
 
 $query = "SELECT id, username, added, uploaded, downloaded, donor, warned FROM users WHERE class = ".UC_UPLOADER;
 $result = sql_query($query);
-$num = mysql_num_rows($result); // how many uploaders
+$num = mysqli_num_rows($result); // how many uploaders
 echo "<h2>Информация о аплоадерах</h2>";
 echo "<p>У нас " . $num . " аплоадер" . ($num > 1 ? "ов" : "") . "</p>";
 
@@ -73,7 +73,7 @@ $warned = mysql_result($result, $i, "warned");
 // get uploader torrents activity
 $upperquery = "SELECT added FROM torrents WHERE owner = $id";
 $upperresult = sql_query($upperquery);
-$numtorrents = mysql_num_rows($upperresult);
+$numtorrents = mysqli_num_rows($upperresult);
 $lastadded = '0000-00-00 00:00:00';
 while ($torrentinfo = mysqli_fetch_assoc($upperresult))
 	if (strtotime($torrentinfo['added']) > strtotime($lastadded))

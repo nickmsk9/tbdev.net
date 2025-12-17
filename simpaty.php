@@ -37,7 +37,7 @@ $action = ( in_array($_GET['action'], $valid_actions) ? $_GET['action'] : '');
 // action: add -------------------------------------------------------------
 if ($action == 'add') {
         if ($CURUSER["warned"] == 'yes') {
-                stderr($tracker_lang['error'], "У вас предупреждение и вы не можете ставить людям респекты.");
+                stderr($tracker_lang['error'], "пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         }
         $current_time = get_date_time();
         $targetid = intval($_GET['targetid']);
@@ -45,28 +45,28 @@ if ($action == 'add') {
         $type = $_GET['type'];
 
         if (!is_valid_id($targetid)) {
-                stderr($tracker_lang['error'], "Неправильный ID $targetid.");
+                stderr($tracker_lang['error'], "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ID $targetid.");
         }
         if (get_row_count("users", "WHERE id = $targetid") == 0)
-        		stderr($tracker_lang['error'],"Такого пользователя не существует!");
+        		stderr($tracker_lang['error'],"пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
         if ($CURUSER["id"] == $targetid) {
-                stderr($tracker_lang['error'],"Вы не можете давать респект или антиреспект себе.");
+                stderr($tracker_lang['error'],"пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ.");
         }
 
         $r = sql_query('SELECT id FROM simpaty WHERE touserid=' . $targetid . ' AND type = ' . sqlesc($type) . ' AND fromuserid = ' . $CURUSER['id']) or sqlerr(__FILE__, __LINE__);
-        if (mysql_num_rows($r) == 1) {
-                stderr ($tracker_lang['error'],"Вы уже давали респект за это действие этому пользователю.");
+        if (mysqli_num_rows($r) == 1) {
+                stderr ($tracker_lang['error'],"пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         }
 
         if (isset($_POST["description"]) && trim($_POST["description"]) == '') {
-                stderr($tracker_lang['error'], "Комментарий не может быть пустым.");
+                stderr($tracker_lang['error'], "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.");
         }
         if (!isset($_POST["description"])) {
-        stderr("","<p>Напишите причину, по которой вы выдаете " . ($resp_type == 1?"респект":"антиреспект") . " пользователю:</p>
+        stderr("","<p>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ " . ($resp_type == 1?"пїЅпїЅпїЅпїЅпїЅпїЅпїЅ":"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ") . " пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:</p>
         <form action=\"" . $_SERVER["PHP_SELF"] . "?action=add&amp;" . ($resp_type == 1?'good':'bad') . "&amp;type=".htmlspecialchars_uni($type)."&amp;targetid=$targetid\" method=\"post\">
         <input type=text name=description maxlength=300 size=100></textarea>
 		".(isset($_GET["returnto"]) ? "<input type=\"hidden\" name=\"returnto\" value=\"" . htmlspecialchars_uni($_GET["returnto"]) . "\" />\n" : "").
-        "<input type=submit value=".($resp_type == 1?"Респект":"Антиреспект").">
+        "<input type=submit value=".($resp_type == 1?"пїЅпїЅпїЅпїЅпїЅпїЅпїЅ":"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ").">
         </form>");
         }
         sql_query ('INSERT INTO simpaty VALUES (0, ' . $targetid . ', ' . $CURUSER['id'] . ', ' . sqlesc($CURUSER['username']) . ', ' . ($resp_type==0?1:0) . ', ' . ($resp_type==1?1:0) . ', ' . sqlesc($type) . ', ' . sqlesc($current_time) . ', ' . sqlesc(htmlspecialchars_uni($_POST["description"])) . ')') or sqlerr(__FILE__, __LINE__);
@@ -76,25 +76,25 @@ if ($action == 'add') {
                 sql_query('UPDATE users SET simpaty = IF(simpaty > 0, simpaty - 1, 0) WHERE id = ' . $targetid) or sqlerr(__FILE__, __LINE__);
         }
         // mod by StirolXXX (Yuna Scatari)
-		$msg = "Пользователь [url=userdetails.php?id=" . $CURUSER['id'] ."]" . $CURUSER['username'] . "[/url] поставил вам " . ($resp_type == 1?'респект':'антиреспект') . " в репутацию со следующим сообщением: \n[quote]" . htmlspecialchars_uni($_POST["description"]) . "[/quote]";
-		$subject = "Уведомление об изменении репутации";
+		$msg = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ [url=userdetails.php?id=" . $CURUSER['id'] ."]" . $CURUSER['username'] . "[/url] пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ " . ($resp_type == 1?'пїЅпїЅпїЅпїЅпїЅпїЅпїЅ':'пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ') . " пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: \n[quote]" . htmlspecialchars_uni($_POST["description"]) . "[/quote]";
+		$subject = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
 		send_pm(0, $targetid, get_date_time(), $subject, $msg);
-		//sql_query("INSERT INTO messages (sender, receiver, added, msg, subject) VALUES (0, $targetid, NOW(), $msg, \"Уведомление об изменении репутации\")");
+		//sql_query("INSERT INTO messages (sender, receiver, added, msg, subject) VALUES (0, $targetid, NOW(), $msg, \"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ\")");
         // mod by StirolXXX (Yuna Scatari)
 		if (isset($_POST["returnto"])) {
 			$returl = $_POST["returnto"];
 			header("Refresh: 2; url=$returl");
 		}
-        stdhead(($resp_type == 1?"Респект":"Антиреспект") . " добавлен");
-        stdmsg($tracker_lang['success'],"<p>Пользователь успешно получил " . ($resp_type == 1?"респект":"антиреспект") . " от вас.</p>".(isset($_POST["returnto"]) ? "Сейчас вы будете переадресованы на страницу, откуда вы пришли." : ""));
+        stdhead(($resp_type == 1?"пїЅпїЅпїЅпїЅпїЅпїЅпїЅ":"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ") . " пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
+        stdmsg($tracker_lang['success'],"<p>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ " . ($resp_type == 1?"пїЅпїЅпїЅпїЅпїЅпїЅпїЅ":"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ") . " пїЅпїЅ пїЅпїЅпїЅ.</p>".(isset($_POST["returnto"]) ? "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ." : ""));
         if (isset($_POST["returnto"])) {
-        	print("<p><a href=\"".htmlspecialchars_uni($_POST["returnto"])."\">Нажмите сюда, если вы не были переадресованы</a></p>");
+        	print("<p><a href=\"".htmlspecialchars_uni($_POST["returnto"])."\">пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</a></p>");
         }
 }
 
 if ($action == 'delete') {
         if(get_user_class() < UC_SYSOP) {
-                stderr($tracker_lang['error'], "У вас нет прав на удаление респектов.");
+                stderr($tracker_lang['error'], "пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         }
         $respect_id = intval($_GET['respect_id']);
         $respect_type = $_GET['respect_type'];
@@ -105,16 +105,16 @@ if ($action == 'delete') {
         else
 			sql_query ('UPDATE users SET simpaty = simpaty + 1 WHERE id = ' . $touserid) or sqlerr(__LINE__,__FILE__);
         /*if (mysql_affected_rows != 1) {
-        	stderr($tracker_lang['error'], "Не могу удалить ".($respect_type == 'good'?"респект":"антиреспект").".");
+        	stderr($tracker_lang['error'], "пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ ".($respect_type == 'good'?"пїЅпїЅпїЅпїЅпїЅпїЅпїЅ":"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ").".");
         }*/
         if (isset($_GET["returnto"])) {
         	$returl = $_GET["returnto"];
 			header("Refresh: 2; url=$returl");
         };
         stdhead();
-        stdmsg($tracker_lang['success'], "<p>".($respect_type == 'good' ? "Респект" : "Антиреспект")." удален успешно.</p>".(isset($_GET["returnto"]) ? "Сейчас вы будете переадресованы на страницу, откуда вы пришли." : ""));
+        stdmsg($tracker_lang['success'], "<p>".($respect_type == 'good' ? "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ" : "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ")." пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.</p>".(isset($_GET["returnto"]) ? "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ." : ""));
         if (isset($_GET["returnto"])) {
-        	print("<p><a href=\"".htmlspecialchars_uni($_GET["returnto"])."\">Нажмите сюда, если вы не были переадресованы</a></p>");
+        	print("<p><a href=\"".htmlspecialchars_uni($_GET["returnto"])."\">пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</a></p>");
         }
         stdfoot();
         die();

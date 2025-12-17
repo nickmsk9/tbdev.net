@@ -328,7 +328,7 @@ $to = "";
 $nmax = 100; // Max recipients per message
 $nthis = 0;
 $ntotal = 0;
-$total = mysql_num_rows($res);
+$total = mysqli_num_rows($res);
 while ($arr = mysql_fetch_row($res))
 {
   if ($nthis == 0)

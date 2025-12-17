@@ -47,7 +47,7 @@ if (!$action)
         }
 }
 
-// начало просмотр почтового ящика
+// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 if ($action == "viewmailbox") {
         // Get Mailbox Number
         $mailbox = (int) $_GET['box'];
@@ -111,7 +111,7 @@ if ($action == "viewmailbox") {
         } else {
                 $res = sql_query("SELECT m.*, u.username AS receiver_username, s.id AS sfid, r.id AS rfid FROM messages m LEFT JOIN users u ON m.receiver = u.id LEFT JOIN friends r ON r.userid = {$CURUSER["id"]} AND r.friendid = m.receiver LEFT JOIN friends s ON s.userid = {$CURUSER["id"]} AND s.friendid = m.sender WHERE sender=" . sqlesc($CURUSER['id']) . " AND saved='yes' ORDER BY id DESC") or sqlerr(__FILE__,__LINE__);
         }
-        if (mysql_num_rows($res) == 0) {
+        if (mysqli_num_rows($res) == 0) {
                 echo("<TD colspan=\"6\" align=\"center\">".$tracker_lang['no_messages'].".</TD>\n");
         }
         else
@@ -124,10 +124,10 @@ if ($action == "viewmailbox") {
                                 $id = $row['sender'];
                                 $friend = $row['sfid'];
                                 if ($friend && $CURUSER['id'] != $row['sender']) {
-                                        $username .= "&nbsp;<a href=friends.php?action=delete&type=friend&targetid=$id>[удалить из друзей]</a>";
+                                        $username .= "&nbsp;<a href=friends.php?action=delete&type=friend&targetid=$id>[пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ]</a>";
                                 }
                                 elseif ($CURUSER['id'] != $row['sender']) {
-                                        $username .= "&nbsp;<a href=friends.php?action=add&type=friend&targetid=$id>[добавить в друзья]</a>";
+                                        $username .= "&nbsp;<a href=friends.php?action=add&type=friend&targetid=$id>[пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ]</a>";
                                 }
                         }
                         else {
@@ -139,10 +139,10 @@ if ($action == "viewmailbox") {
                                 $id_r = $row['receiver'];
                                 $friend = $row['rfid'];
                                 if ($friend && $CURUSER['id'] != $row['receiver']) {
-                                        $receiver .= "&nbsp;<a href=friends.php?action=delete&type=friend&targetid=$id_r>[удалить из друзей]</a>";
+                                        $receiver .= "&nbsp;<a href=friends.php?action=delete&type=friend&targetid=$id_r>[пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ]</a>";
                                 }
                                 elseif ($CURUSER['id'] != $row['receiver']) {
-                                        $receiver .= "&nbsp;<a href=friends.php?action=add&type=friend&targetid=$id_r>[добавить в друзья]</a>";
+                                        $receiver .= "&nbsp;<a href=friends.php?action=add&type=friend&targetid=$id_r>[пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ]</a>";
                                 }
                         }
                         else {
@@ -179,26 +179,26 @@ if ($action == "viewmailbox") {
         </tr>
         </form>
         </table>
-        <div align="left"><img src="pic/pn_inboxnew.gif" alt="Непрочитанные" /> <?=$tracker_lang['mail_unread_desc'];?><br />
-        <img src="pic/pn_inbox.gif" alt="Прочитанные" /> <?=$tracker_lang['mail_read_desc'];?></div>
+        <div align="left"><img src="pic/pn_inboxnew.gif" alt="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" /> <?=$tracker_lang['mail_unread_desc'];?><br />
+        <img src="pic/pn_inbox.gif" alt="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" /> <?=$tracker_lang['mail_read_desc'];?></div>
         <?
         stdfoot();
 }
-// конец просмотр почтового ящика
+// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 
 
-// начало просмотр тела сообщения
+// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 if ($action == "viewmessage") {
         $pm_id = (int) $_GET['id'];
         if (!$pm_id)
         {
-                stderr($tracker_lang['error'], "У вас нет прав для просмотра этого сообщения.");
+                stderr($tracker_lang['error'], "пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         }
         // Get the message
         $res = sql_query('SELECT * FROM messages WHERE id=' . sqlesc($pm_id) . ' AND (receiver=' . sqlesc($CURUSER['id']) . ' OR (sender=' . sqlesc($CURUSER['id']). ' AND saved=\'yes\')) LIMIT 1') or sqlerr(__FILE__,__LINE__);
-        if (mysql_num_rows($res) == 0)
+        if (mysqli_num_rows($res) == 0)
         {
-                stderr($tracker_lang['error'],"Такого сообщения не существует.");
+                stderr($tracker_lang['error'],"пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         }
         // Prepare for displaying message
         $message = mysql_fetch_assoc($res);
@@ -209,14 +209,14 @@ if ($action == "viewmessage") {
                 $sender = mysqli_fetch_assoc($res2);
                 $sender = "<A href=\"userdetails.php?id=" . $message['receiver'] . "\">" . $sender[0] . "</A>";
                 $reply = "";
-                $from = "Кому";
+                $from = "пїЅпїЅпїЅпїЅ";
         }
         else
         {
-                $from = "От кого";
+                $from = "пїЅпїЅ пїЅпїЅпїЅпїЅ";
                 if ($message['sender'] == 0)
                 {
-                        $sender = "Системное";
+                        $sender = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
                         $reply = "";
                 }
                 else
@@ -224,14 +224,14 @@ if ($action == "viewmessage") {
                         $res2 = sql_query("SELECT username FROM users WHERE id=" . sqlesc($message['sender'])) or sqlerr(__FILE__,__LINE__);
                         $sender = mysqli_fetch_assoc($res2);
                         $sender = "<A href=\"userdetails.php?id=" . $message['sender'] . "\">" . $sender[0] . "</A>";
-                        $reply = " [ <A href=\"message.php?action=sendmessage&amp;receiver=" . $message['sender'] . "&amp;replyto=" . $pm_id . "\">Ответить</A> ]";
+                        $reply = " [ <A href=\"message.php?action=sendmessage&amp;receiver=" . $message['sender'] . "&amp;replyto=" . $pm_id . "\">пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</A> ]";
                 }
         }
         $body = format_comment($message['msg']);
         $added = display_date_time(strtotime($message['added']), $CURUSER['tzoffset']);
         if (get_user_class() >= UC_MODERATOR && $message['sender'] == $CURUSER['id'])
         {
-                $unread = ($message['unread'] == 'yes' ? "<SPAN style=\"color: #FF0000;\"><b>(Новое)</b></A>" : "");
+                $unread = ($message['unread'] == 'yes' ? "<SPAN style=\"color: #FF0000;\"><b>(пїЅпїЅпїЅпїЅпїЅ)</b></A>" : "");
         }
         else
         {
@@ -240,17 +240,17 @@ if ($action == "viewmessage") {
         $subject = htmlspecialchars_uni($message['subject']);
         if (strlen($subject) <= 0)
         {
-                $subject = "Без темы";
+                $subject = "пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ";
         }
         // Mark message unread
         sql_query("UPDATE messages SET unread='no' WHERE id=" . sqlesc($pm_id) . " AND receiver=" . sqlesc($CURUSER['id']) . " LIMIT 1");
         // Display message
-        stdhead("Личное Сообщение (Тема: $subject)"); ?>
+        stdhead("пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅ: $subject)"); ?>
         <TABLE width="660" border="0" cellpadding="4" cellspacing="0">
-        <TR><TD class="colhead" colspan="2">Тема: <?=$subject?></TD></TR>
+        <TR><TD class="colhead" colspan="2">пїЅпїЅпїЅпїЅ: <?=$subject?></TD></TR>
         <TR>
         <TD width="50%" class="colhead"><?=$from?></TD>
-        <TD width="50%" class="colhead">Дата отправки</TD>
+        <TD width="50%" class="colhead">пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</TD>
         </TR>
         <TR>
         <TD><?=$sender?></TD>
@@ -260,24 +260,24 @@ if ($action == "viewmessage") {
         <TD colspan="2"><?=$body?></TD>
         </TR>
         <TR>
-        <TD align="right" colspan=2>[ <A href="message.php?action=deletemessage&id=<?=$pm_id?>">Удалить</A> ]<?=$reply?> [ <A href="message.php?action=forward&id=<?=$pm_id?>">Переслать</A> ]</TD>
+        <TD align="right" colspan=2>[ <A href="message.php?action=deletemessage&id=<?=$pm_id?>">пїЅпїЅпїЅпїЅпїЅпїЅпїЅ</A> ]<?=$reply?> [ <A href="message.php?action=forward&id=<?=$pm_id?>">пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</A> ]</TD>
         </TR>
         </TABLE><?
         stdfoot();
 }
-// конец просмотр тела сообщения
+// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 
-// начало просмотр посылка сообщения
+// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 if ($action == "sendmessage") {
 
         $receiver = $_GET["receiver"];
         if (!is_valid_id($receiver))
-                stderr($tracker_lang['error'], "Неверное ID получателя");
+                stderr($tracker_lang['error'], "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ID пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
 
         $replyto = $_GET["replyto"];
         if ($replyto && !is_valid_id($replyto))
-                stderr($tracker_lang['error'], "Неверное ID сообщения");
+                stderr($tracker_lang['error'], "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ID пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
 
         $auto = $_GET["auto"];
         $std = $_GET["std"];
@@ -288,7 +288,7 @@ if ($action == "sendmessage") {
         $res = sql_query("SELECT * FROM users WHERE id=$receiver") or die(mysql_error());
         $user = mysql_fetch_assoc($res);
         if (!$user)
-                stderr($tracker_lang['error'], "Пользователя с таким ID не существует.");
+                stderr($tracker_lang['error'], "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ ID пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         if ($auto)
                 $body = $pm_std_reply[$auto];
         if ($std)
@@ -298,25 +298,25 @@ if ($action == "sendmessage") {
                 $res = sql_query("SELECT * FROM messages WHERE id=$replyto") or sqlerr(__FILE__, __LINE__);
                 $msga = mysql_fetch_assoc($res);
                 if ($msga["receiver"] != $CURUSER["id"])
-                        stderr($tracker_lang['error'], "Вы пытаетесь ответить не на свое сообщение!");
+                        stderr($tracker_lang['error'], "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
 
                 $res = sql_query("SELECT username FROM users WHERE id=" . $msga["sender"]) or sqlerr(__FILE__, __LINE__);
                 $usra = mysql_fetch_assoc($res);
-                $body .= "\n\n\n-------- $usra[username] писал(а): --------\n".htmlspecialchars_uni($msga['msg'])."\n";
+                $body .= "\n\n\n-------- $usra[username] пїЅпїЅпїЅпїЅпїЅ(пїЅ): --------\n".htmlspecialchars_uni($msga['msg'])."\n";
                 // Change
                 $subject = "Re: " . htmlspecialchars_uni($msga['subject']);
                 // End of Change
         }
 
-        stdhead("Отсылка сообщений", false);
+        stdhead("пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", false);
         ?>
         <table class=main border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>
         <form name=message method=post action=message.php>
         <input type=hidden name=action value=takemessage>
         <table class=message cellspacing=0 cellpadding=5>
-        <tr><td colspan=2 class=colhead>Сообщение для <a class=altlink_white href=userdetails.php?id=<?=$receiver?>><?=$user["username"]?></a></td></tr>
+        <tr><td colspan=2 class=colhead>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ <a class=altlink_white href=userdetails.php?id=<?=$receiver?>><?=$user["username"]?></a></td></tr>
         <TR>
-        <TD colspan="2"><B>Тема:&nbsp;&nbsp;</B>
+        <TD colspan="2"><B>пїЅпїЅпїЅпїЅ:&nbsp;&nbsp;</B>
         <INPUT name="subject" type="text" size="60" value="<?=$subject?>" maxlength="255"></TD>
         </TR>
         <tr><td<?=$replyto?" colspan=2":""?>>
@@ -326,11 +326,11 @@ if ($action == "sendmessage") {
         </td></tr>
         <tr>
         <? if ($replyto) { ?>
-        <td align=center><input type=checkbox name='delete' value='yes' <?=$CURUSER['deletepms'] == 'yes'?"checked":""?>>Удалить сообщение после ответа
+        <td align=center><input type=checkbox name='delete' value='yes' <?=$CURUSER['deletepms'] == 'yes'?"checked":""?>>пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         <input type=hidden name=origmsg value=<?=$replyto?>></td>
         <? } ?>
-        <td align=center><input type=checkbox name='save' value='yes' <?=$CURUSER['savepms'] == 'yes'?"checked":""?>>Сохранить сообщение в отправленных</td></tr>
-        <tr><td<?=$replyto?" colspan=2":""?> align=center><input type=submit value="Послать!" class=btn></td></tr>
+        <td align=center><input type=checkbox name='save' value='yes' <?=$CURUSER['savepms'] == 'yes'?"checked":""?>>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ</td></tr>
+        <tr><td<?=$replyto?" colspan=2":""?> align=center><input type=submit value="пїЅпїЅпїЅпїЅпїЅпїЅпїЅ!" class=btn></td></tr>
         </table>
         <input type=hidden name=receiver value=<?=$receiver?>>
         </form>
@@ -338,10 +338,10 @@ if ($action == "sendmessage") {
         <?
         stdfoot();
 }
-// конец посылка сообщения
+// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 
-// начало прием посланного сообщения
+// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 if ($action == 'takemessage') {
 
         $receiver = $_POST["receiver"];
@@ -349,39 +349,39 @@ if ($action == 'takemessage') {
         $save = $_POST["save"];
         $returnto = $_POST["returnto"];
         if (!is_valid_id($receiver) || ($origmsg && !is_valid_id($origmsg)))
-                stderr($tracker_lang['error'],"Неверный ID");
+                stderr($tracker_lang['error'],"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ID");
         $msg = trim($_POST["msg"]);
         if (!$msg)
-                stderr($tracker_lang['error'],"Пожалуйста введите сообщение!");
+                stderr($tracker_lang['error'],"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
         $subject = trim($_POST['subject']);
         if (!$subject)
-                stderr($tracker_lang['error'],"Пожалуйста введите тему сообщения!");
+                stderr($tracker_lang['error'],"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
         // Change
         $save = ($save == 'yes') ? "yes" : "no";
         // End of Change
         $res = sql_query("SELECT email, acceptpms, notifs, parked, UNIX_TIMESTAMP(last_access) as la FROM users WHERE id=$receiver") or sqlerr(__FILE__, __LINE__);
         $user = mysql_fetch_assoc($res);
         if (!$user)
-                stderr($tracker_lang['error'], "Нет пользователя с таким ID $receiver.");
+                stderr($tracker_lang['error'], "пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ ID $receiver.");
         //Make sure recipient wants this message
         if ($user["parked"] == "yes")
-                stderr($tracker_lang['error'], "Этот аккаунт припаркован.");
+                stderr($tracker_lang['error'], "пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         if (get_user_class() < UC_MODERATOR)
         {
                 if ($user["acceptpms"] == "yes")
                 {
                         $res2 = sql_query("SELECT * FROM blocks WHERE userid=$receiver AND blockid=" . $CURUSER["id"]) or sqlerr(__FILE__, __LINE__);
-                        if (mysql_num_rows($res2) == 1)
-                                sttderr("Отклонено", "Этот пользователь добавил вас в черный список.");
+                        if (mysqli_num_rows($res2) == 1)
+                                sttderr("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.");
                 }
                 elseif ($user["acceptpms"] == "friends")
                 {
                         $res2 = sql_query("SELECT * FROM friends WHERE userid=$receiver AND friendid=" . $CURUSER["id"]) or sqlerr(__FILE__, __LINE__);
-                        if (mysql_num_rows($res2) != 1)
-                                 stderr("Отклонено", "Этот пользователь принимает сообщение только из списка своих друзей");
+                        if (mysqli_num_rows($res2) != 1)
+                                 stderr("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ");
                 }
                 elseif ($user["acceptpms"] == "no")
-                                 stderr("Отклонено", "Этот пользователь не принимает сообщения.");
+                                 stderr("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         }
         sql_query("INSERT INTO messages (poster, sender, receiver, added, msg, subject, saved, location) VALUES(" . $CURUSER["id"] . ", " . $CURUSER["id"] . ",
         $receiver, '" . get_date_time() . "', " . sqlesc($msg) . ", " . sqlesc($subject) . ", " . sqlesc($save) . ", 1)") or sqlerr(__FILE__, __LINE__);
@@ -390,9 +390,9 @@ if ($action == 'takemessage') {
                 $username = $CURUSER["username"];
                 $usremail = $user["email"];
 $body = <<<EOD
-$username послал вам личное сообщение!
+$username пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!
 
-Пройдите по ссылке ниже, чтобы его прочитать.
+пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 
 $DEFAULTBASEURL/message.php?action=viewmessage&id=$sended_id
 
@@ -400,7 +400,7 @@ $DEFAULTBASEURL/message.php?action=viewmessage&id=$sended_id
 
 $SITENAME
 EOD;
-                $subj = "Вы получили новое ЛС от $username!"; 
+                $subj = "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ $username!"; 
                 sent_mail($usremail, $SITENAME, $SITEEMAIL, $subj, $body, false);
         }
         $delete = $_POST["delete"];
@@ -410,11 +410,11 @@ EOD;
                 {
                         // Make sure receiver of $origmsg is current user
                         $res = sql_query("SELECT * FROM messages WHERE id=$origmsg") or sqlerr(__FILE__, __LINE__);
-                        if (mysql_num_rows($res) == 1)
+                        if (mysqli_num_rows($res) == 1)
                         {
                                 $arr = mysql_fetch_assoc($res);
                                 if ($arr["receiver"] != $CURUSER["id"])
-                                        stderr($tracker_lang['error'],"Вы пытаетесь удалить не свое сообщение!");
+                                        stderr($tracker_lang['error'],"пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
                                 if ($arr["saved"] == "no")
                                         sql_query("DELETE FROM messages WHERE id=$origmsg") or sqlerr(__FILE__, __LINE__);
                                 elseif ($arr["saved"] == "yes")
@@ -430,15 +430,15 @@ EOD;
         }
         else {
                 header ("Refresh: 2; url=message.php");
-                stderr($tracker_lang['success'] , "Сообщение было успешно отправлено!");
+                stderr($tracker_lang['success'] , "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
         }
 
 
 }
-// конец прием посланного сообщения
+// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 
-//начало массовая рассылка
+//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 if ($action == 'mass_pm') {
         if (get_user_class() < UC_MODERATOR)
                 stderr($tracker_lang['error'], $tracker_lang['access_denied']);
@@ -449,7 +449,7 @@ if ($action == 'mass_pm') {
         if ($auto)
                 $body=$mm_template[$auto][1];
 
-        stdhead("Отсылка сообщений", false);
+        stdhead("пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", false);
         ?>
         <table class=main border=0 cellspacing=0 cellpadding=0>
         <tr><td class=embedded><div align=center>
@@ -459,26 +459,26 @@ if ($action == 'mass_pm') {
         <input type=hidden name=returnto value="<?=htmlspecialchars_uni($_SERVER["HTTP_REFERER"]);?>">
         <? } ?>
         <table border=1 cellspacing=0 cellpadding=5>
-        <tr><td class=colhead colspan=2>Массовая рассылка для <?=$n_pms?> пользовате<?=($n_pms>1?"лей":"ля")?></td></tr>
+        <tr><td class=colhead colspan=2>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ <?=$n_pms?> пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ<?=($n_pms>1?"пїЅпїЅпїЅ":"пїЅпїЅ")?></td></tr>
         <TR>
-        <TD colspan="2"><B>Тема:&nbsp;&nbsp;</B>
+        <TD colspan="2"><B>пїЅпїЅпїЅпїЅ:&nbsp;&nbsp;</B>
         <INPUT name="subject" type="text" size="60" maxlength="255"></TD>
         </TR>
         <tr><td colspan="2"><div align="center">
         <?=textbbcode("message","msg","$body");?>
         </div></td></tr>
-        <tr><td colspan="2"><div align="center"><b>Комментарий:&nbsp;&nbsp;</b>
+        <tr><td colspan="2"><div align="center"><b>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:&nbsp;&nbsp;</b>
         <input name="comment" type="text" size="70">
         </div></td></tr>
-        <tr><td><div align="center"><b>От:&nbsp;&nbsp;</b>
+        <tr><td><div align="center"><b>пїЅпїЅ:&nbsp;&nbsp;</b>
         <?=$CURUSER['username']?>
         <input name="sender" type="radio" value="self" checked>
-        &nbsp; Системное
+        &nbsp; пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         <input name="sender" type="radio" value="system">
         </div></td>
         <td><div align="center"><b>Take snapshot:</b>&nbsp;<input name="snap" type="checkbox" value="1">
          </div></td></tr>
-        <tr><td colspan="2" align=center><input type=submit value="Послать!" class=btn>
+        <tr><td colspan="2" align=center><input type=submit value="пїЅпїЅпїЅпїЅпїЅпїЅпїЅ!" class=btn>
         </td></tr></table>
         <input type=hidden name=pmees value="<?=$pmees?>">
         <input type=hidden name=n_pms value=<?=$n_pms?>>
@@ -491,16 +491,16 @@ if ($action == 'mass_pm') {
         stdfoot();
 
 }
-//конец массовая рассылка
+//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 
-//начало прием сообщений из массовой рассылки
+//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 if ($action == 'takemass_pm') {
         if (get_user_class() < UC_MODERATOR)
                 stderr($tracker_lang['error'], $tracker_lang['access_denied']);
         $msg = trim($_POST["msg"]);
         if (!$msg)
-                stderr($tracker_lang['error'],"Пожалуйста введите сообщение.");
+                stderr($tracker_lang['error'],"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         $sender_id = ($_POST['sender'] == 'system' ? 0 : $CURUSER['id']);
         $from_is = unesc($_POST['pmees']);
         // Change
@@ -517,7 +517,7 @@ if ($action == 'takemass_pm') {
         if ($comment || $snapshot)
         {
                 $res = sql_query("SELECT u.id, u.uploaded, u.downloaded, u.modcomment ".$from_is) or sqlerr(__FILE__, __LINE__);
-                if (mysql_num_rows($res) > 0)
+                if (mysqli_num_rows($res) > 0)
                 {
                         $l = 0;
                         while ($user = mysqli_fetch_assoc($res))
@@ -542,12 +542,12 @@ if ($action == 'takemass_pm') {
                 }
         }
         header ("Refresh: 3; url=message.php");
-        stderr($tracker_lang['success'], (($n_pms > 1) ? "$n сообщений из $n_pms было" : "Сообщение было")." успешно отправлено!" . ($l ? " $l комментарий(ев) в профиле " . (($l>1) ? "были" : " был") . " обновлен!" : ""));
+        stderr($tracker_lang['success'], (($n_pms > 1) ? "$n пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ $n_pms пїЅпїЅпїЅпїЅ" : "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ")." пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!" . ($l ? " $l пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ(пїЅпїЅ) пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ " . (($l>1) ? "пїЅпїЅпїЅпїЅ" : " пїЅпїЅпїЅ") . " пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!" : ""));
 }
-//конец прием сообщений из массовой рассылки
+//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 
-//начало перемещение, помечание как прочитанного
+//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 if ($action == "moveordel") {
         $pm_id = (int) $_POST['id'];
         $pm_box = (int) $_POST['box'];
@@ -563,7 +563,7 @@ if ($action == "moveordel") {
                 }
                 // Check if messages were moved
                 if (@mysql_affected_rows() == 0) {
-                        stderr($tracker_lang['error'], "Не возможно переместить сообщения!");
+                        stderr($tracker_lang['error'], "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
                 }
                 header("Location: message.php?action=viewmailbox&box=" . $pm_box);
                 exit();
@@ -607,7 +607,7 @@ if ($action == "moveordel") {
                 }
                 // Check if messages were moved
                 if (@mysql_affected_rows() == 0) {
-                        stderr($tracker_lang['error'],"Сообщение не может быть удалено!");
+                        stderr($tracker_lang['error'],"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
                 }
                 else {
                         header("Location: message.php?action=viewmailbox&box=" . $pm_box);
@@ -615,11 +615,11 @@ if ($action == "moveordel") {
                 }
         }
         elseif ($_POST["markread"]) {
-                //помечаем одно сообщение
+                //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 if ($pm_id) {
                         sql_query("UPDATE messages SET unread='no' WHERE id = " . sqlesc($pm_id)) or sqlerr(__FILE__,__LINE__);
                 }
-                //помечаем множество сообщений
+                //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 else {
                 		if (is_array($pm_messages))
                         foreach ($pm_messages as $id) {
@@ -628,9 +628,9 @@ if ($action == "moveordel") {
                                 sql_query("UPDATE messages SET unread='no' WHERE id = " . sqlesc((int) $id)) or sqlerr(__FILE__,__LINE__);
                         }
                 }
-                // Проверяем, были ли помечены сообщения
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 if (@mysql_affected_rows() == 0) {
-                        stderr($tracker_lang['error'], "Сообщение не может быть помечено как прочитанное! ");
+                        stderr($tracker_lang['error'], "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ! ");
                 }
                 else {
                         header("Location: message.php?action=viewmailbox&box=" . $pm_box);
@@ -638,12 +638,12 @@ if ($action == "moveordel") {
                 }
         }
 
-stderr($tracker_lang['error'],"Нет действия.");
+stderr($tracker_lang['error'],"пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
 }
-//конец перемещение, помечание как прочитанного
+//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 
-//начало пересылка
+//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 if ($action == "forward") {
         if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 // Display form
@@ -653,10 +653,10 @@ if ($action == "forward") {
                 $res = sql_query('SELECT * FROM messages WHERE id=' . sqlesc($pm_id) . ' AND (receiver=' . sqlesc($CURUSER['id']) . ' OR sender=' . sqlesc($CURUSER['id']) . ') LIMIT 1') or sqlerr(__FILE__,__LINE__);
 
                 if (!$res) {
-                        stderr($tracker_lang['error'], "У вас нет разрешения пересылать это сообщение.");
+                        stderr($tracker_lang['error'], "пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
                 }
-                if (mysql_num_rows($res) == 0) {
-                        stderr($tracker_lang['error'], "У вас нет разрешения пересылать это сообщение.");
+                if (mysqli_num_rows($res) == 0) {
+                        stderr($tracker_lang['error'], "пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
                 }
                 $message = mysql_fetch_assoc($res);
 
@@ -670,15 +670,15 @@ if ($action == "forward") {
                 $orig2 = mysql_fetch_assoc($res);
                 $orig_name = "<A href=\"userdetails.php?id=" . $from . "\">" . $orig2['username'] . "</A>";
                 if ($from == 0) {
-                        $from_name = "Системное";
-                        $from2['username'] = "Системное";
+                        $from_name = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
+                        $from2['username'] = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
                 }
                 else {
                         $from2 = mysqli_fetch_assoc($res);
                         $from_name = "<A href=\"userdetails.php?id=" . $from . "\">" . $from2['username'] . "</A>";
                 }
 
-                $body = "-------- Оригинальное сообщение от " . $from2['username'] . ": --------<BR>" . format_comment($message['msg']);
+                $body = "-------- пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ " . $from2['username'] . ": --------<BR>" . format_comment($message['msg']);
 
                 stdhead($subject);?>
 
@@ -688,27 +688,27 @@ if ($action == "forward") {
                 <TABLE border="0" cellpadding="4" cellspacing="0">
                 <TR><TD class="colhead" colspan="2"><?=$subject?></TD></TR>
                 <TR>
-                <TD>Кому:</TD>
-                <TD><INPUT type="text" name="to" value="Введите имя" size="83"></TD>
+                <TD>пїЅпїЅпїЅпїЅ:</TD>
+                <TD><INPUT type="text" name="to" value="пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ" size="83"></TD>
                 </TR>
                 <TR>
-                <TD>Оригинальный<BR>отправитель:</TD>
+                <TD>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ<BR>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:</TD>
                 <TD><?=$orig_name?></TD>
                 </TR>
                 <TR>
-                <TD>От:</TD>
+                <TD>пїЅпїЅ:</TD>
                 <TD><?=$from_name?></TD>
                 </TR>
                 <TR>
-                <TD>Тема:</TD>
+                <TD>пїЅпїЅпїЅпїЅ:</TD>
                 <TD><INPUT type="text" name="subject" value="<?=$subject?>" size="83"></TD>
                 </TR>
                 <TR>
-                <TD>Сообщение:</TD>
+                <TD>пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:</TD>
                 <TD><TEXTAREA name="msg" cols="80" rows="8"></TEXTAREA><BR><?=$body?></TD>
                 </TR>
                 <TR>
-                <TD colspan="2" align="center">Сохранить сообщение <INPUT type="checkbox" name="save" value="1"<?=$CURUSER['savepms'] == 'yes'?" checked":""?>>&nbsp;<INPUT type="submit" value="Переслать"></TD>
+                <TD colspan="2" align="center">пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ <INPUT type="checkbox" name="save" value="1"<?=$CURUSER['savepms'] == 'yes'?" checked":""?>>&nbsp;<INPUT type="submit" value="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"></TD>
                 </TR>
                 </TABLE>
                 </FORM><?
@@ -723,11 +723,11 @@ if ($action == "forward") {
                 // Get the message
                 $res = sql_query('SELECT * FROM messages WHERE id=' . sqlesc($pm_id) . ' AND (receiver=' . sqlesc($CURUSER['id']) . ' OR sender=' . sqlesc($CURUSER['id']) . ') LIMIT 1') or sqlerr(__FILE__,__LINE__);
                 if (!$res) {
-                        stderr($tracker_lang['error'], "У вас нет разрешения пересылать это сообщение.");
+                        stderr($tracker_lang['error'], "пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
                 }
 
-                if (mysql_num_rows($res) == 0) {
-                        stderr($tracker_lang['error'], "У вас нет разрешения пересылать это сообщение.");
+                if (mysqli_num_rows($res) == 0) {
+                        stderr($tracker_lang['error'], "пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
                 }
 
                 $message = mysql_fetch_assoc($res);
@@ -738,10 +738,10 @@ if ($action == "forward") {
 
                 $res = sql_query("SELECT id FROM users WHERE LOWER(username)=LOWER(" . sqlesc($username) . ") LIMIT 1");
                 if (!$res) {
-                        stderr($tracker_lang['error'], "Пользователя, с таким именем не существует.");
+                        stderr($tracker_lang['error'], "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
                 }
-                if (mysql_num_rows($res) == 0) {
-                        stderr($tracker_lang['error'], "Пользователя, с таким именем не существует.");
+                if (mysqli_num_rows($res) == 0) {
+                        stderr($tracker_lang['error'], "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
                 }
 
                 $to = mysqli_fetch_assoc($res);
@@ -749,7 +749,7 @@ if ($action == "forward") {
 
                 // Get Orignal sender's username
                 if ($message['sender'] == 0) {
-                        $from = "Системное";
+                        $from = "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ";
                 }
                 else {
                         $res = sql_query("SELECT * FROM users WHERE id=" . sqlesc($message['sender'])) or sqlerr(__FILE__,__LINE__);
@@ -757,7 +757,7 @@ if ($action == "forward") {
                         $from = $from['username'];
                 }
                 $body = (string) $_POST['msg'];
-                $body .= "\n-------- Оригинальное сообщение от " . $from . ": --------\n" . $message['msg'];
+                $body .= "\n-------- пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ " . $from . ": --------\n" . $message['msg'];
                 $save = (int) $_POST['save'];
                 if ($save) {
                         $save = 'yes';
@@ -770,36 +770,36 @@ if ($action == "forward") {
                 if (get_user_class() < UC_MODERATOR) {
                         if ($from["acceptpms"] == "yes") {
                                 $res2 = sql_query("SELECT * FROM blocks WHERE userid=$to AND blockid=" . $CURUSER["id"]) or sqlerr(__FILE__, __LINE__);
-                                if (mysql_num_rows($res2) == 1)
-                                        stderr("Отклонено", "Этот пользователь добавил вас в черный список.");
+                                if (mysqli_num_rows($res2) == 1)
+                                        stderr("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.");
                         }
                         elseif ($from["acceptpms"] == "friends") {
                                 $res2 = sql_query("SELECT * FROM friends WHERE userid=$to AND friendid=" . $CURUSER["id"]) or sqlerr(__FILE__, __LINE__);
-                                if (mysql_num_rows($res2) != 1)
-                                        stderr("Отклонено", "Этот пользователь принимает сообщение только из списка своих друзей.");
+                                if (mysqli_num_rows($res2) != 1)
+                                        stderr("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.");
                         }
 
                         elseif ($from["acceptpms"] == "no")
-                                stderr("Отклонено", "Этот пользователь не принимает сообщения.");
+                                stderr("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
                 }
                 sql_query("INSERT INTO messages (poster, sender, receiver, added, subject, msg, location, saved) VALUES(" . $CURUSER["id"] . ", " . $CURUSER["id"] . ", $to, '" . get_date_time() . "', " . sqlesc($subject) . "," . sqlesc($body) . ", " . sqlesc(PM_INBOX) . ", " . sqlesc($save) . ")") or sqlerr(__FILE__, __LINE__);
-                        stderr("Удачно", "ЛС переслано.");
+                        stderr("пїЅпїЅпїЅпїЅпїЅпїЅ", "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         }
 }
-//конец пересылка
+//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 
-//начало удаление сообщения
+//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 if ($action == "deletemessage") {
         $pm_id = (int) $_GET['id'];
 
         // Delete message
         $res = sql_query("SELECT * FROM messages WHERE id=" . sqlesc($pm_id)) or sqlerr(__FILE__,__LINE__);
         if (!$res) {
-                stderr($tracker_lang['error'],"Сообщения с таким ID не существует.");
+                stderr($tracker_lang['error'],"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ ID пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         }
-        if (mysql_num_rows($res) == 0) {
-                stderr($tracker_lang['error'],"Сообщения с таким ID не существует.");
+        if (mysqli_num_rows($res) == 0) {
+                stderr($tracker_lang['error'],"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ ID пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         }
         $message = mysql_fetch_assoc($res);
         if ($message['receiver'] == $CURUSER['id'] && $message['saved'] == 'no') {
@@ -815,15 +815,15 @@ if ($action == "deletemessage") {
                 $res2 = sql_query("UPDATE messages SET saved = 'no' WHERE id = " . sqlesc($pm_id)) or sqlerr(__FILE__,__LINE__);
         }
         if (!$res2) {
-                stderr($tracker_lang['error'],"Невозможно удалить сообщение.");
+                stderr($tracker_lang['error'],"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         }
         if (mysql_affected_rows() == 0) {
-                stderr($tracker_lang['error'],"Невозможно удалить сообщение.");
+                stderr($tracker_lang['error'],"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
         }
         else {
                 header("Location: message.php?action=viewmailbox&id=" . $message['location']);
                 exit();
         }
 }
-//конец удаление сообщения
+//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 ?>

@@ -596,7 +596,7 @@ $count_row = mysqli_fetch_assoc($count_sql);
 $count = $count_row[0];*/
 
 $thanked_sql = sql_query("SELECT thanks.userid, users.username, users.class FROM thanks INNER JOIN users ON thanks.userid = users.id WHERE thanks.torrentid = $torrentid");
-$count = mysql_num_rows($thanked_sql);
+$count = mysqli_num_rows($thanked_sql);
 
 if ($count == 0) {
 	$thanksby = $tracker_lang['none_yet'];
