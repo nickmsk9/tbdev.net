@@ -129,18 +129,43 @@ if ($action === 'edit') {
         $returnto = isset($_GET['returnto']) ? (string)$_GET['returnto'] : '';
         $returnto = htmlentities($returnto, ENT_QUOTES, 'UTF-8');
 
-        stdhead("Редактирование новости");
-        echo '<form name="news" method="post" action="?action=edit&newsid=' . $newsid . '">';
-        echo '<table border="1" cellspacing="0" cellpadding="5">';
-        echo '<tr><td class="colhead">Редактирование новости</td></tr>';
-        echo '<tr><td>Тема: <input type="text" name="subject" maxlength="70" size="50" value="' . htmlspecialchars_uni($arr['subject'] ?? '') . '"/></td></tr>';
-        echo '<tr><td>' . textbbcode("news", "body", htmlspecialchars_uni($arr['body'] ?? '')) . '</td></tr>';
-        echo '<input type="hidden" name="returnto" value="' . $returnto . '">';
-        echo '<tr><td align="center"><input type="submit" value="Сохранить"></td></tr>';
-        echo '</table>';
-        echo '</form>';
-        stdfoot();
-        die;
+       stdhead("Редактирование новости");
+
+echo '<form name="news" method="post" action="?action=edit&newsid=' . (int)$newsid . '">';
+echo '<input type="hidden" name="returnto" value="' . $returnto . '">';
+
+echo '<table width="100%" border="0" cellspacing="0" cellpadding="0">';
+echo '<tr><td align="center">';
+
+echo '<table width="80%" border="1" cellspacing="0" cellpadding="5">';
+
+echo '<tr><td class="colhead" align="center">Редактирование новости</td></tr>';
+
+// Центрируем и подпись, и поле
+echo '<tr><td align="center">'
+    . 'Тема:&nbsp;'
+    . '<input type="text" name="subject" maxlength="70" size="70" value="'
+    . htmlspecialchars_uni($arr['subject'] ?? '')
+    . '"/>'
+    . '</td></tr>';
+
+// Центрируем редактор
+echo '<tr><td align="center">';
+echo textbbcode("news", "body", htmlspecialchars_uni($arr['body'] ?? ''));
+echo '</td></tr>';
+
+echo '<tr><td align="center"><input type="submit" value="Сохранить"></td></tr>';
+
+echo '</table>';
+
+echo '</td></tr></table>';
+echo '</form>';
+
+stdfoot();
+die;
+
+
+
     }
 }
 
