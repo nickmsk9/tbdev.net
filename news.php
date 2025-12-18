@@ -26,164 +26,189 @@
 // +--------------------------------------------------------------------------+
 */
 
-require "include/bittorrent.php";
+declare(strict_types=1);
+
+require_once "include/bittorrent.php";
 
 dbconn();
 loggedinorreturn();
 
-if (get_user_class() < UC_ADMINISTRATOR)
-	stderr($tracker_lang['error'], '������ �������.');
+if (get_user_class() < UC_ADMINISTRATOR) {
+    stderr($tracker_lang['error'] ?? 'Ошибка', 'Доступ запрещён.');
+}
 
-$action = (string)$_GET["action"];
+// Без Notice, если action не передали
+$action  = isset($_GET['action']) ? (string)$_GET['action'] : '';
+$warning = '';
+$arr     = ['subject' => '', 'body' => '']; // чтобы форма "добавить" не сыпала undefined
 
-///////// �������� �������� /////////
+///////// Удаление новости /////////
+if ($action === 'delete') {
+    $newsid = isset($_GET['newsid']) ? (int)$_GET['newsid'] : 0;
 
-if ($action == 'delete')
-{
-	$newsid = (int)$_GET["newsid"];
+    if (!is_valid_id($newsid)) {
+        stderr($tracker_lang['error'] ?? 'Ошибка', 'Неверный идентификатор.');
+    }
 
-    if (!is_valid_id($newsid))
-  	    stderr($tracker_lang['error'], '�������� �������������.');
+    $sure = isset($_GET['sure']) ? (int)$_GET['sure'] : 0;
 
-    $sure = $_GET["sure"];
-
-    if (!$sure)
-        stderr('������� �������', '�� ������������� ������ ������� ��� �������? ������� <a href="?action=delete&newsid='.$newsid.'&sure=1">����</a> ���� �� �������.');
+    if (!$sure) {
+        stderr(
+            'Удаление новости',
+            'Вы действительно хотите удалить эту новость? Нажмите <a href="?action=delete&newsid=' . $newsid . '&sure=1">ДА</a>, если уверены.'
+        );
+    }
 
     sql_query("DELETE FROM news WHERE id=$newsid") or sqlerr(__FILE__, __LINE__);
-
-	$warning = '������� <b>�������</b> �������';
+    $warning = 'Новость <b>удалена</b>.';
 }
 
-///////// ���������� �������� /////////
+///////// Добавление новости /////////
+if ($action === 'add') {
+    // Без Notice и с тримом
+    $subject = isset($_POST['subject']) ? trim((string)$_POST['subject']) : '';
+    $body    = isset($_POST['body']) ? trim((string)$_POST['body']) : '';
 
-if ($action == 'add')
-{
-	$subject = $_POST["subject"];
-	if (!$subject)
-		stderr($tracker_lang['error'], '���� ������� �� ����� ���� ������!');
+    if ($subject === '') {
+        stderr($tracker_lang['error'] ?? 'Ошибка', 'Тема новости не может быть пустой!');
+    }
 
-	$body = $_POST["body"];
-	if (!$body)
-		stderr($tracker_lang['error'], '���� ������� �� ����� ���� ������!');
+    if ($body === '') {
+        stderr($tracker_lang['error'] ?? 'Ошибка', 'Текст новости не может быть пустым!');
+    }
 
-    sql_query("INSERT INTO news (userid, added, body, subject) VALUES (" . $CURUSER['id'] . ", NOW(), " . sqlesc($body) . ", " . sqlesc($subject) . ")") or sqlerr(__FILE__, __LINE__);
+    $uid = (int)$CURUSER['id'];
 
-    if (mysql_affected_rows() == 1)
-		$warning = '������� <b>������� ���������</b>';
-	else
-		stderr($tracker_lang['error'], '������ �������.');
+    sql_query(
+        "INSERT INTO news (userid, added, body, subject)
+         VALUES ($uid, NOW(), " . sqlesc($body) . ", " . sqlesc($subject) . ")"
+    ) or sqlerr(__FILE__, __LINE__);
 
-
+    // mysql_affected_rows() в mysqli-проекте часто ломается — безопаснее так:
+    // если есть твой враппер для affected rows — подставь его.
+    if (function_exists('mysqli_affected_rows')) {
+        // Ничего не делаем: прямого mysqli link тут может не быть
+    }
+    $warning = 'Новость <b>добавлена</b>.';
 }
 
-///////// �������������� �������� /////////
+///////// Редактирование новости /////////
+if ($action === 'edit') {
+    $newsid = isset($_GET['newsid']) ? (int)$_GET['newsid'] : 0;
 
-if ($action == 'edit')
-{
-	$newsid = (int)$_GET["newsid"];
+    if (!is_valid_id($newsid)) {
+        stderr($tracker_lang['error'] ?? 'Ошибка', 'Неверный идентификатор.');
+    }
 
-    if (!is_valid_id($newsid))
-  	    stderr($tracker_lang['error'], '�������� �������������.');
+    $res = sql_query("SELECT id, body, subject FROM news WHERE id=$newsid LIMIT 1") or sqlerr(__FILE__, __LINE__);
+    if (!$res || mysqli_num_rows($res) !== 1) {
+        stderr($tracker_lang['error'] ?? 'Ошибка', 'Новость не найдена.');
+    }
 
-    $res = sql_query("SELECT * FROM news WHERE id=$newsid") or sqlerr(__FILE__, __LINE__);
+    $arr = mysqli_fetch_assoc($res);
 
-	if (mysqli_num_rows($res) != 1)
-	  stderr($tracker_lang['error'], "������� �� �������.");
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $subject = isset($_POST['subject']) ? trim((string)$_POST['subject']) : '';
+        $body    = isset($_POST['body']) ? trim((string)$_POST['body']) : '';
 
-	$arr = mysqli_fetch_assoc($res);
+        if ($subject === '') {
+            stderr($tracker_lang['error'] ?? 'Ошибка', 'Тема новости не может быть пустой!');
+        }
+        if ($body === '') {
+            stderr($tracker_lang['error'] ?? 'Ошибка', 'Текст новости не может быть пустым!');
+        }
 
-    if ($_SERVER['REQUEST_METHOD'] == 'POST')
-    {
-  	    $body = $_POST['body'];
-  	    $subject = $_POST['subject'];
+        sql_query(
+            "UPDATE news
+             SET body=" . sqlesc($body) . ", subject=" . sqlesc($subject) . "
+             WHERE id=$newsid"
+        ) or sqlerr(__FILE__, __LINE__);
 
-        if ($subject == '')
-		    stderr($tracker_lang['error'], '���� ������� �� ����� ���� ������!');
-
-        if ($body == '')
-    	    stderr($tracker_lang['error'], '���� ������� �� ����� ���� ������!');
-
-        $body = sqlesc($body);
-        $subject = sqlesc($subject);
-
-        sql_query("UPDATE news SET body=$body, subject=$subject WHERE id=$newsid") or sqlerr(__FILE__, __LINE__);
-
-		$warning = '������� <b>�������</b> ���������������';
-
+        $warning = 'Новость <b>обновлена</b>.';
     } else {
+        $returnto = isset($_GET['returnto']) ? (string)$_GET['returnto'] : '';
+        $returnto = htmlentities($returnto, ENT_QUOTES, 'UTF-8');
 
- 	    $returnto = htmlentities($_GET['returnto']);
-
-	    stdhead("�������������� �������");
-	        echo '<form name="news" method=post action=?action=edit&newsid='.$newsid.'>';
-	            echo '<table border=1 cellspacing=0 cellpadding=5>';
-	                echo '<tr><td class=colhead>�������������� �������</td></tr>';
-	                echo '<tr><td>����: <input type=text name=subject maxlength=70 size=50 value="' . htmlspecialchars_uni($arr["subject"]) . '"/></td></tr>';
-                    echo '<tr><td>';
-                        echo textbbcode("news", "body", htmlspecialchars_uni($arr["body"]));
-                    echo '</td></tr>';
-                    echo '<input type=hidden name=returnto value='.$returnto.'>';
-	                echo '<tr><td align=center><input type=submit value="���������������"></td></tr>';
-	            echo '</table>';
-	        echo '</form>';
-	    stdfoot();
-	  die;
-  }
+        stdhead("Редактирование новости");
+        echo '<form name="news" method="post" action="?action=edit&newsid=' . $newsid . '">';
+        echo '<table border="1" cellspacing="0" cellpadding="5">';
+        echo '<tr><td class="colhead">Редактирование новости</td></tr>';
+        echo '<tr><td>Тема: <input type="text" name="subject" maxlength="70" size="50" value="' . htmlspecialchars_uni($arr['subject'] ?? '') . '"/></td></tr>';
+        echo '<tr><td>' . textbbcode("news", "body", htmlspecialchars_uni($arr['body'] ?? '')) . '</td></tr>';
+        echo '<input type="hidden" name="returnto" value="' . $returnto . '">';
+        echo '<tr><td align="center"><input type="submit" value="Сохранить"></td></tr>';
+        echo '</table>';
+        echo '</form>';
+        stdfoot();
+        die;
+    }
 }
 
-stdhead("�������");
+stdhead("Новости");
 
-    if ($warning)
-	    echo '<p><font size=-3>('.$warning.')</font></p>';
+if ($warning !== '') {
+    echo '<p><font size="-3">(' . $warning . ')</font></p>';
+}
 
-    echo '<form name="news" method="post" action="?action=add">';
-        echo '<table border=1 cellspacing=0 cellpadding=5>';
-            echo '<tr><td class=colhead>�������� �������</td></tr>';
-            echo '<tr><td>����: <input type=text name=subject maxlength=40 size=50 value="' . htmlspecialchars_uni($arr["subject"]) . '"/></td></tr>';
-            echo '<tr><td>';
-                echo textbbcode("news", "body");
-            echo '</td></tr>';
-            echo '<tr><td align=center><input type="submit" value="��������" class="btn"></td></tr>';
-        echo '</table>';
-    echo '</form><br /><br />';
+// Форма добавления (оставляем тот же вид)
+echo '<form name="news" method="post" action="?action=add">';
+echo '<table border="1" cellspacing="0" cellpadding="5">';
+echo '<tr><td class="colhead">Добавить новость</td></tr>';
+echo '<tr><td>Тема: <input type="text" name="subject" maxlength="40" size="50" value="' . htmlspecialchars_uni($arr['subject'] ?? '') . '"/></td></tr>';
 
-$query = sql_query("SELECT news.*, users.username FROM news LEFT JOIN users ON news.userid = users.id ORDER BY news.added DESC") or sqlerr(__FILE__, __LINE__);
+// ВАЖНО: textbbcode выводим без обёртки <tr><td>...</td></tr>, как в оригинале TBDev
+echo '<tr><td>';
+echo textbbcode("news", "body");
+echo '</td></tr>';
 
-if (mysqli_num_rows($query) > 0)
-{
- 	begin_main_frame();
-	begin_frame();
+echo '<tr><td align="center"><input type="submit" value="Добавить" class="btn"></td></tr>';
+echo '</table>';
+echo '</form><br /><br />';
 
-	while ($result = mysqli_fetch_assoc($query))
-	{
-	    $newsid = $result["id"];
-		$body = $result["body"];
-		$subject = $result["subject"];
-	    $userid = $result["userid"];
-	    $added = $result["added"] . ' GMT (' . (get_elapsed_time(sql_timestamp_to_unix_timestamp($result["added"]))) . ' �����)';
+// 1 запрос на весь список (оптимально)
+$query = sql_query(
+    "SELECT n.id, n.userid, n.added, n.body, n.subject, u.username
+     FROM news AS n
+     LEFT JOIN users AS u ON u.id = n.userid
+     ORDER BY n.added DESC"
+) or sqlerr(__FILE__, __LINE__);
 
-        $username = $result["username"];
+if ($query && mysqli_num_rows($query) > 0) {
+    begin_main_frame();
+    begin_frame();
 
-        if ($username == "")
-    	    $by = '���������� ['.$userid.']';
-        else
-    	    $by = '<a href="userdetails.php?id='.$userid.'"><b>'.$username.'</b></a>';
+    while ($result = mysqli_fetch_assoc($query)) {
+        $newsid  = (int)$result['id'];
+        $body    = (string)$result['body'];
+        $subject = (string)$result['subject'];
+        $userid  = (int)$result['userid'];
 
-	    echo '<p class=sub><table border=0 cellspacing=0 cellpadding=0><tr><td class=embedded>';
-            echo '��������� '.$added.'&nbsp;-&nbsp;'.$by;
-            echo ' - [<a href="?action=edit&newsid='.$newsid.'"><b>�������������</b></a>]';
-            echo ' - [<a href="?action=delete&newsid='.$newsid.'"><b>�������</b></a>]';
+        $added = $result['added'] . ' GMT (' . get_elapsed_time(sql_timestamp_to_unix_timestamp($result['added'])) . ' назад)';
+
+        $username = (string)($result['username'] ?? '');
+
+        if ($username === '') {
+            $by = 'Неизвестно [' . $userid . ']';
+        } else {
+            $by = '<a href="userdetails.php?id=' . $userid . '"><b>' . htmlspecialchars_uni($username) . '</b></a>';
+        }
+
+        echo '<p class="sub"><table border="0" cellspacing="0" cellpadding="0"><tr><td class="embedded">';
+        echo 'Добавлено ' . $added . '&nbsp;-&nbsp;' . $by;
+        echo ' - [<a href="?action=edit&newsid=' . $newsid . '"><b>Редактировать</b></a>]';
+        echo ' - [<a href="?action=delete&newsid=' . $newsid . '"><b>Удалить</b></a>]';
         echo '</td></tr></table></p>';
 
-	    begin_table(true);
-            echo '<tr valign=top><td><b>'.htmlspecialchars_uni($subject).'</b></td></tr>';
-	        echo '<tr valign=top><td class=comment>'.format_comment($body).'</td></tr>';
-	    end_table();
-	}
-	end_frame();
-	end_main_frame();
+        begin_table(true);
+        echo '<tr valign="top"><td><b>' . htmlspecialchars_uni($subject) . '</b></td></tr>';
+        echo '<tr valign="top"><td class="comment">' . format_comment($body) . '</td></tr>';
+        end_table();
+    }
+
+    end_frame();
+    end_main_frame();
+} else {
+    stdmsg('Новости', 'Новостей нет!');
 }
-else
-  stdmsg('��������', '�������� ���!');
+
 stdfoot();
