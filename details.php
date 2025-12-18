@@ -195,7 +195,10 @@ $row = mysqli_fetch_assoc($res);
 $keywords = $row['keywords'];
 $description = $row['description'];
 
-sql_query("INSERT INTO readtorrents (userid, torrentid) VALUES (".sqlesc($CURUSER["id"]).", ".sqlesc($id).")")/* or sqlerr(__FILE__,__LINE__)*/;
+sql_query(
+    "INSERT IGNORE INTO readtorrents (userid, torrentid)
+     VALUES (" . (int)$CURUSER['id'] . ", " . (int)$id . ")"
+);
 
 $owned = $moderator = 0;
 if (get_user_class() >= UC_MODERATOR)
@@ -437,9 +440,13 @@ $rating_selector = <<<SELECTOR
 </div>
 SELECTOR;
 
-		$is_voted = mysqli_fetch_assoc(sql_query('SELECT rating FROM ratings WHERE torrent = ' . $id . ' AND user = ' . $CURUSER['id']));
-		if (mysql_error())
-			sqlerr();
+		$res = sql_query('SELECT rating FROM ratings WHERE torrent = ' . (int)$id . ' AND user = ' . (int)$CURUSER['id']);
+$is_voted = $res ? mysqli_fetch_assoc($res) : null;
+
+if (!$res) {
+    sqlerr(__FILE__, __LINE__); // штатный обработчик
+}
+
 		if ($is_voted) {
 			$stars .= ratingpic($row['rating']) . "(" . $row["rating"] . " " . $tracker_lang['from'] . " 5 ".$tracker_lang['with'] . " " . $row["numratings"] . " " . getWord($row["numratings"], array($tracker_lang['votes_1'], $tracker_lang['votes_2'], $tracker_lang['votes_3'])).")".' Ваша оценка <b>' . $is_voted['rating'] . '</b> - <b>' . $tracker_lang['vote_' . $is_voted['rating']] . '</b>';
 		} else {

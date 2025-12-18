@@ -26,290 +26,382 @@
 // +--------------------------------------------------------------------------+
 */
 
-require_once("include/BDecode.php");
-require_once("include/BEncode.php");
-require_once("include/bittorrent.php");
 
-function bark($msg) {
-	stderr("Œ¯Ë·Í‡", $msg);
+
+require_once "include/BDecode.php";
+require_once "include/BEncode.php";
+require_once "include/bittorrent.php";
+
+function bark(string $msg): void
+{
+    // –í–∞–∂–Ω–æ: –∑–∞–≥–æ–ª–æ–≤–æ–∫ —Ç–æ–∂–µ –≤ UTF-8
+    stderr("–û—à–∏–±–∫–∞", $msg);
 }
 
 ////////////////////////////////////////////////
-function uploadimage($x, $imgname, $tid) {
-	global $max_image_size;
+function uploadimage(int $x, string $imgname, int $tid): ?string
+{
+    global $max_image_size;
 
-	$maxfilesize = $max_image_size; // default 1mb
+    $maxfilesize = (int)$max_image_size; // default 1mb
 
-	$allowed_types = array(
-	"image/gif" => "gif",
-	"image/pjpeg" => "jpg",
-	"image/jpeg" => "jpg",
-	"image/jpg" => "jpg",
-	"image/png" => "png"
-	// Add more types here if you like
-	);
+    $allowed_types = [
+        "image/gif"   => "gif",
+        "image/pjpeg" => "jpg",
+        "image/jpeg"  => "jpg",
+        "image/jpg"   => "jpg",
+        "image/png"   => "png",
+    ];
 
-	if (!($_FILES['image'.$x]['name'] == "")) {
+    $key = 'image' . $x;
 
-		if ($imgname != "") {
-			// Make sure is same as in takeedit.php (except for the $imgname bit)
-			$img = "torrents/images/$imgname";
-			$del = unlink($img);
-		}
+    if (empty($_FILES[$key]['name'])) {
+        return null;
+    }
 
-		$y = $x + 1;
+    // —É–¥–∞–ª–∏—Ç—å —Å—Ç–∞—Ä—É—é –∫–∞—Ä—Ç–∏–Ω–∫—É (–µ—Å–ª–∏ –±—ã–ª–∞)
+    if ($imgname !== '') {
+        $img = "torrents/images/" . $imgname;
+        @unlink($img);
+    }
 
-		// Is valid filetype?
-		if (!array_key_exists($_FILES['image'.$x]['type'], $allowed_types))
-			bark("Invalid file type! Image $y (".htmlspecialchars_uni($_FILES['image'.$x]['type']).")");
+    // –¢–∏–ø
+    $mime = (string)($_FILES[$key]['type'] ?? '');
+    if ($mime === '' || !array_key_exists($mime, $allowed_types)) {
+        bark("–ù–µ–≤–µ—Ä–Ω—ã–π —Ç–∏–ø —Ñ–∞–π–ª–∞ –∏–∑–æ–±—Ä–∞–∂–µ–Ω–∏—è! Image " . ($x + 1) . " (" . htmlspecialchars_uni($mime) . ")");
+    }
 
-		if (!preg_match('/^(.+)\.(jpg|jpeg|png|gif)$/si', $_FILES['image'.$x]['name']))
-			bark("ÕÂ‚ÂÌÓÂ ËÏˇ Ù‡ÈÎ‡ (ÌÂ Í‡ÚËÌÍ‡).");
+    // –ò–º—è + —Ä–∞—Å—à–∏—Ä–µ–Ω–∏–µ
+    $origName = (string)($_FILES[$key]['name'] ?? '');
+    if (!preg_match('/^(.+)\.(jpg|jpeg|png|gif)$/si', $origName)) {
+        bark("–ù–µ–≤–µ—Ä–Ω–æ–µ –∏–º—è —Ñ–∞–π–ª–∞ (–Ω–µ jpg/png/gif).");
+    }
 
-		// Is within allowed filesize?
-		if ($_FILES['image'.$x]['size'] > $maxfilesize)
-			bark("œÂ‚˚¯ÂÌ ‡ÁÏÂ Ù‡ÈÎ‡!  ‡ÚËÌÍ‡ $y - ƒÓÎÊÌ‡ ·˚Ú¸ ÏÂÌ¸¯Â ".mksize($maxfilesize));
+    // –†–∞–∑–º–µ—Ä
+    $size = (int)($_FILES[$key]['size'] ?? 0);
+    if ($size > $maxfilesize) {
+        bark("–°–ª–∏—à–∫–æ–º –±–æ–ª—å—à–æ–π —Ñ–∞–π–ª! –ò–∑–æ–±—Ä–∞–∂–µ–Ω–∏–µ " . ($x + 1) . " ‚Äî –º–∞–∫—Å–∏–º—É–º " . mksize($maxfilesize));
+    }
 
-		// Where to upload?
-		// Make sure is same as on takeupload.php
-		$uploaddir = "torrents/images/";
+    $uploaddir = "torrents/images/";
+    $tmp = (string)($_FILES[$key]['tmp_name'] ?? '');
 
-		// What is the temporary file name?
-		$ifile = $_FILES['image'.$x]['tmp_name'];
+    if ($tmp === '' || !is_uploaded_file($tmp)) {
+        bark("–û—à–∏–±–∫–∞ –∑–∞–≥—Ä—É–∑–∫–∏ –∏–∑–æ–±—Ä–∞–∂–µ–Ω–∏—è (tmp).");
+    }
 
-		// By what filename should the tracker associate the image with?
-		//$ifilename = $tid . $x . substr($_FILES['image'.$x]['name'], strlen($_FILES['image'.$x]['name'])-4, 4);
-		$ifilename = $tid . $x . '.' . end(explode('.', $_FILES['image'.$x]['name']));
+    // –±–µ–∑–æ–ø–∞—Å–Ω–æ –ø–æ–ª—É—á–∞–µ–º ext
+    $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+    if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif'], true)) {
+        bark("–ù–µ–≤–µ—Ä–Ω–æ–µ —Ä–∞—Å—à–∏—Ä–µ–Ω–∏–µ –∏–∑–æ–±—Ä–∞–∂–µ–Ω–∏—è.");
+    }
+    if ($ext === 'jpeg') $ext = 'jpg';
 
-		// Upload the file
-		$copy = copy($ifile, $uploaddir.$ifilename);
+    $ifilename = $tid . ($x + 1) . '.' . $ext;
 
-		if (!$copy)
-			bark("Error occured uploading image! - Image $y");
+    if (!@copy($tmp, $uploaddir . $ifilename)) {
+        bark("–û—à–∏–±–∫–∞ –ø—Ä–∏ –∑–∞–≥—Ä—É–∑–∫–µ –∏–∑–æ–±—Ä–∞–∂–µ–Ω–∏—è! Image " . ($x + 1));
+    }
 
-		return $ifilename;
-
-	}
-
+    return $ifilename;
 }
 ////////////////////////////////////////////////
 
-function dict_check($d, $s) {
-	if ($d["type"] != "dictionary")
-		bark("not a dictionary");
-	$a = explode(":", $s);
-	$dd = $d["value"];
-	$ret = array();
-	foreach ($a as $k) {
-		unset($t);
-		if (preg_match('/^(.*)\((.*)\)$/', $k, $m)) {
-			$k = $m[1];
-			$t = $m[2];
-		}
-		if (!isset($dd[$k]))
-			bark("dictionary is missing key(s)");
-		if (isset($t)) {
-			if ($dd[$k]["type"] != $t)
-				bark("invalid entry in dictionary");
-			$ret[] = $dd[$k]["value"];
-		}
-		else
-			$ret[] = $dd[$k];
-	}
-	return $ret;
+function dict_check(array $d, string $s): array
+{
+    if (($d["type"] ?? '') !== "dictionary") {
+        bark("not a dictionary");
+    }
+
+    $a = explode(":", $s);
+    $dd = $d["value"] ?? [];
+    $ret = [];
+
+    foreach ($a as $k) {
+        $t = null;
+
+        if (preg_match('/^(.*)\((.*)\)$/', $k, $m)) {
+            $k = $m[1];
+            $t = $m[2];
+        }
+
+        if (!isset($dd[$k])) {
+            bark("dictionary is missing key(s)");
+        }
+
+        if ($t !== null) {
+            if (($dd[$k]["type"] ?? '') !== $t) {
+                bark("invalid entry in dictionary");
+            }
+            $ret[] = $dd[$k]["value"];
+        } else {
+            $ret[] = $dd[$k];
+        }
+    }
+
+    return $ret;
 }
 
-function dict_get($d, $k, $t) {
-	if ($d["type"] != "dictionary")
-		bark("not a dictionary");
-	$dd = $d["value"];
-	if (!isset($dd[$k]))
-		return;
-	$v = $dd[$k];
-	if ($v["type"] != $t)
-		bark("invalid dictionary entry type");
-	return $v["value"];
+function dict_get(array $d, string $k, string $t)
+{
+    if (($d["type"] ?? '') !== "dictionary") {
+        bark("not a dictionary");
+    }
+    $dd = $d["value"] ?? [];
+    if (!isset($dd[$k])) {
+        return null;
+    }
+    $v = $dd[$k];
+    if (($v["type"] ?? '') !== $t) {
+        bark("invalid dictionary entry type");
+    }
+    return $v["value"];
 }
 
 dbconn();
 loggedinorreturn();
 
-if (!mkglobal("id:name:descr:type"))
-	bark("missing form data");
+if (!mkglobal("id:name:descr:type")) {
+    bark("missing form data");
+}
 
-$id = intval($id);
-if (!$id)
-	die();
+$id = (int)$id;
+if ($id <= 0) {
+    die();
+}
 
 $res = sql_query("SELECT owner, filename, save_as, image1, image2, image3, image4, image5 FROM torrents WHERE id = $id");
 $row = mysqli_fetch_assoc($res);
-if (!$row)
-	die();
+if (!$row) {
+    die();
+}
 
-if ($CURUSER["id"] != $row["owner"] && get_user_class() < UC_MODERATOR)
-	bark("You're not the owner! How did that happen?\n");
+if ((int)$CURUSER["id"] !== (int)$row["owner"] && get_user_class() < UC_MODERATOR) {
+    bark("You're not the owner! How did that happen?\n");
+}
 
-$updateset = array();
+$updateset = [];
 
-$fname = $row["filename"];
+$fname = (string)$row["filename"];
 preg_match('/^(.+)\.torrent$/si', $fname, $matches);
-$shortfname = $matches[1];
-$dname = $row["save_as"];
+$shortfname = $matches[1] ?? '';
+$dname = (string)$row["save_as"];
 
-// picturemod
-for ($x=1; $x <= 5; $x++) {
-	$_GLOBALS['img'.$x.'action'] = $_POST['img'.$x.'action'];
-	if ($_GLOBALS['img'.$x.'action'] == 'update')
-		$updateset[] = 'image' . $x . ' = ' .sqlesc(uploadimage($x - 1, $row['image' . $x], $id));
-	if ($_GLOBALS['img'.$x.'action'] == 'delete') {
-		if ($row['image' . $x]) {
-			$del = unlink('torrents/images/' . $row['image' . $x]);
-			$updateset[] = 'image' . $x . ' = ""';
-		}
-	}
+// picturemod (5 –∫–∞—Ä—Ç–∏–Ω–æ–∫)
+for ($x = 1; $x <= 5; $x++) {
+    $action = (string)($_POST['img' . $x . 'action'] ?? '');
+    $_GLOBALS['img' . $x . 'action'] = $action;
+
+    if ($action === 'update') {
+        $new = uploadimage($x - 1, (string)($row['image' . $x] ?? ''), $id);
+        if ($new !== null) {
+            $updateset[] = 'image' . $x . ' = ' . sqlesc($new);
+        }
+    }
+
+    if ($action === 'delete') {
+        $old = (string)($row['image' . $x] ?? '');
+        if ($old !== '') {
+            @unlink('torrents/images/' . $old);
+            $updateset[] = 'image' . $x . ' = ""';
+        }
+    }
 }
 // picturemod
 
-if (isset($_FILES["tfile"]) && !empty($_FILES["tfile"]["name"]))
-	$update_torrent = true;
+// ‚úÖ FIX 1: –≤—Å–µ–≥–¥–∞ –∏–Ω–∏—Ü–∏–∞–ª–∏–∑–∏—Ä—É–µ–º
+$update_torrent = false;
+if (!empty($_FILES["tfile"]["name"])) {
+    $update_torrent = true;
+}
 
 if ($update_torrent) {
-	$f = $_FILES["tfile"];
-	$fname = unesc($f["name"]);
-	if (empty($fname))
-		bark("‘‡ÈÎ ÌÂ Á‡„ÛÊÂÌ. œÛÒÚÓÂ ËÏˇ Ù‡ÈÎ‡!");
-	if (!validfilename($fname))
-		bark("ÕÂ‚ÂÌÓÂ ËÏˇ Ù‡ÈÎ‡!");
-	if (!preg_match('/^(.+)\.torrent$/si', $fname, $matches))
-		bark("ÕÂ‚ÂÌÓÂ ËÏˇ Ù‡ÈÎ‡ (ÌÂ .torrent).");
-	$tmpname = $f["tmp_name"];
-	if (!is_uploaded_file($tmpname))
-		bark("eek");
-	if (!filesize($tmpname))
-		bark("œÛÒÚÓÈ Ù‡ÈÎ!");
-	$dict = bdecode(file_get_contents($tmpname));
-	if (!isset($dict))
-		bark("◊ÚÓ Á‡ ıÂÌ¸ Ú˚ Á‡„ÛÊ‡Â¯¸? ›ÚÓ ÌÂ ·ËÌ‡ÌÓ-ÍÓ‰ËÓ‚‡Ì˚È Ù‡ÈÎ!");
-	$info = $dict['info'];
-	list($dname, $plen, $pieces, $totallen) = array($info['name'], $info['piece length'], $info['pieces'], $info['length']);
-	if (strlen($pieces) % 20 != 0)
-		bark("invalid pieces");
+    $f = $_FILES["tfile"];
 
-	$filelist = array();
-	if (isset($totallen)) {
-		$filelist[] = array($dname, $totallen);
-		$torrent_type = "single";
-	} else {
-		$flist = $info['files'];
-		if (!isset($flist))
-			bark("missing both length and files");
-		if (!count($flist))
-			bark("no files");
-		$totallen = 0;
-		foreach ($flist as $fn) {
-			list($ll, $ff) = array($fn['length'], $fn['path']);
-			$totallen += $ll;
-			$ffa = array();
-			foreach ($ff as $ffe) {
-				$ffa[] = $ffe;
-			}
-			if (!count($ffa))
-				bark("filename error");
-			$ffe = implode("/", $ffa);
-			$filelist[] = array($ffe, $ll);
-		if ($ffe == 'Thumbs.db')
-	        {
-	            stderr("Œ¯Ë·Í‡", "¬ ÚÓÂÌÚ‡ı Á‡ÔÂ˘ÂÌÓ ‰ÂÊ‡Ú¸ Ù‡ÈÎ˚ Thumbs.db!");
-	            die;
-	        }
-		}
-		$torrent_type = "multi";
-	}
+    $fname = unesc((string)($f["name"] ?? ''));
+    if ($fname === '') {
+        bark("–§–∞–π–ª –Ω–µ –≤—ã–±—Ä–∞–Ω. –í—ã–±–µ—Ä–∏ .torrent!");
+    }
+    if (!validfilename($fname)) {
+        bark("–ù–µ–≤–µ—Ä–Ω–æ–µ –∏–º—è —Ñ–∞–π–ª–∞!");
+    }
+    if (!preg_match('/^(.+)\.torrent$/si', $fname, $matches)) {
+        bark("–ù–µ–≤–µ—Ä–Ω–æ–µ –∏–º—è —Ñ–∞–π–ª–∞ (–Ω–µ .torrent).");
+    }
 
-	$dict['announce'] = $announce_urls[0];  // change announce url to local
-	$dict['info']['private'] = 1;  // add private tracker flag
-	$dict['info']['source'] = "[$DEFAULTBASEURL] $SITENAME"; // add link for bitcomet users
-	unset($dict['announce-list']); // remove multi-tracker capability
-	unset($dict['nodes']); // remove cached peers (Bitcomet & Azareus)
-	unset($dict['info']['crc32']); // remove crc32
-	unset($dict['info']['ed2k']); // remove ed2k
-	unset($dict['info']['md5sum']); // remove md5sum
-	unset($dict['info']['sha1']); // remove sha1
-	unset($dict['info']['tiger']); // remove tiger
-	unset($dict['azureus_properties']); // remove azureus properties
-	$dict = BDecode(BEncode($dict)); // double up on the becoding solves the occassional misgenerated infohash
-	$dict['comment'] = "“ÓÂÌÚ ÒÓÁ‰‡Ì ‰Îˇ '$SITENAME'"; // change torrent comment
-	$dict['created by'] = "$CURUSER[username]"; // change created by
-	$dict['publisher'] = "$CURUSER[username]"; // change publisher
-	$dict['publisher.utf-8'] = "$CURUSER[username]"; // change publisher.utf-8
-	$dict['publisher-url'] = "$DEFAULTBASEURL/userdetails.php?id=$CURUSER[id]"; // change publisher-url
-	$dict['publisher-url.utf-8'] = "$DEFAULTBASEURL/userdetails.php?id=$CURUSER[id]"; // change publisher-url.utf-8
-	$infohash = sha1(BEncode($dict['info']));
+    $tmpname = (string)($f["tmp_name"] ?? '');
+    if ($tmpname === '' || !is_uploaded_file($tmpname)) {
+        bark("eek");
+    }
+    if (!@filesize($tmpname)) {
+        bark("–ü—É—Å—Ç–æ–π —Ñ–∞–π–ª!");
+    }
 
-	move_uploaded_file($tmpname, "$torrent_dir/$id.torrent");
+    $dict = bdecode((string)file_get_contents($tmpname));
+    if (!isset($dict)) {
+        bark("–≠—Ç–æ –Ω–µ –≤–∞–ª–∏–¥–Ω—ã–π torrent-—Ñ–∞–π–ª!");
+    }
 
-	$fp = fopen("$torrent_dir/$id.torrent", "w");
-	if ($fp) {
-		$dict_str = BEncode($dict);
-	    @fwrite($fp, $dict_str, strlen($dict_str));
-	    fclose($fp);
-	}
+    $info = $dict['info'] ?? null;
+    if (!is_array($info)) {
+        bark("Torrent –±–µ–∑ —Å–µ–∫—Ü–∏–∏ info.");
+    }
 
-	$updateset[] = "info_hash = " . sqlesc($infohash);
-	$updateset[] = "filename = " . sqlesc($fname);
-	$updateset[] = "save_as = " . sqlesc($dname);
-	$updateset[] = "size = " . sqlesc($totallen);
-	$updateset[] = "type = " . sqlesc($torrent_type);
-	$updateset[] = "numfiles = " . count($filelist);
+    $dname    = (string)($info['name'] ?? '');
+    $plen     = (int)($info['piece length'] ?? 0);
+    $pieces   = (string)($info['pieces'] ?? '');
+    $totallen = $info['length'] ?? null;
 
-	@sql_query("DELETE FROM files WHERE torrent = $id");
-	foreach ($filelist as $file) {
-		@sql_query("INSERT INTO files (torrent, filename, size) VALUES ($id, ".sqlesc($file[0]).", ".$file[1].")");
-	}
+    if ($dname === '' || $plen <= 0 || $pieces === '') {
+        bark("–ù–µ–≤–∞–ª–∏–¥–Ω—ã–µ –¥–∞–Ω–Ω—ã–µ –≤ torrent info.");
+    }
+    if (strlen($pieces) % 20 !== 0) {
+        bark("invalid pieces");
+    }
 
+    $filelist = [];
+    if ($totallen !== null) {
+        $filelist[] = [$dname, (int)$totallen];
+        $torrent_type = "single";
+        $totallen = (int)$totallen;
+    } else {
+        $flist = $info['files'] ?? null;
+        if (!is_array($flist)) {
+            bark("missing both length and files");
+        }
+        if (!count($flist)) {
+            bark("no files");
+        }
+
+        $totallen = 0;
+        foreach ($flist as $fn) {
+            $ll = (int)($fn['length'] ?? 0);
+            $ff = $fn['path'] ?? null;
+
+            if ($ll <= 0 || !is_array($ff)) {
+                bark("filename error");
+            }
+
+            $ffa = [];
+            foreach ($ff as $ffe) {
+                $ffa[] = (string)$ffe;
+            }
+            if (!count($ffa)) {
+                bark("filename error");
+            }
+
+            $ffe = implode("/", $ffa);
+
+            // –∑–∞—â–∏—Ç–∞ –æ—Ç Thumbs.db
+            if ($ffe === 'Thumbs.db') {
+                stderr("–û—à–∏–±–∫–∞", "–í —Ä–∞–∑–¥–∞—á–µ –Ω–∞–π–¥–µ–Ω –∑–∞–ø—Ä–µ—â—ë–Ω–Ω—ã–π —Ñ–∞–π–ª Thumbs.db!");
+                die;
+            }
+
+            $filelist[] = [$ffe, $ll];
+            $totallen += $ll;
+        }
+
+        $torrent_type = "multi";
+    }
+
+    // –Ω–æ—Ä–º–∞–ª–∏–∑–∞—Ü–∏—è announce/private
+    $dict['announce'] = $announce_urls[0];
+    $dict['info']['private'] = 1;
+    $dict['info']['source'] = "[$DEFAULTBASEURL] $SITENAME";
+
+    unset($dict['announce-list'], $dict['nodes'], $dict['azureus_properties']);
+    unset($dict['info']['crc32'], $dict['info']['ed2k'], $dict['info']['md5sum'], $dict['info']['sha1'], $dict['info']['tiger']);
+
+    $dict = BDecode(BEncode($dict));
+    $dict['comment'] = "–°–¥–µ–ª–∞–Ω–æ –¥–ª—è '$SITENAME'";
+    $dict['created by'] = (string)$CURUSER['username'];
+    $dict['publisher'] = (string)$CURUSER['username'];
+    $dict['publisher.utf-8'] = (string)$CURUSER['username'];
+    $dict['publisher-url'] = "$DEFAULTBASEURL/userdetails.php?id=" . (int)$CURUSER['id'];
+    $dict['publisher-url.utf-8'] = "$DEFAULTBASEURL/userdetails.php?id=" . (int)$CURUSER['id'];
+
+    $infohash = sha1(BEncode($dict['info']));
+
+    move_uploaded_file($tmpname, "$torrent_dir/$id.torrent");
+
+    $fp = @fopen("$torrent_dir/$id.torrent", "wb");
+    if ($fp) {
+        $dict_str = BEncode($dict);
+        @fwrite($fp, $dict_str);
+        fclose($fp);
+    }
+
+    $updateset[] = "info_hash = " . sqlesc($infohash);
+    $updateset[] = "filename = " . sqlesc($fname);
+    $updateset[] = "save_as = " . sqlesc($dname);
+    $updateset[] = "size = " . sqlesc((string)$totallen);
+    $updateset[] = "type = " . sqlesc($torrent_type);
+    $updateset[] = "numfiles = " . count($filelist);
+
+    @sql_query("DELETE FROM files WHERE torrent = $id");
+    foreach ($filelist as $file) {
+        @sql_query("INSERT INTO files (torrent, filename, size) VALUES ($id, " . sqlesc((string)$file[0]) . ", " . (int)$file[1] . ")");
+    }
 }
 
-$name = html_uni($name);
+// –ø–æ–ª—è —Ñ–æ—Ä–º—ã
+$name = html_uni((string)$name);
 
-$descr = unesc($_POST["descr"]);
-if (!$descr)
-	bark("¬˚ ‰ÓÎÊÌ˚ ‚‚ÂÒÚË ÓÔËÒ‡ÌËÂ!");
+$descr = unesc((string)($_POST["descr"] ?? ''));
+if ($descr === '') {
+    bark("–í—ã –¥–æ–ª–∂–Ω—ã –≤–≤–µ—Å—Ç–∏ –æ–ø–∏—Å–∞–Ω–∏–µ!");
+}
 
 $updateset[] = "name = " . sqlesc($name);
-
 $updateset[] = "descr = " . sqlesc($descr);
 $updateset[] = "ori_descr = " . sqlesc($descr);
-sql_query('REPLACE INTO torrents_descr (tid, descr_hash, descr_parsed) VALUES ('.implode(', ', array_map('sqlesc', array($id, md5($descr), format_comment($descr)))).')') or sqlerr(__FILE__,__LINE__);
 
-$updateset[] = "category = " . (intval($type));
+// —Ñ–æ—Ä–º–∞—Ç–∏—Ä–æ–≤–∞–Ω–∏–µ –æ–ø–∏—Å–∞–Ω–∏—è
+sql_query(
+    'REPLACE INTO torrents_descr (tid, descr_hash, descr_parsed) VALUES (' .
+    implode(', ', array_map('sqlesc', [$id, md5($descr), format_comment($descr)])) .
+    ')'
+) or sqlerr(__FILE__, __LINE__);
+
+$updateset[] = "category = " . (int)$type;
+
+// ‚úÖ FIX 2: banned / not_sticky / free / visible ‚Äî –±–µ–∑–æ–ø–∞—Å–Ω–æ
 if (get_user_class() >= UC_ADMINISTRATOR) {
-	if ($_POST["banned"]) {
-		$updateset[] = "banned = 'yes'";
-		$_POST["visible"] = 0;
-	} else
-		$updateset[] = "banned = 'no'";
-	if ($_POST["not_sticky"] == "no")
-	        $updateset[] = "not_sticky = 'no'";
-	    else
-	        $updateset[] = "not_sticky = 'yes'";
+    $isBanned = !empty($_POST["banned"]);
+
+    if ($isBanned) {
+        $updateset[] = "banned = 'yes'";
+        $_POST["visible"] = 0;
+    } else {
+        $updateset[] = "banned = 'no'";
+    }
+
+    $updateset[] = (($_POST["not_sticky"] ?? '') === "no")
+        ? "not_sticky = 'no'"
+        : "not_sticky = 'yes'";
 }
 
-if(get_user_class() >= UC_ADMINISTRATOR && in_array($_POST['free'], array('yes', 'silver', 'no')))
-       $updateset[] = "free = " . sqlesc($_POST['free']);
+if (get_user_class() >= UC_ADMINISTRATOR) {
+    $free = (string)($_POST['free'] ?? '');
+    if (in_array($free, ['yes', 'silver', 'no'], true)) {
+        $updateset[] = "free = " . sqlesc($free);
+    }
+}
 
-$updateset[] = "visible = '" . ($_POST["visible"] ? "yes" : "no") . "'";
-
+$updateset[] = "visible = '" . (!empty($_POST["visible"]) ? "yes" : "no") . "'";
 $updateset[] = "moderated = 'yes'";
-$updateset[] = "moderatedby = ".sqlesc($CURUSER["id"]);
+$updateset[] = "moderatedby = " . sqlesc((string)(int)$CURUSER["id"]);
 
-sql_query("UPDATE torrents SET " . join(", ", $updateset) . " WHERE id = $id") or sqlerr(__FILE__,__LINE__);
+sql_query("UPDATE torrents SET " . join(", ", $updateset) . " WHERE id = $id") or sqlerr(__FILE__, __LINE__);
 
-write_log("“ÓÂÌÚ '$name' ·˚Î ÓÚÂ‰‡ÍÚËÓ‚‡Ì ÔÓÎ¸ÁÓ‚‡ÚÂÎÂÏ {$CURUSER['username']}", "F25B61", "torrent");
+// –õ–æ–≥ ‚Äî –ø–∏—à–µ–º –Ω–æ—Ä–º–∞–ª—å–Ω—ã–º UTF-8 —Ç–µ–∫—Å—Ç–æ–º (—á—Ç–æ–±—ã –Ω–µ –ª–æ–≤–∏—Ç—å Incorrect string value)
+write_log("–¢–æ—Ä—Ä–µ–Ω—Ç '$name' –±—ã–ª –æ—Ç—Ä–µ–¥–∞–∫—Ç–∏—Ä–æ–≤–∞–Ω –ø–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª–µ–º {$CURUSER['username']}", "F25B61", "torrent");
 
 $returl = "details.php?id=$id";
-if (isset($_POST["returnto"]))
-	$returl .= "&returnto=" . urlencode($_POST["returnto"]);
+if (isset($_POST["returnto"])) {
+    $returl .= "&returnto=" . urlencode((string)$_POST["returnto"]);
+}
 
-header("Refresh: 0; url=$returl");
-
-?>
+header("Location: $returl");
+exit;
