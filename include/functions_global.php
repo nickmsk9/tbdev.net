@@ -69,511 +69,215 @@ function cut_text($txt, $car) {
 	return $txt;
 }
 
-function textbbcode($form, $name, $content = "") {
-	?>
-	<script type="text/javascript" language="JavaScript">
-	function RowsTextarea(n, w) {
-		var inrows = document.getElementById(n);
-		if (w < 1) {
-			var rows = -5;
-		} else {
-			var rows = +5;
-		}
-		var outrows = inrows.rows + rows;
-		if (outrows >= 5 && outrows < 50) {
-			inrows.rows = outrows;
-		}
-		return false;
-	}
+function textbbcode($form, $name, $content = false, $id_area = 'area')
+{
+    global $tracker_lang;
 
-	var SelField = document.<?php echo $form;?>.<?php echo $name;?>;
-	var TxtFeld = document.<?php echo $form;?>.<?php echo $name;?>;
+    $script = basename($_SERVER['SCRIPT_FILENAME'] ?? '');
+    $isEdit = ($script === 'edit.php' || $script === 'uploadnext.php');
+    $isDetails = ($script === 'details.php');
 
-	var clientPC = navigator.userAgent.toLowerCase(); // Get client info
-	var clientVer = parseInt(navigator.appVersion); // Get browser version
+    // высота textarea как было (по смыслу твоих условий)
+    if (stripos($script, 'upload') !== false) {
+        $rows = 18;
+    } elseif (stripos($script, 'edit') !== false) {
+        $rows = 38;
+    } else {
+        $rows = 11;
+    }
 
-	var is_ie = ((clientPC.indexOf("msie") != -1) && (clientPC.indexOf("opera") == -1));
-	var is_nav = ((clientPC.indexOf('mozilla') != -1) && (clientPC.indexOf('spoofer') == -1)
-		&& (clientPC.indexOf('compatible') == -1) && (clientPC.indexOf('opera') == -1)
-		&& (clientPC.indexOf('webtv') == -1) && (clientPC.indexOf('hotjava') == -1));
+    // Контент как строка
+    $content = ($content === false || $content === null) ? '' : (string)$content;
 
-	var is_moz = 0;
+    // Подключаем ресурсы один раз
+    if (!defined('TEXTBBCODE_ASSETS')) {
+        define('TEXTBBCODE_ASSETS', 1);
 
-	var is_win = ((clientPC.indexOf("win") != -1) || (clientPC.indexOf("16bit") != -1));
-	var is_mac = (clientPC.indexOf("mac") != -1);
+        echo '<script type="text/javascript" src="js/ajax.js"></script>';
+        echo '<script type="text/javascript" src="js/bbcode.js"></script>';
 
-	function StoreCaret(text) {
-		if (document.selection) {
-			text.caretPos = document.selection.createRange().duplicate();
-		} else if (document.getSelection) {
-			text.caretPos = document.getSelection();
-		}
-	}
-	function FieldName(text, which) {
-		if (document.selection) {
-			text.caretPos = document.selection.createRange().duplicate();
-		} else if (document.getSelection) {
-			text.caretPos = document.getSelection();
-		}
-		if (which != "") {
-			var Field = eval("document.<?php echo $form;?>." + which);
-			SelField = Field;
-			TxtFeld = Field;
-		}
-	}
-	function AddSmile(SmileCode) {
-		var SmileCode;
-		var newPost;
-		var oldPost = SelField.value;
-		newPost = oldPost + SmileCode;
-		SelField.value = newPost;
-		SelField.focus();
-		return;
-	}
-	function AddSelectedText(Open, Close) {
-		if (SelField.createTextRange && SelField.caretPos && Close == '\n') {
-			var caretPos = SelField.caretPos;
-			caretPos.text = caretPos.text.charAt(caretPos.text.length - 1) == ' ' ? Open + Close + ' ' : Open + Close;
-			SelField.focus();
-		} else if (SelField.caretPos) {
-			SelField.caretPos.text = Open + SelField.caretPos.text + Close;
-		} else {
-			SelField.value += Open + Close;
-			SelField.focus();
-		}
-	}
-	function jqwrapText(element, openTag, closeTag) {
-		// This function is not working properly with IE, thus making workaround without JQ
-		if ((clientVer >= 4) && is_ie && is_win) {
-			AddSelectedText(openTag, closeTag);
-		} else {
-		    var textArea = $(element);
-		    var len = textArea.val().length;
-		    var sel = textArea.getSelection();
-		    var start = sel.start;
-		    var end = sel.end;
-		    var selectedText = textArea.val().substring(start, end);
-		    var replacement = openTag + selectedText + closeTag;
-		    textArea.val(textArea.val().substring(0, start) + replacement + textArea.val().substring(end, len));
-		}
-	}
+        echo '<style>
+            .editbutton{cursor:pointer;padding:2px 1px 0 5px}
+            div.grippie{background:#EEE url("/pic/grippie.png") no-repeat scroll center 2px;border:0;border-left:1px solid #DDD;border-right:1px solid #DDD;border-bottom:1px solid #DDD;cursor:s-resize;height:9px;overflow:hidden}
+        </style>';
 
-	function InsertCode(code, info, type, error) {
-		if (code == 'name') {
-			AddSelectedText('[b]' + info + '[/b]', '\n');
-		} else if (code == 'url' || code == 'mail') {
-			if (code == 'url') var url = prompt(info, 'http://');
-			if (code == 'mail') var url = prompt(info, '');
-			if (!url) return alert(error);
-			jqwrapText(TxtFeld, '[' + code + '=' + url + ']', '[/' + code + ']');
-		} else if (code == 'color' || code == 'family' || code == 'size') {
-			jqwrapText(TxtFeld, '[' + code + '=' + info + ']', '[/' + code + ']');
-		} else if (code == 'li' || code == 'hr') {
-			jqwrapText(TxtFeld, '[' + code + ']', '');
-		} else {
-			jqwrapText(TxtFeld, '[' + code + ']', '[/' + code + ']');
-		}
-	}
+        // Лоадер (для ajaxpreview)
+        $loading = $tracker_lang['loading'] ?? 'Загрузка...';
+        echo '<div id="loading-layer" style="display:none;font-family:Verdana;font-size:11px;width:200px;height:50px;background:#FFF;padding:10px;text-align:center;border:1px solid #000">'
+            . '<div style="font-weight:bold" id="loading-layer-text">' . $loading . '</div><br />'
+            . '<img src="../pic/loading.gif" border="0" alt="loading" />'
+            . '</div>';
+    }
 
-	function mozWrap(txtarea, open, close) {
-		alert('mozWrap function is deprecated!');
-		var selLength = txtarea.textLength;
-		var selStart = txtarea.selectionStart;
-		var selEnd = txtarea.selectionEnd;
-		if (selEnd == 1 || selEnd == 2)
-			selEnd = selLength;
+    // Для подписей кнопок
+    $bcode = array_map('trim', explode(', ', (string)($tracker_lang['bb_bcode'] ?? 'HR, BR, Спойлер, B, I, U, S, BB, PRE, HT, MG, Quote, Img, QuoteSel, HIDE, Url, Url=, PHP, Flash, YT, MM, LI, LG1, LG2, HIG, UDesk, Smiles')));
+    $brepl = array_map('trim', explode(', ', (string)($tracker_lang['bb_brepl'] ?? '')));
 
-		var s1 = (txtarea.value).substring(0, selStart);
-		var s2 = (txtarea.value).substring(selStart, selEnd);
-		var s3 = (txtarea.value).substring(selEnd, selLength);
-		var sT = txtarea.scrollTop, sL = txtarea.scrollLeft;
-		txtarea.value = s1 + open + s2 + close + s3;
-		txtarea.focus();
-		txtarea.scrollTop = sT;
-		txtarea.scrollLeft = sL;
-		return;
-	}
+    // Выравнивание (если есть строка)
+    $valign = array_map('trim', explode(', ', (string)($tracker_lang['bb_valign'] ?? 'Слева, Справа, По центру, По ширине')));
 
-	language = 1;
-	richtung = 1;
-	var DOM = document.getElementById ? 1 : 0,
-		opera = window.opera && DOM ? 1 : 0,
-		IE = !opera && document.all ? 1 : 0,
-		NN6 = DOM && !IE && !opera ? 1 : 0;
-	var ablauf = new Date();
-	var jahr = ablauf.getTime() + (365 * 24 * 60 * 60 * 1000);
-	ablauf.setTime(jahr);
-	var richtung = 1;
-	var isChat = false;
-	NoHtml = true;
-	NoScript = true;
-	NoStyle = true;
-	NoBBCode = true;
-	NoBefehl = false;
+    // disable/enable
+    $quoteSelDisabled = $isEdit ? '' : 'disabled="disabled"';
+    $hideDisabled     = $isEdit ? '' : 'disabled="disabled"';
 
-	function setZustand() {
-		transHtmlPause = false;
-		transScriptPause = false;
-		transStylePause = false;
-		transBefehlPause = false;
-		transBBPause = false;
-	}
-	setZustand();
-	function keks(Name, Wert) {
-		document.cookie = Name + "=" + Wert + "; expires=" + ablauf.toGMTString();
-	}
-	function changeNoTranslit(Nr) {
-		if (document.trans.No_translit_HTML.checked)NoHtml = true; else {
-			NoHtml = false
-		}
-		if (document.trans.No_translit_BBCode.checked)NoBBCode = true; else {
-			NoBBCode = false
-		}
-		keks("NoHtml", NoHtml);
-		keks("NoScript", NoScript);
-		keks("NoStyle", NoStyle);
-		keks("NoBBCode", NoBBCode);
-	}
-	function changeRichtung(r) {
-		richtung = r;
-		keks("TransRichtung", richtung);
-		setFocus()
-	}
-	function changelanguage() {
-		if (language == 1) {
-			language = 0;
-		}
-		else {
-			language = 1;
-		}
-		keks("autoTrans", language);
-		setFocus();
-		setZustand();
-	}
-	function setFocus() {
-		TxtFeld.focus();
-	}
-	function repl(t, a, b) {
-		var w = t, i = 0, n = 0;
-		while ((i = w.indexOf(a, n)) >= 0) {
-			t = t.substring(0, i) + b + t.substring(i + a.length, t.length);
-			w = w.substring(0, i) + b + w.substring(i + a.length, w.length);
-			n = i + b.length;
-			if (n >= w.length) {
-				break;
-			}
-		}
-		return t;
-	}
-	var rus_lr2 = ('�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�').split('-');
-	var lat_lr2 = ('/E-/e-/O-/o-�O-�o-�O-�o-�H-�h-�H-�h-�H-�h-�H-�h-�' + String.fromCharCode(35) + '-�' + String.fromCharCode(39) + '-�E-�e-�U-�u-�A-�a-�A-�a-�o-�o-�h-�h-�h-�h-�e-�u-�a-�a').split('-');
-	var rus_lr1 = ('�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�').split('-');
-	var lat_lr1 = ('A-B-V-G-D-E-Z-I-J-K-L-M-N-O-P-R-S-T-U-F-H-X-C-W-Y-Q-a-b-v-g-d-e-z-i-j-k-l-m-n-o-p-r-s-t-u-f-h-x-c-w-' + String.fromCharCode(35) + '-y-' + String.fromCharCode(39) + '-q').split('-');
-	var rus_rl = ('�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�-�').split('-');
-	var lat_rl = ('A-B-V-G-D-E-JO-ZH-Z-I-J-K-L-M-N-O-P-R-S-T-U-F-H-C-CH-SH-SHH-' + String.fromCharCode(35) + String.fromCharCode(35) + '-Y-' + String.fromCharCode(39) + String.fromCharCode(39) + '-JE-JU-JA-a-b-v-g-d-e-jo-zh-z-i-j-k-l-m-n-o-p-r-s-t-u-f-h-c-ch-sh-shh-' + String.fromCharCode(35) + '-y-' + String.fromCharCode(39) + '-je-ju-ja').split('-');
-	var transAN = true;
-	function transliteText(txt) {
-		vorTxt = txt.length > 1 ? txt.substr(txt.length - 2, 1) : "";
-		buchstabe = txt.substr(txt.length - 1, 1);
-		txt = txt.substr(0, txt.length - 2);
-		return txt + translitBuchstabeCyr(vorTxt, buchstabe);
-	}
-	function translitBuchstabeCyr(vorTxt, txt) {
-		var zweiBuchstaben = vorTxt + txt;
-		var code = txt.charCodeAt(0);
+    echo '<table cellpadding="0" cellspacing="0" align="center">';
+    echo '<tr><td class="b"><div>';
 
-		if (txt == "<")transHtmlPause = true; else if (txt == ">")transHtmlPause = false;
-		if (txt == "<script")transScriptPause = true; else if (txt == "<" + "/script>")transScriptPause = false;
-		if (txt == "<style")transStylePause = true; else if (txt == "<" + "/style>")transStylePause = false;
-		if (txt == "[")transBBPause = true; else if (txt == "]")transBBPause = false;
-		if (txt == "/")transBefehlPause = true; else if (txt == " ")transBefehlPause = false;
+    // ====== Верхняя панель селектов ======
+    echo '<div align="center">';
 
-		if (
-			(transHtmlPause == true && NoHtml == true) ||
-				(transScriptPause == true && NoScript == true) ||
-				(transStylePause == true && NoStyle == true) ||
-				(transBBPause == true && NoBBCode == true) ||
-				(transBefehlPause == true && NoBefehl == true) || !(((code >= 65) && (code <= 123)) || (code == 35) || (code == 39))) return zweiBuchstaben;
+    // Шрифты (сгенерируем из массива — короче)
+    $fonts = [
+        'Verdana' => 'Verdana', 'Courier' => 'Courier', 'Courier New' => 'Courier New',
+        'monospace' => 'monospace', 'Fixedsys' => 'Fixedsys', 'Arial' => 'Arial',
+        'Comic Sans MS' => 'Comic Sans', 'Georgia' => 'Georgia', 'Tahoma' => 'Tahoma',
+        'Times New Roman' => 'Times', 'serif' => 'serif', 'sans-serif' => 'sans-serif',
+        'cursive' => 'cursive', 'fantasy' => 'fantasy', 'Book Antiqua' => 'Antiqua',
+        'Century Gothic' => 'Century Gothic', 'Franklin Gothic Medium' => 'Franklin',
+        'Garamond' => 'Garamond', 'Impact' => 'Impact', 'Lucida Console' => 'Lucida',
+        'Palatino Linotype' => 'Palatino', 'Trebuchet MS' => 'Trebuchet',
+    ];
 
-		for (x = 0; x < lat_lr2.length; x++) {
-			if (lat_lr2[x] == zweiBuchstaben) return rus_lr2[x];
-		}
-		for (x = 0; x < lat_lr1.length; x++) {
-			if (lat_lr1[x] == txt) return vorTxt + rus_lr1[x];
-		}
-		return zweiBuchstaben;
-	}
-	function translitBuchstabeLat(buchstabe) {
-		for (x = 0; x < rus_rl.length; x++) {
-			if (rus_rl[x] == buchstabe)
-				return lat_rl[x];
-		}
-		return buchstabe;
-	}
-	function translateAlltoLatin() {
-		if (!IE) {
-			var txt = TxtFeld.value;
-			var txtnew = "";
-			var symb = "";
-			for (y = 0; y < txt.length; y++) {
-				symb = translitBuchstabeLat(txt.substr(y, 1));
-				txtnew += symb;
-			}
-			TxtFeld.value = txtnew;
-			setFocus()
-		} else {
-			var is_selection_flag = 1;
-			var userselection = document.selection.createRange();
-			var txt = userselection.text;
+    $bbFonts = $tracker_lang['bb_fonts'] ?? 'Шрифт';
+    echo '<select name="fontFace" class="editbutton">';
+    echo '<option style="font-family:Verdana;" value="Verdana" selected="selected">' . $bbFonts . ':</option>';
+    foreach ($fonts as $val => $label) {
+        if ($val === 'Verdana') continue;
+        echo '<option style="font-family:' . htmlspecialchars($val, ENT_QUOTES, 'UTF-8') . ';" value="' . htmlspecialchars($val, ENT_QUOTES, 'UTF-8') . '">&nbsp;' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</option>';
+    }
+    echo '</select>&nbsp;';
 
-			if (userselection == null || userselection.text == null || userselection.parentElement == null || userselection.parentElement().type != "textarea") {
-				is_selection_flag = 0;
-				txt = TxtFeld.value;
-			}
-			txtnew = "";
-			var symb = "";
-			for (y = 0; y < txt.length; y++) {
-				symb = translitBuchstabeLat(txt.substr(y, 1));
-				txtnew += symb;
-			}
-			if (is_selection_flag) {
-				userselection.text = txtnew;
-				userselection.collapse();
-				userselection.select();
-			} else {
-				TxtFeld.value = txtnew;
-				setFocus()
-			}
-		}
-		return;
-	}
-	function TransliteFeld(object, evnt) {
-		if (language == 1 || opera) return;
-		if (NN6) {
-			var code = void 0;
-			var code = evnt.charCode;
-			var textareafontsize = 14;
-			var textreafontwidth = 7;
-			if (code == 13) {
-				return;
-			}
-			if (code && (!(evnt.ctrlKey || evnt.altKey))) {
-				pXpix = object.scrollTop;
-				pYpix = object.scrollLeft;
-				evnt.preventDefault();
-				txt = String.fromCharCode(code);
-				pretxt = object.value.substring(0, object.selectionStart);
-				result = transliteText(pretxt + txt);
-				object.value = result + object.value.substring(object.selectionEnd);
-				object.setSelectionRange(result.length, result.length);
-				object.scrollTop = 100000;
-				object.scrollLeft = 0;
+    // Цвета — оставил набор как у тебя (можно сократить ещё сильнее, если скажешь)
+    $bbColor = $tracker_lang['bb_colorfont'] ?? 'Цвет';
+    echo '<select name="codeColor" class="editbutton">';
+    echo '<option style="color:black;background:#fff" value="black" selected="selected">' . $bbColor . ':</option>';
+    $colors = [
+        'Black'=>'Черный','Sienna'=>'Охра','Beige'=>'Бежевый','DarkOliveGreen'=>'Олив. зеленый',
+        'DarkGreen'=>'Т. зеленый','Cornflower'=>'Васильковый','Navy'=>'Темно-синий','DarkRed'=>'Т. красный',
+        'DarkOrange'=>'Т. оранжевый','Olive'=>'Оливковый','Green'=>'Зеленый','Teal'=>'Морской волны',
+        'Blue'=>'Голубой','Gray'=>'Серый','Red'=>'Красный','Orange'=>'Оранжевый','Yellow'=>'Желтый',
+        'Gold'=>'Золотой','Silver'=>'Серебристый','Pink'=>'Розовый','White'=>'Белый'
+    ];
+    foreach ($colors as $val => $label) {
+        echo '<option style="color:' . htmlspecialchars($val, ENT_QUOTES, 'UTF-8') . ';" value="' . htmlspecialchars($val, ENT_QUOTES, 'UTF-8') . '">&nbsp;' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</option>';
+    }
+    echo '</select>&nbsp;';
 
-				cXpix = (result.split("\n").length) * (textareafontsize + 3);
-				cYpix = (result.length - result.lastIndexOf("\n") - 1) * (textreafontwidth + 1);
-				taXpix = (object.rows + 1) * (textareafontsize + 3);
-				taYpix = object.clientWidth;
+    // Размер
+    $bbSize = $tracker_lang['bb_sizefont'] ?? 'Размер';
+    echo '<select name="codeSize" class="editbutton">';
+    echo '<option value="12" selected="selected">' . $bbSize . ' - 12:</option>';
+    foreach ([9,10,11,12,14,16,18,20,22,24] as $s) {
+        echo '<option value="' . $s . '">&nbsp;' . $bbSize . ' - ' . $s . '</option>';
+    }
+    echo '</select>&nbsp;';
 
-				if ((cXpix > pXpix) && (cXpix < (pXpix + taXpix))) object.scrollTop = pXpix;
-				if (cXpix <= pXpix) object.scrollTop = cXpix - (textareafontsize + 3);
-				if (cXpix >= (pXpix + taXpix)) object.scrollTop = cXpix - taXpix;
+    // Align
+    $bbAlign = $tracker_lang['bb_align'] ?? 'Выравнивание';
+    echo '<select name="codeAlign" class="editbutton">';
+    echo '<option value="" selected="selected">' . $bbAlign . ':</option>';
+    echo '<option style="text-align:left" value="left">&nbsp;' . ($valign[0] ?? 'Слева') . '</option>';
+    echo '<option style="text-align:right" value="right">&nbsp;' . ($valign[1] ?? 'Справа') . '</option>';
+    echo '<option style="text-align:center" value="center">&nbsp;' . ($valign[2] ?? 'По центру') . '</option>';
+    echo '<option style="text-align:justify" value="justify">&nbsp;' . ($valign[3] ?? 'По ширине') . '</option>';
+    echo '</select>';
 
-				if ((cYpix >= pYpix) && (cYpix < (pYpix + taYpix))) object.scrollLeft = pYpix;
-				if (cYpix < pYpix) object.scrollLeft = cYpix - (textreafontwidth + 1);
-				if (cYpix >= (pYpix + taYpix)) object.scrollLeft = cYpix - taYpix + 1;
-			}
-			return true;
-		} else if (IE) {
-			if (isChat) {
-				var code = frames['input'].event.keyCode;
-				if (code == 13) {
-					return;
-				}
-				txt = String.fromCharCode(code);
-				cursor_pos_selection = frames['input'].document.selection.createRange();
-				cursor_pos_selection.text = "";
-				cursor_pos_selection.moveStart("character", -1);
-				vorTxt = cursor_pos_selection.text;
-				if (vorTxt.length > 1) {
-					vorTxt = "";
-				}
-				frames['input'].event.keyCode = 0;
-				if (richtung == 2) {
-					result = vorTxt + translitBuchstabeLat(txt)
-				} else {
-					result = translitBuchstabeCyr(vorTxt, txt)
-				}
-				if (vorTxt != "") {
-					cursor_pos_selection.select();
-					cursor_pos_selection.collapse();
-				}
-				with (frames['input'].document.selection.createRange()) {
-					text = result;
-					collapse();
-					select()
-				}
-			} else {
-				var code = event.keyCode;
-				if (code == 13) {
-					return;
-				}
-				txt = String.fromCharCode(code);
-				cursor_pos_selection = document.selection.createRange();
-				cursor_pos_selection.text = "";
-				cursor_pos_selection.moveStart("character", -1);
-				vorTxt = cursor_pos_selection.text;
-				if (vorTxt.length > 1) {
-					vorTxt = "";
-				}
-				event.keyCode = 0;
-				if (richtung == 2) {
-					result = vorTxt + translitBuchstabeLat(txt)
-				} else {
-					result = translitBuchstabeCyr(vorTxt, txt)
-				}
-				if (vorTxt != "") {
-					cursor_pos_selection.select();
-					cursor_pos_selection.collapse();
-				}
-				with (document.selection.createRange()) {
-					text = result;
-					collapse();
-					select()
-				}
-			}
-			return;
-		}
-	}
-	function translateAlltoCyrillic() {
-		if (!IE) {
-			txt = TxtFeld.value;
-			var txtnew = translitBuchstabeCyr("", txt.substr(0, 1));
-			var symb = "";
-			for (kk = 1; kk < txt.length; kk++) {
-				symb = translitBuchstabeCyr(txtnew.substr(txtnew.length - 1, 1), txt.substr(kk, 1));
-				txtnew = txtnew.substr(0, txtnew.length - 1) + symb;
-			}
-			TxtFeld.value = txtnew;
-			setFocus()
-		} else {
-			var is_selection_flag = 1;
-			var userselection = document.selection.createRange();
-			var txt = userselection.text;
-			if (userselection == null || userselection.text == null || userselection.parentElement == null || userselection.parentElement().type != "textarea") {
-				is_selection_flag = 0;
-				txt = TxtFeld.value;
-			}
-			var txtnew = translitBuchstabeCyr("", txt.substr(0, 1));
-			var symb = "";
-			for (kk = 1; kk < txt.length; kk++) {
-				symb = translitBuchstabeCyr(txtnew.substr(txtnew.length - 1, 1), txt.substr(kk, 1));
-				txtnew = txtnew.substr(0, txtnew.length - 1) + symb;
-			}
-			if (is_selection_flag) {
-				userselection.text = txtnew;
-				userselection.collapse();
-				userselection.select();
-			} else {
-				TxtFeld.value = txtnew;
-				setFocus()
-			}
-		}
-		return;
-	}
-	</script>
-	<textarea class="editorinput" id="area" name="<?php echo $name; ?>" cols="65" rows="10" style="width:400px"
-			  OnKeyPress="TransliteFeld(this, event)" OnSelect="FieldName(this, this.name)"
-			  OnClick="FieldName(this, this.name)"
-			  OnKeyUp="FieldName(this, this.name)"><?php echo $content; ?></textarea>
-	<div class="editor" style="background-image: url(editor/bg.gif); background-repeat: repeat-x;">
-		<div class="editorbutton" OnClick="RowsTextarea('area',1)"><img title="��������� ����" src="editor/plus.gif">
-		</div>
-		<div class="editorbutton" OnClick="RowsTextarea('area',0)"><img title="��������� ����" src="editor/minus.gif">
-		</div>
-		<div class="editorbutton" OnClick="InsertCode('b')"><img title="������ �����" src="editor/bold.gif"></div>
-		<div class="editorbutton" OnClick="InsertCode('i')"><img title="��������� �����" src="editor/italic.gif"></div>
-		<div class="editorbutton" OnClick="InsertCode('u')"><img title="������������ �����" src="editor/underline.gif">
-		</div>
-		<div class="editorbutton" OnClick="InsertCode('s')"><img title="������������� �����" src="editor/striket.gif">
-		</div>
-		<div class="editorbutton" OnClick="InsertCode('li')"><img title="������������� ������" src="editor/li.gif">
-		</div>
-		<div class="editorbutton" OnClick="InsertCode('hr')"><img title="�������������� �����" src="editor/hr.gif">
-		</div>
-		<div class="editorbutton" OnClick="InsertCode('left')"><img title="������������ �� ������ ����"
-																	src="editor/left.gif"></div>
-		<div class="editorbutton" OnClick="InsertCode('center')"><img title="������������ �� ������"
-																	  src="editor/center.gif"></div>
-		<div class="editorbutton" OnClick="InsertCode('right')"><img title="������������ �� ������� ����"
-																	 src="editor/right.gif"></div>
-		<div class="editorbutton" OnClick="InsertCode('justify')"><img title="������������ �� ������"
-																	   src="editor/justify.gif"></div>
-		<div class="editorbutton" OnClick="InsertCode('code')"><img title="���" src="editor/code.gif"></div>
-		<div class="editorbutton" OnClick="InsertCode('php')"><img title="PHP-���" src="editor/php.gif"></div>
-		<div class="editorbutton" OnClick="InsertCode('hide')"><img title="������� �����" src="editor/hide.gif"></div>
-		<div class="editorbutton"
-			 OnClick="InsertCode('url','������� ������ �����','������� ��������','�� �� ������� �����!')"><img
-				title="�������� ������" src="editor/url.gif"></div>
-		<div class="editorbutton"
-			 OnClick="InsertCode('mail','������� ������ �����','������� ��������','�� �� ������� �����!')"><img
-				title="�������� E-Mail" src="editor/mail.gif"></div>
-		<div class="editorbutton" OnClick="InsertCode('img')"><img title="�������� ��������" src="editor/img.gif"></div>
-	</div>
-	<div class="editor" style="background-image: url(editor/bg.gif); background-repeat: repeat-x;">
-		<div class="editorbutton" OnClick="InsertCode('quote')"><img title="����������" src="editor/quote.gif"></div>
-		<div class="editorbutton" OnClick="translateAlltoCyrillic()"><img title="������� ������ � �������� � ���������"
-																		  src="editor/rus.gif"></div>
-		<div class="editorbutton" OnClick="translateAlltoLatin()"><img title="������� ������ � ��������� � ��������"
-																	   src="editor/eng.gif"></div>
-		<div class="editorbutton" OnClick="changelanguage()"><img title="�������������� ������� ������"
-																  src="editor/auto.gif"></div>
-		<!--<div class="editorbutton"><select class="editorinput" tabindex="1" style="font-size:10px;" name="family" onChange="InsertCode('family',this.options[this.selectedIndex].value)"><option style="font-family:Verdana;" value="Verdana">Verdana</option><option style="font-family:Arial;" value="Arial">Arial</option><option style="font-family:'Courier New';" value="Courier New">Courier New</option><option style="font-family:Tahoma;" value="Tahoma">Tahoma</option><option style="font-family:Helvetica;" value="Helvetica">Helvetica</option></select></div>-->
-		<div class="editorbutton"><select class="editorinput" tabindex="1" style="font-size:10px;" name="family"
-										  onChange="InsertCode('family',this.options[this.selectedIndex].value)"
-										  onFocus="this.value='�����'">
-				<option style="font-weight:bold;" value="�����">�����</option>
-				<option style="font-family:Verdana;" value="Verdana">Verdana</option>
-				<option style="font-family:Arial;" value="Arial">Arial</option>
-				<option style="font-family:'Courier New';" value="Courier New">Courier New</option>
-				<option style="font-family:Tahoma;" value="Tahoma">Tahoma</option>
-				<option style="font-family:Helvetica;" value="Helvetica">Helvetica</option>
-			</select></div>
-		<!--<div class="editorbutton"><select class="editorinput" tabindex="1" style="font-size:10px;" name="color" onChange="InsertCode('color',this.options[this.selectedIndex].value)"><option style="color:black;" value="black">���� ������</option><option style="color:silver;" value="silver">���� ������</option><option style="color:gray;" value="gray">���� ������</option><option style="color:white;" value="white">���� ������</option><option style="color:maroon;" value="maroon">���� ������</option><option style="color:red;" value="red">���� ������</option><option style="color:purple;" value="purple">���� ������</option><option style="color:fuchsia;" value="fuchsia">���� ������</option><option style="color:green;" value="green">���� ������</option><option style="color:lime;" value="lime">���� ������</option><option style="color:olive;" value="olive">���� ������</option><option style="color:yellow;" value="yellow">���� ������</option><option style="color:navy;" value="navy">���� ������</option><option style="color:blue;" value="blue">���� ������</option><option style="color:teal;" value="teal">���� ������</option><option style="color:aqua;" value="aqua">���� ������</option></select></div>-->
-		<div class="editorbutton"><select class="editorinput" tabindex="1" style="font-size:10px;" name="color"
-										  onChange="InsertCode('color',this.options[this.selectedIndex].value)"
-										  onFocus="this.value='����'">
-				<option style="font-weight:bold;" value="����">����</option>
-				<option style="color:black;" value="black">Black</option>
-				<option style="color:silver;" value="silver">Silver</option>
-				<option style="color:gray;" value="gray">Gray</option>
-				<option style="color:white;" value="white">White</option>
-				<option style="color:maroon;" value="maroon">Maroon</option>
-				<option style="color:red;" value="red">Red</option>
-				<option style="color:purple;" value="purple">Purple</option>
-				<option style="color:fuchsia;" value="fuchsia">Fuchsia</option>
-				<option style="color:green;" value="green">Green</option>
-				<option style="color:lime;" value="lime">Lime</option>
-				<option style="color:olive;" value="olive">Olive</option>
-				<option style="color:yellow;" value="yellow">Yellow</option>
-				<option style="color:navy;" value="navy">Navy</option>
-				<option style="color:blue;" value="blue">Blue</option>
-				<option style="color:teal;" value="teal">Teal</option>
-				<option style="color:aqua;" value="aqua">Aqua</option>
-			</select></div>
-		<!--<div class="editorbutton"><select class="editorinput" tabindex="1" style="font-size:10px;" name="size" onChange="InsertCode('size',this.options[this.selectedIndex].value)"><option value="8">������ 8</option><option value="10">������ 10</option><option value="12">������ 12</option><option value="14">������ 14</option><option value="18">������ 18</option><option value="24">������ 24</option></select></div>-->
-		<div class="editorbutton"><select class="editorinput" tabindex="1" style="font-size:10px;" name="size"
-										  onChange="InsertCode('size',this.options[this.selectedIndex].value)"
-										  onFocus="this.value='������'">
-				<option style="font-weight:bold;" value="������">������</option>
-				<option value="8">������ 8</option>
-				<option value="10">������ 10</option>
-				<option value="12">������ 12</option>
-				<option value="14">������ 14</option>
-				<option value="18">������ 18</option>
-				<option value="24">������ 24</option>
-			</select></div>
-	</div>
-<?php
+    echo '</div>';
+
+    // ====== Кнопки ======
+    echo '<div align="center">';
+
+    // Чтобы не сломать твои индексы, берём по месту, но если строк нет — ставим дефолты
+    $btn = static function($idx, $fallback) use ($bcode) {
+        return $bcode[$idx] ?? $fallback;
+    };
+    $ttl = static function($idx, $fallback) use ($brepl) {
+        return $brepl[$idx] ?? $fallback;
+    };
+
+    echo '<input class="btn" type="button" value="' . $btn(0,'HR') . '" name="codeHR" title="' . $ttl(0,'Горизонтальная линия') . ' (Ctrl+8)" style="font-weight:bold;width:26px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(1,'BR') . '" name="codeBR" title="' . $ttl(1,'Перенос строки') . '" style="width:26px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(2,'Спойлер') . '" name="codeSpoiler" title="' . $ttl(2,'Спойлер') . ' (Ctrl+S)" style="width:70px" /> ';
+
+    echo '<input class="btn" type="button" value=" ' . $btn(3,'B') . ' " name="codeB" title="' . $ttl(3,'Жирный') . ' (Ctrl+B)" style="font-weight:bold;width:30px" /> ';
+    echo '<input class="btn" type="button" value=" ' . $btn(4,'I') . ' " name="codeI" title="' . $ttl(4,'Курсив') . ' (Ctrl+I)" style="width:30px;font-style:italic" /> ';
+    echo '<input class="btn" type="button" value=" ' . $btn(5,'U') . ' " name="codeU" title="' . $ttl(5,'Подчеркнутый') . ' (Ctrl+U)" style="width:30px;text-decoration:underline" /> ';
+    echo '<input class="btn" type="button" value=" ' . $btn(6,'S') . ' " name="codeS" title="' . $ttl(6,'Зачеркнутый') . '" style="width:30px;text-decoration:line-through" /> ';
+
+    echo '<input class="btn" type="button" value=" ' . $btn(7,'BB') . ' " name="codeBB" title="' . $ttl(7,'BBCode') . ' (Ctrl+N)" style="font-weight:bold;width:30px" /> ';
+    echo '<input class="btn" type="button" value=" ' . $btn(8,'PRE') . ' " name="codePRE" title="' . $ttl(8,'PRE') . ' (Ctrl+P)" style="width:40px" /> ';
+    echo '<input class="btn" type="button" value=" ' . $btn(11,'Quote') . ' " name="codeQuote" title="' . $ttl(11,'Цитата') . ' (Ctrl+Q)" style="width:60px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(12,'Img') . '" name="codeImg" title="' . $ttl(12,'Картинка') . ' (Ctrl+R)" style="width:40px" /> ';
+
+    echo '<input class="btn" type="button" ' . $quoteSelDisabled . ' value="' . $btn(13,'QuoteSel') . '" name="quoteselected" title="' . $ttl(13,'Цитировать выделение') . '" style="width:165px" onmouseout="bbcode.refreshSelection(false);" onmouseover="bbcode.refreshSelection(true);" onclick="bbcode.onclickQuoteSel();" /> ';
+    echo '<input class="btn" type="button" ' . $hideDisabled . ' value="' . $btn(14,'HIDE') . '" name="codeHIDE" title="' . $ttl(14,'Скрытый текст') . '" style="width:70px" /> ';
+
+    echo '<input class="btn" type="button" value="' . $btn(15,'Url') . '" name="codeUri" title="' . $ttl(15,'Ссылка') . '" style="width:40px;text-decoration:underline" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(16,'Url=') . '" name="codeUr" title="' . $ttl(16,'Ссылка с текстом') . '" style="width:40px;text-decoration:underline" /> ';
+
+    echo '<input class="btn" type="button" value="' . $btn(17,'PHP') . '" name="codeCode" title="' . $ttl(17,'PHP-код') . ' (Ctrl+K)" style="width:46px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(18,'Flash') . '" name="codeFlash" title="' . $ttl(18,'Flash') . ' (Ctrl+F)" style="width:50px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(19,'YT') . '" name="codeYT" title="' . $ttl(19,'Видео') . '" style="width:50px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(20,'MM') . '" name="codeMM" title="' . $ttl(20,'MM') . '" style="width:50px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(21,'LI') . '" name="codeOpt" title="' . $ttl(21,'Список') . ' (Ctrl+0)" style="width:30px" /> ';
+
+    if ($isEdit) {
+        echo '<input class="btn" type="button" value="' . $btn(25,'UDesk') . '" onclick="textbb_udesck(\'' . htmlspecialchars($id_area, ENT_QUOTES, 'UTF-8') . '\')" title="' . $ttl(25,'UDesk') . '" style="width:60px" /> ';
+    }
+
+    echo '<input class="btn" type="button" value="' . $btn(26,'Смайлы') . '" name="Smailes" title="' . $ttl(26,'Смайлы') . '" style="width:60px" onclick="window.open(\'smilies.php?form=' . rawurlencode($form) . '&text=' . rawurlencode($name) . '\', \'height=500,width=450,resizable=no,scrollbars=yes\'); return false;" /> ';
+
+    echo '</div>';
+
+    // ====== Textarea ======
+    echo '<textarea class="resizable" id="' . htmlspecialchars($id_area, ENT_QUOTES, 'UTF-8') . '" name="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" style="width:100%;" rows="' . (int)$rows . '" onfocus="storeCaret(this);" onselect="storeCaret(this);" onclick="storeCaret(this);" onkeyup="storeCaret(this);">'
+        . $content
+        . '</textarea>';
+
+    // ====== Привязка BBCode ======
+    echo '<script type="text/javascript">';
+    echo 'var bbcode = new BBCode(document.' . $form . '.' . $name . ');';
+    echo 'var ctrl = "ctrl";';
+    echo 'bbcode.addTag("codeB","b",null,"B",ctrl);';
+    echo 'bbcode.addTag("codeBB","bb",null,"N",ctrl);';
+    echo 'bbcode.addTag("codePRE","pre",null,"P",ctrl);';
+    echo 'bbcode.addTag("codeHIDE","hide",null,"",ctrl);';
+    echo 'bbcode.addTag("codeI","i",null,"I",ctrl);';
+    echo 'bbcode.addTag("codeU","u",null,"U",ctrl);';
+    echo 'bbcode.addTag("codeS","s",null,"",ctrl);';
+    echo 'bbcode.addTag("codeQuote","quote",null,"Q",ctrl);';
+    echo 'bbcode.addTag("codeImg","img",null,"R",ctrl);';
+    echo 'bbcode.addTag("codeUri","url","/url","",ctrl);';
+    echo 'bbcode.addTag("codeUr","url=","/url","",ctrl);';
+    echo 'bbcode.addTag("codeCode","php",null,"K",ctrl);';
+    echo 'bbcode.addTag("codeFlash","flash",null,"F",ctrl);';
+    echo 'bbcode.addTag("codeOpt","li","","0",ctrl);';
+    echo 'bbcode.addTag("codeHR","hr","","8",ctrl);';
+    echo 'bbcode.addTag("codeYT","video=","","",ctrl);';
+    echo 'bbcode.addTag("codeBR","br","","",ctrl);';
+    echo 'bbcode.addTag("codeSpoiler","spoiler",null,"S",ctrl);';
+    echo 'bbcode.addTag("codeMM","[mcom=#529EDC:#F5F5F5]","/mcom","",ctrl);';
+    echo 'bbcode.addTag("fontFace",function(e){var v=e.value;e.selectedIndex=0;return "font="+v}, "/font");';
+    echo 'bbcode.addTag("codeColor",function(e){var v=e.value;e.selectedIndex=0;return "color="+v}, "/color");';
+    echo 'bbcode.addTag("codeSize",function(e){var v=e.value;e.selectedIndex=0;return "size="+v}, "/size");';
+    echo 'bbcode.addTag("codeAlign",function(e){var v=e.value;e.selectedIndex=0;return "align="+v}, "/align");';
+    echo '</script>';
+
+    echo '</div><div id="prevsmalie" align="center" name="' . htmlspecialchars($form, ENT_QUOTES, 'UTF-8') . ':' . htmlspecialchars($id_area, ENT_QUOTES, 'UTF-8') . '"></div>';
+    echo '</td></tr>';
+
+    // Preview + reset (если не details.php)
+    if (!$isDetails) {
+        $preview = $tracker_lang['preview'] ?? 'Предпросмотр';
+        $reset   = $tracker_lang['reset'] ?? 'Сброс';
+        echo '<tr><td style="margin:0;padding:0" align="center" class="b">'
+            . '<input type="button" name="preview" class="btn" title="ALT+ENTER ' . $preview . '" value="' . $preview . '" onclick="javascript:ajaxpreview(\'' . addslashes($id_area) . '\');" /> '
+            . '<input type="reset" class="btn" value="' . $reset . '" />'
+            . '</td></tr>'
+            . '<tr><td id="preview" style="margin:0;padding:0" class="a"></td></tr>';
+    }
+
+    echo '</table>';
 }
 
 function get_row_count($table, $suffix = "") {
