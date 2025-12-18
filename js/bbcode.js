@@ -49,28 +49,29 @@
     replaceOnInsert: false,
     tags: null,
 
-    // Create new BBCode control.
     construct: function (textarea) {
       this.textarea = textarea;
       this.tags = {};
 
       var th = this;
 
-      // Tag for quoting poster name + selected text.
+      // Quoter tag: quote="name" + selected text
       this.addTag(
         "_quoter",
         function () { return 'quote="' + (th.quoter || "") + '"'; },
-        "/quote\n",
+        "/quote",
         null,
         null,
-        function () { th.collapseAfterInsert = true; return th._prepareMultiline(th.quoterText || ""); }
+        function () {
+          th.collapseAfterInsert = true;
+          return th._prepareMultiline(th.quoterText || "");
+        }
       );
 
       addEvent(textarea, "keydown", function (e) { return th.onKeyPress(e || window.event, "down"); });
       addEvent(textarea, "keypress", function (e) { return th.onKeyPress(e || window.event, "press"); });
     },
 
-    // Insert poster name or poster quotes to the text.
     onclickPoster: function (name) {
       var sel = this.getSelection()[0];
       if (sel) {
@@ -86,7 +87,7 @@
     onclickQuoteSel: function () {
       var sel = this.getSelection()[0];
       if (sel) this.insertAtCursor("[quote]" + sel + "[/quote]\n");
-      else alert("���������� �������� ����� ��� �����������");
+      else alert("Пожалуйста выделите текст для цитирования");
       return false;
     },
 
@@ -147,15 +148,14 @@
       var text = rt[0];
       var range = rt[1];
 
-      // IE <= 8 range object is real range; in modern we use {start,end}
-      // Surround for IE old
+      // IE <= 8 real range object
       if (range && range.text !== undefined) {
         var newText = open + fTrans(text) + (close ? close : "");
         range.text = newText;
 
         // place caret inside if empty selection
         if (!text) {
-          range.moveStart("character", - (close ? close.length : 0));
+          range.moveStart("character", -(close ? close.length : 0));
           range.moveEnd("character", 0);
         }
         if (!this.collapseAfterInsert) range.select();
@@ -163,7 +163,7 @@
         return !!text;
       }
 
-      // Surround for modern
+      // Modern selection by indexes
       if (range && typeof range.start === "number") {
         var start = range.start, end = range.end;
         var top = t.scrollTop;
@@ -277,15 +277,21 @@
       this.tags[id] = tag;
 
       var elt = tag.elt;
-      if (elt) {
-        var th = this;
-        // input type=button or button
-        addEvent(elt, "click", function () { th.insertTag(id); return false; });
-        // select
+      if (!elt) return;
+
+      var th = this;
+      var tagName = (elt.tagName || "").toUpperCase();
+      var type = (elt.type || "").toLowerCase();
+
+      // ✅ SELECT: только change (иначе выпадашка закрывается сразу)
+      if (tagName === "SELECT") {
         addEvent(elt, "change", function () { th.insertTag(id); return false; });
-      } else {
-        // silently ignore missing elements (TBDev often has conditional buttons)
-        // if you want strictness: alert here
+        return;
+      }
+
+      // ✅ BUTTON / INPUT button: click
+      if (tagName === "BUTTON" || type === "button" || type === "submit" || type === "image") {
+        addEvent(elt, "click", function () { th.insertTag(id); return false; });
       }
     },
 
@@ -294,11 +300,18 @@
       if (!tag) return false;
 
       var op = (typeof tag.open === "function") ? tag.open(tag.elt) : tag.open;
+
+      // ✅ если функция селекта вернула пустоту — ничего не вставляем
+      if (!op) return false;
+
       var cl = (tag.close != null) ? tag.close : ("/" + op);
 
       // Wrap by [] if needed
       if (op && op.charAt(0) !== this.BRK_OP) op = this.BRK_OP + op + this.BRK_CL;
       if (cl && cl.charAt(0) !== this.BRK_OP) cl = this.BRK_OP + cl + this.BRK_CL;
+
+      // Quoter needs newline after closing quote
+      if (id === "_quoter") cl += "\n";
 
       var ml = tag.multiline;
       var fTrans = (!ml) ? null : (ml === true ? this._prepareMultiline.bind(this) : ml);
