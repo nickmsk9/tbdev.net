@@ -567,108 +567,222 @@ function code_nobb($matches) {
 	return '[code]' . $code . '[/code]';
 }
 
-function format_comment($text, $strip_html = true) {
-	global $smilies, $privatesmilies, $pic_base_url;
-	$smiliese = $smilies;
-	$s = $text;
 
-	// This fixes the extraneous ;) smilies problem. When there was an html escaped
-	// char before a closing bracket - like >), "), ... - this would be encoded
-	// to &xxx;), hence all the extra smilies. I created a new :wink: label, removed
-	// the ;) one, and replace all genuine ;) by :wink: before escaping the body.
-	// (What took us so long? :blush:)- wyz
 
-	$s = str_replace(";)", ":wink:", $s);
+function format_comment(string $text, bool $strip_html = true): string
+{
+    global $smilies, $privatesmilies, $pic_base_url;
 
-	$s = preg_replace_callback("#\[code\](.*?)\[/code\]#si", "code_nobb", $s);
+    $s = $text;
 
-	if ($strip_html)
-		$s = htmlspecialchars_uni($s);
+    // legacy wink
+    $s = str_replace(";)", ":wink:", $s);
 
-	$bb[] = "#\[img\](?!javascript:)([^?](?:[^\[]+|\[(?!url))*?)\[/img\]#i";
-	$html[] = "<img class=\"linked-image\" src=\"\\1\" border=\"0\" alt=\"\\1\" title=\"\\1\" />";
-	$bb[] = "#\[img=([a-zA-Z]+)\](?!javascript:)([^?](?:[^\[]+|\[(?!url))*?)\[/img\]#is";
-	$html[] = "<img class=\"linked-image\" src=\"\\2\" align=\"\\1\" border=\"0\" alt=\"\\2\" title=\"\\2\" />";
-	$bb[] = "#\[img\ alt=([a-zA-Z�-��-�0-9\_\-\. ]+)\](?!javascript:)([^?](?:[^\[]+|\[(?!url))*?)\[/img\]#is";
-	$html[] = "<img class=\"linked-image\" src=\"\\2\" align=\"\\1\" border=\"0\" alt=\"\\1\" title=\"\\1\" />";
-	$bb[] = "#\[img=([a-zA-Z]+) alt=([a-zA-Z�-��-�0-9\_\-\. ]+)\](?!javascript:)([^?](?:[^\[]+|\[(?!url))*?)\[/img\]#is";
-	$html[] = "<img class=\"linked-image\" src=\"\\3\" align=\"\\1\" border=\"0\" alt=\"\\2\" title=\"\\2\" />";
-	$bb[] = "#\[kp=([0-9]+)\]#is";
-	$html[] = "<a href=\"http://www.kinopoisk.ru/level/1/film/\\1/\" rel=\"nofollow\"><img src=\"http://www.kinopoisk.ru/rating/\\1.gif/\" alt=\"���������\" title=\"���������\" border=\"0\" /></a>";
-	$bb[] = "#\[url\]([\w]+?://([\w\#$%&~/.\-;:=,?@\]+]+|\[(?!url=))*?)\[/url\]#is";
-	$html[] = "<a href=\"\\1\" title=\"\\1\">\\1</a>";
-	$bb[] = "#\[url\]((www|ftp)\.([\w\#$%&~/.\-;:=,?@\]+]+|\[(?!url=))*?)\[/url\]#is";
-	$html[] = "<a href=\"http://\\1\" title=\"\\1\">\\1</a>";
-	$bb[] = "#\[url=([\w]+?://[\w\#$%&~/.\-;:=,?@\[\]+]*?)\]([^?\n\r\t].*?)\[/url\]#is";
-	$html[] = "<a href=\"\\1\" title=\"\\1\">\\2</a>";
-	$bb[] = "#\[url=((www|ftp)\.[\w\#$%&~/.\-;:=,?@\[\]+]*?)\]([^?\n\r\t].*?)\[/url\]#is";
-	$html[] = "<a href=\"http://\\1\" title=\"\\1\">\\3</a>";
-	$bb[] = "/\[url=([^()<>\s]+?)\]((\s|.)+?)\[\/url\]/i";
-	$html[] = "<a href=\"\\1\">\\2</a>";
-	$bb[] = "/\[url\]([^()<>\s]+?)\[\/url\]/i";
-	$html[] = "<a href=\"\\1\">\\1</a>";
-	$bb[] = "#\[mail\](\S+?)\[/mail\]#i";
-	$html[] = "<a href=\"mailto:\\1\">\\1</a>";
-	$bb[] = "#\[mail\s*=\s*([\.\w\-]+\@[\.\w\-]+\.[\w\-]+)\s*\](.*?)\[\/mail\]#i";
-	$html[] = "<a href=\"mailto:\\1\">\\2</a>";
-	$bb[] = "#\[color=(\#[0-9A-F]{6}|[a-z]+)\](.*?)\[/color\]#si";
-	$html[] = "<span style=\"color: \\1\">\\2</span>";
-	$bb[] = "#\[(font|family)=([A-Za-z ]+)\](.*?)\[/\\1\]#si";
-	$html[] = "<span style=\"font-family: \\2\">\\3</span>";
-	$bb[] = "#\[size=([0-9]+)\](.*?)\[/size\]#si";
-	$html[] = "<span style=\"font-size: \\1\">\\2</span>";
-	$bb[] = "#\[(left|right|center|justify)\](.*?)\[/\\1\]#is";
-	$html[] = "<div align=\"\\1\">\\2</div>";
-	$bb[] = "#\[b\](.*?)\[/b\]#si";
-	$html[] = "<b>\\1</b>";
-	$bb[] = "#\[i\](.*?)\[/i\]#si";
-	$html[] = "<i>\\1</i>";
-	$bb[] = "#\[u\](.*?)\[/u\]#si";
-	$html[] = "<u>\\1</u>";
-	$bb[] = "#\[s\](.*?)\[/s\]#si";
-	$html[] = "<s>\\1</s>";
-	$bb[] = "#\[li\]#si";
-	$html[] = "<li>";
-	$bb[] = "#\[hr\]#si";
-	$html[] = "<hr>";
-	$bb[] = "#\[youtube=([[:alnum:]]+)\]#si";
-	$html[] = '<iframe width="640" height="360" src="//www.youtube.com/embed/\\1?rel=0" frameborder="0" allowfullscreen></iframe>';
+    // [code]...[/code] — вырезаем до экранирования (как у тебя было)
+    $s = preg_replace_callback("#\[code\](.*?)\[/code\]#si", "code_nobb", $s);
 
-	$s = preg_replace($bb, $html, $s);
+    // экранирование HTML
+    if ($strip_html) {
+        $s = htmlspecialchars_uni($s);
+    }
 
-	// Linebreaks
-	$s = nl2br($s);
+    // Доп. псевдо-теги (из второго кода)
+    $s = str_replace(
+        "[pi]",
+        "<div align=\"center\" style=\"font-size:25px;width:auto;position:relative;\">&#8604; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &#9986; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &ndash; &#8605;</div>",
+        $s
+    );
+    $s = str_replace(
+        "[me]",
+        "<script type=\"text/javascript\" src=\"/js/blink.js\"></script><blink><font color=\"red\">IMHO</font></blink>&nbsp;",
+        $s
+    );
 
-	// URLs
-	$s = format_urls($s);
-	//$s = format_local_urls($s);
+    // Безопасная сборка URL для img/audio/flash
+    $safeUrl = static function (string $url): string {
+        $url = trim($url);
+        if ($url === '') return '';
+        // режем очевидные опасности
+        if (preg_match('#^(?:javascript|data|vbscript):#i', $url)) return '';
+        // допускаем http/https и относительные пути
+        if (preg_match('#^(https?://|/|\.{1,2}/)#i', $url)) return $url;
+        return $url; // оставляем как было (TBDev-совместимость), но без js/data схем
+    };
 
-	// Maintain spacing
-	//$s = str_replace("  ", " &nbsp;", $s);
+    $bb = [];
+    $html = [];
 
-	foreach ($smiliese as $code => $url)
-		$s = str_replace($code,
-						 "<img border=\"0\" src=\"$pic_base_url/smilies/$url\">", $s);
+    // --- IMG (чуть актуальнее: https тоже) ---
+    $bb[]   = "#\[img\]((?!javascript:|data:|vbscript:)[^\[]+?)\[/img\]#i";
+    $html[] = "<img class=\"linked-image\" src=\"\\1\" border=\"0\" alt=\"\\1\" title=\"\\1\" />";
 
-	foreach ($privatesmilies as $code => $url)
-		$s = str_replace($code, "<img border=\"0\" src=\"$pic_base_url/smilies/$url\">", $s);
+    $bb[]   = "#\[img=([a-zA-Z]+)\]((?!javascript:|data:|vbscript:)[^\[]+?)\[/img\]#is";
+    $html[] = "<img class=\"linked-image\" src=\"\\2\" align=\"\\1\" border=\"0\" alt=\"\\2\" title=\"\\2\" />";
 
-	while (preg_match("#\[quote\](.*?)\[/quote\]#si", $s)) {
-		$s = encode_quote($s);
-	}
-	while (preg_match("#\[quote=(.+?)\](.*?)\[/quote\]#si", $s)) {
-		$s = encode_quote_from($s);
-	}
-	while (preg_match("#\[hide\](.*?)\[/hide\]#si", $s)) {
-		$s = encode_spoiler($s);
-	}
-	while (preg_match("#\[hide=(.+?)\](.*?)\[/hide\]#si", $s)) {
-		$s = encode_spoiler_from($s);
-	}
-	if (preg_match("#\[code\](.*?)\[/code\]#si", $s)) $s = encode_code($s);
-	if (preg_match("#\[php\](.*?)\[/php\]#si", $s)) $s = encode_php($s);
+    $bb[]   = "#\[img\ alt=([a-zA-ZА-Яа-я0-9_\-\. ]+)\]((?!javascript:|data:|vbscript:)[^\[]+?)\[/img\]#is";
+    $html[] = "<img class=\"linked-image\" src=\"\\2\" align=\"\\1\" border=\"0\" alt=\"\\1\" title=\"\\1\" />";
 
-	return $s;
+    $bb[]   = "#\[img=([a-zA-Z]+)\ alt=([a-zA-ZА-Яа-я0-9_\-\. ]+)\]((?!javascript:|data:|vbscript:)[^\[]+?)\[/img\]#is";
+    $html[] = "<img class=\"linked-image\" src=\"\\3\" align=\"\\1\" border=\"0\" alt=\"\\2\" title=\"\\2\" />";
+
+    // --- KP ---
+    $bb[]   = "#\[kp=([0-9]+)\]#is";
+    $html[] = "<a href=\"http://www.kinopoisk.ru/level/1/film/\\1/\" rel=\"nofollow\"><img src=\"http://www.kinopoisk.ru/rating/\\1.gif/\" alt=\"Рейтинг\" title=\"Рейтинг\" border=\"0\" /></a>";
+
+    // --- URL / MAIL (как было) ---
+    $bb[]   = "#\[url\]([\w]+?://([\w\#$%&~/.\-;:=,?@\]+]+|\[(?!url=))*?)\[/url\]#is";
+    $html[] = "<a href=\"\\1\" title=\"\\1\">\\1</a>";
+
+    $bb[]   = "#\[url\]((www|ftp)\.([\w\#$%&~/.\-;:=,?@\]+]+|\[(?!url=))*?)\[/url\]#is";
+    $html[] = "<a href=\"http://\\1\" title=\"\\1\">\\1</a>";
+
+    $bb[]   = "#\[url=([\w]+?://[\w\#$%&~/.\-;:=,?@\[\]+]*?)\]([^?\n\r\t].*?)\[/url\]#is";
+    $html[] = "<a href=\"\\1\" title=\"\\1\">\\2</a>";
+
+    $bb[]   = "#\[url=((www|ftp)\.[\w\#$%&~/.\-;:=,?@\[\]+]*?)\]([^?\n\r\t].*?)\[/url\]#is";
+    $html[] = "<a href=\"http://\\1\" title=\"\\1\">\\3</a>";
+
+    $bb[]   = "/\[url=([^()<>\s]+?)\]((\s|.)+?)\[\/url\]/i";
+    $html[] = "<a href=\"\\1\">\\2</a>";
+
+    $bb[]   = "/\[url\]([^()<>\s]+?)\[\/url\]/i";
+    $html[] = "<a href=\"\\1\">\\1</a>";
+
+    $bb[]   = "#\[mail\](\S+?)\[/mail\]#i";
+    $html[] = "<a href=\"mailto:\\1\">\\1</a>";
+
+    $bb[]   = "#\[mail\s*=\s*([\.\w\-]+\@[\.\w\-]+\.[\w\-]+)\s*\](.*?)\[\/mail\]#i";
+    $html[] = "<a href=\"mailto:\\1\">\\2</a>";
+
+    // --- COLOR / FONT / SIZE / ALIGN ---
+    $bb[]   = "#\[color=(\#[0-9A-F]{6}|[a-z]+)\](.*?)\[/color\]#si";
+    $html[] = "<span style=\"color: \\1\">\\2</span>";
+
+    $bb[]   = "#\[(font|family)=([A-Za-z ]+)\](.*?)\[/\\1\]#si";
+    $html[] = "<span style=\"font-family: \\2\">\\3</span>";
+
+    // из второго кода: [font=Arial]...[/font]
+    $bb[]   = "#\[font=([a-zA-Z ,]+)\](.*?)\[/font\]#si";
+    $html[] = "<span style=\"font-family: \\1\">\\2</span>";
+
+    $bb[]   = "#\[size=([0-9]+)\](.*?)\[/size\]#si";
+    $html[] = "<span style=\"font-size: \\1\">\\2</span>";
+
+    // из второго кода: [align=center]...[/align]
+    $bb[]   = "#\[align=(left|right|center|justify)\](.*?)\[/align\]#is";
+    $html[] = "<div align=\"\\1\">\\2</div>";
+
+    // --- BASIC ---
+    $bb[]   = "#\[(left|right|center|justify)\](.*?)\[/\\1\]#is";
+    $html[] = "<div align=\"\\1\">\\2</div>";
+
+    $bb[]   = "#\[b\](.*?)\[/b\]#si";
+    $html[] = "<strong>\\1</strong>";
+
+    $bb[]   = "#\[i\](.*?)\[/i\]#si";
+    $html[] = "<i>\\1</i>";
+
+    $bb[]   = "#\[h\](.*?)\[/h\]#si";
+    $html[] = "<h3>\\1</h3>";
+
+    $bb[]   = "#\[u\](.*?)\[/u\]#si";
+    $html[] = "<u>\\1</u>";
+
+    $bb[]   = "#\[s\](.*?)\[/s\]#si";
+    $html[] = "<s>\\1</s>";
+
+    $bb[]   = "#\[li\]#si";
+    $html[] = "<li>";
+
+    $bb[]   = "#\[hr\]#si";
+    $html[] = "<hr>";
+
+    $bb[]   = "#\[br\]#si";
+    $html[] = "<br />";
+
+    // --- PRE / HIGHLIGHT / LEGEND / MARQUEE ---
+    $bb[]   = "#\[pre\](.*?)\[/pre\]#si";
+    $html[] = "<pre>\\1</pre>";
+
+    $bb[]   = "#\[highlight\](.*?)\[/highlight\]#si";
+    $html[] = "<table border=\"0\" cellspacing=\"0\" cellpadding=\"1\"><tr><td bgcolor=\"white\"><b>\\1</b></td></tr></table>";
+
+    $bb[]   = "#\[legend=(.*?)\](.*?)\[/legend\]#si";
+    $html[] = "<fieldset><legend>\\1</legend>\\2</fieldset>";
+
+    $bb[]   = "#\[legend\](.*?)\[/legend\]#si";
+    $html[] = "<fieldset>\\1</fieldset>";
+
+    $bb[]   = "#\[marquee\](.*?)\[/marquee\]#si";
+    $html[] = "<marquee behavior=\"alternate\">\\1</marquee>";
+
+    // --- AUDIO ---
+    $bb[]   = "#\[audio\]([^\[]+?)\[/audio\]#si";
+    $html[] = "<embed autostart=\"false\" loop=\"false\" controller=\"true\" width=\"220\" height=\"42\" src=\"\\1\"></embed>";
+
+    // --- FLASH (оба варианта из второго кода) ---
+    $bb[]   = "#\[flash=(\d{1,4}):(\d{1,4})\]((?:https?://|www\.)[^\s\[]+?\.swf)\[/flash\]#si";
+    $html[] = "<param name=\"movie\" value=\"\\3\" /><embed width=\"\\1\" height=\"\\2\" src=\"\\3\"></embed>";
+
+    $bb[]   = "#\[flash\]((?:https?://|www\.)[^\s\[]+?\.swf)\[/flash\]#si";
+    $html[] = "<param name=\"movie\" value=\"\\1\" /><embed width=\"470\" height=\"310\" src=\"\\1\"></embed>";
+
+    // --- MCOM ---
+    $bb[]   = "#\[mcom=(\#[a-f0-9]{6}):(\#[a-f0-9]{6})\](.*?)\[/mcom\]#si";
+    $html[] = "<div style=\"background-color: \\1; color: \\2; font-weight: bold; font-size: small;\">\\3</div>";
+
+    // --- YOUTUBE (как было) ---
+    $bb[]   = "#\[youtube=([[:alnum:]]+)\]#si";
+    $html[] = "<iframe width=\"640\" height=\"360\" src=\"//www.youtube.com/embed/\\1?rel=0\" frameborder=\"0\" allowfullscreen></iframe>";
+
+    // --- VIDEO=YouTube (из второго кода; поддержка youtu.be / youtube.com / nocookie) ---
+    $bb[]   = "#\[video=(https?://(?:[a-z\\d-]+\\.)?youtu(?:be(?:-nocookie)?\\.com/.*?(?:v=|/embed/|/v/)|\\.be/)([-\\w]{11}).*?)\]#si";
+    $html[] = "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/\\2\" frameborder=\"0\" allowfullscreen></iframe>";
+
+    $s = preg_replace($bb, $html, $s);
+
+    // Минимальная зачистка (как у тебя было)
+    $s = str_replace(["javascript", "alert", "<body", "<html"], "", $s);
+
+    // Linebreaks
+    $s = nl2br($s);
+
+    // URLs (твоя функция)
+    $s = format_urls($s);
+
+    // Smilies
+    foreach ((array)$smilies as $code => $url) {
+        $s = str_replace($code, "<img border=\"0\" src=\"{$pic_base_url}/smilies/{$url}\">", $s);
+    }
+    foreach ((array)$privatesmilies as $code => $url) {
+        $s = str_replace($code, "<img border=\"0\" src=\"{$pic_base_url}/smilies/{$url}\">", $s);
+    }
+
+    // Quotes / hide / spoiler (как у тебя было; не трогаю логику encode_*)
+    while (preg_match("#\[quote\](.*?)\[/quote\]#si", $s)) {
+        $s = encode_quote($s);
+    }
+    while (preg_match("#\[quote=(.+?)\](.*?)\[/quote\]#si", $s)) {
+        $s = encode_quote_from($s);
+    }
+    while (preg_match("#\[hide\](.*?)\[/hide\]#si", $s)) {
+        $s = encode_spoiler($s);
+    }
+    while (preg_match("#\[hide=(.+?)\](.*?)\[/hide\]#si", $s)) {
+        $s = encode_spoiler_from($s);
+    }
+
+    if (preg_match("#\[code\](.*?)\[/code\]#si", $s)) $s = encode_code($s);
+    if (preg_match("#\[php\](.*?)\[/php\]#si", $s))   $s = encode_php($s);
+
+    // Лёгкая страховка для embed’ов (применяем к уже собранным тегам)
+    // (если URL опасный — выкидываем src)
+    $s = preg_replace_callback('#(<(?:img|embed)\b[^>]*\bsrc=")([^"]+)(")#i', static function ($m) use ($safeUrl) {
+        $u = $safeUrl($m[2]);
+        return $u === '' ? '' : $m[1] . $u . $m[3];
+    }, $s);
+
+    return $s;
 }
 
 function get_user_class(): int 
