@@ -42,10 +42,18 @@ if (get_user_class() < UC_UPLOADER)
   exit;
 }
 
-if (strlen($CURUSER['passkey']) != 32) {
-$CURUSER['passkey'] = md5($CURUSER['username'].get_date_time().$CURUSER['passhash']);
-sql_query("UPDATE users SET passkey='$CURUSER[passkey]' WHERE id=$CURUSER[id]");
+$passkey = $CURUSER['passkey'] ?? '';
+
+if (strlen($passkey) !== 32) {
+    $newPasskey = md5(($CURUSER['username'] ?? '') . get_date_time() . ($CURUSER['passhash'] ?? ''));
+
+    $CURUSER['passkey'] = $newPasskey;
+
+    sql_query(
+        "UPDATE users SET passkey=" . sqlesc($newPasskey) . " WHERE id=" . (int)$CURUSER['id']
+    );
 }
+
 
 ?>
 <div align="center">
