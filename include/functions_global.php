@@ -77,7 +77,6 @@ function textbbcode($form, $name, $content = false, $id_area = 'area')
     $isEdit = ($script === 'edit.php' || $script === 'uploadnext.php');
     $isDetails = ($script === 'details.php');
 
-    // высота textarea как было (по смыслу твоих условий)
     if (stripos($script, 'upload') !== false) {
         $rows = 18;
     } elseif (stripos($script, 'edit') !== false) {
@@ -86,10 +85,8 @@ function textbbcode($form, $name, $content = false, $id_area = 'area')
         $rows = 11;
     }
 
-    // Контент как строка
     $content = ($content === false || $content === null) ? '' : (string)$content;
 
-    // Подключаем ресурсы один раз
     if (!defined('TEXTBBCODE_ASSETS')) {
         define('TEXTBBCODE_ASSETS', 1);
 
@@ -101,7 +98,6 @@ function textbbcode($form, $name, $content = false, $id_area = 'area')
             div.grippie{background:#EEE url("/pic/grippie.png") no-repeat scroll center 2px;border:0;border-left:1px solid #DDD;border-right:1px solid #DDD;border-bottom:1px solid #DDD;cursor:s-resize;height:9px;overflow:hidden}
         </style>';
 
-        // Лоадер (для ajaxpreview)
         $loading = $tracker_lang['loading'] ?? 'Загрузка...';
         echo '<div id="loading-layer" style="display:none;font-family:Verdana;font-size:11px;width:200px;height:50px;background:#FFF;padding:10px;text-align:center;border:1px solid #000">'
             . '<div style="font-weight:bold" id="loading-layer-text">' . $loading . '</div><br />'
@@ -109,24 +105,44 @@ function textbbcode($form, $name, $content = false, $id_area = 'area')
             . '</div>';
     }
 
-    // Для подписей кнопок
+    // кнопки/подсказки
     $bcode = array_map('trim', explode(', ', (string)($tracker_lang['bb_bcode'] ?? 'HR, BR, Спойлер, B, I, U, S, BB, PRE, HT, MG, Quote, Img, QuoteSel, HIDE, Url, Url=, PHP, Flash, YT, MM, LI, LG1, LG2, HIG, UDesk, Smiles')));
     $brepl = array_map('trim', explode(', ', (string)($tracker_lang['bb_brepl'] ?? '')));
 
-    // Выравнивание (если есть строка)
     $valign = array_map('trim', explode(', ', (string)($tracker_lang['bb_valign'] ?? 'Слева, Справа, По центру, По ширине')));
 
-    // disable/enable
     $quoteSelDisabled = $isEdit ? '' : 'disabled="disabled"';
     $hideDisabled     = $isEdit ? '' : 'disabled="disabled"';
+
+    // русские подписи селектов (если нет в языке — дефолт)
+    $bbFonts = $tracker_lang['bb_fonts']     ?? 'Шрифт';
+    $bbColor = $tracker_lang['bb_colorfont'] ?? 'Цвет';
+    $bbSize  = $tracker_lang['bb_sizefont']  ?? 'Размер';
+    $bbAlign = $tracker_lang['bb_align']     ?? 'Выравнивание';
+
+    // дефолтные русские tooltip’ы (если bb_brepl пустой)
+    $ttlDef = [
+        0=>'Горизонтальная линия', 1=>'Перенос строки', 2=>'Спойлер',
+        3=>'Жирный', 4=>'Курсив', 5=>'Подчёркнутый', 6=>'Зачёркнутый',
+        7=>'BBCode', 8=>'Предформатированный текст', 11=>'Цитата', 12=>'Картинка',
+        13=>'Цитировать выделенное', 14=>'Скрытый текст',
+        15=>'Ссылка', 16=>'Ссылка с текстом',
+        17=>'PHP-код', 18=>'Flash', 19=>'Видео', 20=>'MM', 21=>'Элемент списка'
+    ];
+
+    $btn = static function($idx, $fallback) use ($bcode) {
+        return $bcode[$idx] ?? $fallback;
+    };
+    $ttl = static function($idx, $fallback) use ($brepl, $ttlDef) {
+        if (!empty($brepl[$idx])) return $brepl[$idx];
+        return $ttlDef[$idx] ?? $fallback;
+    };
 
     echo '<table cellpadding="0" cellspacing="0" align="center">';
     echo '<tr><td class="b"><div>';
 
-    // ====== Верхняя панель селектов ======
     echo '<div align="center">';
 
-    // Шрифты (сгенерируем из массива — короче)
     $fonts = [
         'Verdana' => 'Verdana', 'Courier' => 'Courier', 'Courier New' => 'Courier New',
         'monospace' => 'monospace', 'Fixedsys' => 'Fixedsys', 'Arial' => 'Arial',
@@ -138,24 +154,20 @@ function textbbcode($form, $name, $content = false, $id_area = 'area')
         'Palatino Linotype' => 'Palatino', 'Trebuchet MS' => 'Trebuchet',
     ];
 
-    $bbFonts = $tracker_lang['bb_fonts'] ?? 'Шрифт';
     echo '<select name="fontFace" class="editbutton">';
-    echo '<option style="font-family:Verdana;" value="Verdana" selected="selected">' . $bbFonts . ':</option>';
+    echo '<option style="font-family:Verdana;" value="" selected="selected">' . htmlspecialchars($bbFonts, ENT_QUOTES, 'UTF-8') . ':</option>';
     foreach ($fonts as $val => $label) {
-        if ($val === 'Verdana') continue;
         echo '<option style="font-family:' . htmlspecialchars($val, ENT_QUOTES, 'UTF-8') . ';" value="' . htmlspecialchars($val, ENT_QUOTES, 'UTF-8') . '">&nbsp;' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</option>';
     }
     echo '</select>&nbsp;';
 
-    // Цвета — оставил набор как у тебя (можно сократить ещё сильнее, если скажешь)
-    $bbColor = $tracker_lang['bb_colorfont'] ?? 'Цвет';
     echo '<select name="codeColor" class="editbutton">';
-    echo '<option style="color:black;background:#fff" value="black" selected="selected">' . $bbColor . ':</option>';
+    echo '<option style="color:black;background:#fff" value="" selected="selected">' . htmlspecialchars($bbColor, ENT_QUOTES, 'UTF-8') . ':</option>';
     $colors = [
-        'Black'=>'Черный','Sienna'=>'Охра','Beige'=>'Бежевый','DarkOliveGreen'=>'Олив. зеленый',
-        'DarkGreen'=>'Т. зеленый','Cornflower'=>'Васильковый','Navy'=>'Темно-синий','DarkRed'=>'Т. красный',
-        'DarkOrange'=>'Т. оранжевый','Olive'=>'Оливковый','Green'=>'Зеленый','Teal'=>'Морской волны',
-        'Blue'=>'Голубой','Gray'=>'Серый','Red'=>'Красный','Orange'=>'Оранжевый','Yellow'=>'Желтый',
+        'Black'=>'Чёрный','Sienna'=>'Охра','Beige'=>'Бежевый','DarkOliveGreen'=>'Оливковый (тёмн.)',
+        'DarkGreen'=>'Тёмно-зелёный','Cornflower'=>'Васильковый','Navy'=>'Тёмно-синий','DarkRed'=>'Тёмно-красный',
+        'DarkOrange'=>'Тёмно-оранжевый','Olive'=>'Оливковый','Green'=>'Зелёный','Teal'=>'Морская волна',
+        'Blue'=>'Синий','Gray'=>'Серый','Red'=>'Красный','Orange'=>'Оранжевый','Yellow'=>'Жёлтый',
         'Gold'=>'Золотой','Silver'=>'Серебристый','Pink'=>'Розовый','White'=>'Белый'
     ];
     foreach ($colors as $val => $label) {
@@ -163,78 +175,64 @@ function textbbcode($form, $name, $content = false, $id_area = 'area')
     }
     echo '</select>&nbsp;';
 
-    // Размер
-    $bbSize = $tracker_lang['bb_sizefont'] ?? 'Размер';
     echo '<select name="codeSize" class="editbutton">';
-    echo '<option value="12" selected="selected">' . $bbSize . ' - 12:</option>';
+    echo '<option value="" selected="selected">' . htmlspecialchars($bbSize, ENT_QUOTES, 'UTF-8') . ':</option>';
     foreach ([9,10,11,12,14,16,18,20,22,24] as $s) {
-        echo '<option value="' . $s . '">&nbsp;' . $bbSize . ' - ' . $s . '</option>';
+        echo '<option value="' . (int)$s . '">&nbsp;' . (int)$s . '</option>';
     }
     echo '</select>&nbsp;';
 
-    // Align
-    $bbAlign = $tracker_lang['bb_align'] ?? 'Выравнивание';
     echo '<select name="codeAlign" class="editbutton">';
-    echo '<option value="" selected="selected">' . $bbAlign . ':</option>';
-    echo '<option style="text-align:left" value="left">&nbsp;' . ($valign[0] ?? 'Слева') . '</option>';
-    echo '<option style="text-align:right" value="right">&nbsp;' . ($valign[1] ?? 'Справа') . '</option>';
-    echo '<option style="text-align:center" value="center">&nbsp;' . ($valign[2] ?? 'По центру') . '</option>';
-    echo '<option style="text-align:justify" value="justify">&nbsp;' . ($valign[3] ?? 'По ширине') . '</option>';
+    echo '<option value="" selected="selected">' . htmlspecialchars($bbAlign, ENT_QUOTES, 'UTF-8') . ':</option>';
+    echo '<option style="text-align:left" value="left">&nbsp;' . htmlspecialchars($valign[0] ?? 'Слева', ENT_QUOTES, 'UTF-8') . '</option>';
+    echo '<option style="text-align:right" value="right">&nbsp;' . htmlspecialchars($valign[1] ?? 'Справа', ENT_QUOTES, 'UTF-8') . '</option>';
+    echo '<option style="text-align:center" value="center">&nbsp;' . htmlspecialchars($valign[2] ?? 'По центру', ENT_QUOTES, 'UTF-8') . '</option>';
+    echo '<option style="text-align:justify" value="justify">&nbsp;' . htmlspecialchars($valign[3] ?? 'По ширине', ENT_QUOTES, 'UTF-8') . '</option>';
     echo '</select>';
 
     echo '</div>';
 
-    // ====== Кнопки ======
     echo '<div align="center">';
 
-    // Чтобы не сломать твои индексы, берём по месту, но если строк нет — ставим дефолты
-    $btn = static function($idx, $fallback) use ($bcode) {
-        return $bcode[$idx] ?? $fallback;
-    };
-    $ttl = static function($idx, $fallback) use ($brepl) {
-        return $brepl[$idx] ?? $fallback;
-    };
-
-    echo '<input class="btn" type="button" value="' . $btn(0,'HR') . '" name="codeHR" title="' . $ttl(0,'Горизонтальная линия') . ' (Ctrl+8)" style="font-weight:bold;width:26px" /> ';
-    echo '<input class="btn" type="button" value="' . $btn(1,'BR') . '" name="codeBR" title="' . $ttl(1,'Перенос строки') . '" style="width:26px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(0,'HR') . '" name="codeHR" title="' . $ttl(0,'HR') . ' (Ctrl+8)" style="font-weight:bold;width:26px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(1,'BR') . '" name="codeBR" title="' . $ttl(1,'BR') . '" style="width:26px" /> ';
     echo '<input class="btn" type="button" value="' . $btn(2,'Спойлер') . '" name="codeSpoiler" title="' . $ttl(2,'Спойлер') . ' (Ctrl+S)" style="width:70px" /> ';
 
-    echo '<input class="btn" type="button" value=" ' . $btn(3,'B') . ' " name="codeB" title="' . $ttl(3,'Жирный') . ' (Ctrl+B)" style="font-weight:bold;width:30px" /> ';
-    echo '<input class="btn" type="button" value=" ' . $btn(4,'I') . ' " name="codeI" title="' . $ttl(4,'Курсив') . ' (Ctrl+I)" style="width:30px;font-style:italic" /> ';
-    echo '<input class="btn" type="button" value=" ' . $btn(5,'U') . ' " name="codeU" title="' . $ttl(5,'Подчеркнутый') . ' (Ctrl+U)" style="width:30px;text-decoration:underline" /> ';
-    echo '<input class="btn" type="button" value=" ' . $btn(6,'S') . ' " name="codeS" title="' . $ttl(6,'Зачеркнутый') . '" style="width:30px;text-decoration:line-through" /> ';
+    echo '<input class="btn" type="button" value=" ' . $btn(3,'B') . ' " name="codeB" title="' . $ttl(3,'B') . ' (Ctrl+B)" style="font-weight:bold;width:30px" /> ';
+    echo '<input class="btn" type="button" value=" ' . $btn(4,'I') . ' " name="codeI" title="' . $ttl(4,'I') . ' (Ctrl+I)" style="width:30px;font-style:italic" /> ';
+    echo '<input class="btn" type="button" value=" ' . $btn(5,'U') . ' " name="codeU" title="' . $ttl(5,'U') . ' (Ctrl+U)" style="width:30px;text-decoration:underline" /> ';
+    echo '<input class="btn" type="button" value=" ' . $btn(6,'S') . ' " name="codeS" title="' . $ttl(6,'S') . '" style="width:30px;text-decoration:line-through" /> ';
 
-    echo '<input class="btn" type="button" value=" ' . $btn(7,'BB') . ' " name="codeBB" title="' . $ttl(7,'BBCode') . ' (Ctrl+N)" style="font-weight:bold;width:30px" /> ';
+    echo '<input class="btn" type="button" value=" ' . $btn(7,'BB') . ' " name="codeBB" title="' . $ttl(7,'BB') . ' (Ctrl+N)" style="font-weight:bold;width:30px" /> ';
     echo '<input class="btn" type="button" value=" ' . $btn(8,'PRE') . ' " name="codePRE" title="' . $ttl(8,'PRE') . ' (Ctrl+P)" style="width:40px" /> ';
-    echo '<input class="btn" type="button" value=" ' . $btn(11,'Quote') . ' " name="codeQuote" title="' . $ttl(11,'Цитата') . ' (Ctrl+Q)" style="width:60px" /> ';
-    echo '<input class="btn" type="button" value="' . $btn(12,'Img') . '" name="codeImg" title="' . $ttl(12,'Картинка') . ' (Ctrl+R)" style="width:40px" /> ';
+    echo '<input class="btn" type="button" value=" ' . $btn(11,'Quote') . ' " name="codeQuote" title="' . $ttl(11,'Quote') . ' (Ctrl+Q)" style="width:60px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(12,'Img') . '" name="codeImg" title="' . $ttl(12,'Img') . ' (Ctrl+R)" style="width:40px" /> ';
 
-    echo '<input class="btn" type="button" ' . $quoteSelDisabled . ' value="' . $btn(13,'QuoteSel') . '" name="quoteselected" title="' . $ttl(13,'Цитировать выделение') . '" style="width:165px" onmouseout="bbcode.refreshSelection(false);" onmouseover="bbcode.refreshSelection(true);" onclick="bbcode.onclickQuoteSel();" /> ';
-    echo '<input class="btn" type="button" ' . $hideDisabled . ' value="' . $btn(14,'HIDE') . '" name="codeHIDE" title="' . $ttl(14,'Скрытый текст') . '" style="width:70px" /> ';
+    echo '<input class="btn" type="button" ' . $quoteSelDisabled . ' value="' . $btn(13,'QuoteSel') . '" name="quoteselected" title="' . $ttl(13,'QuoteSel') . '" style="width:165px" onmouseout="bbcode.refreshSelection(false);" onmouseover="bbcode.refreshSelection(true);" onclick="bbcode.onclickQuoteSel();" /> ';
+    echo '<input class="btn" type="button" ' . $hideDisabled . ' value="' . $btn(14,'HIDE') . '" name="codeHIDE" title="' . $ttl(14,'HIDE') . '" style="width:70px" /> ';
 
-    echo '<input class="btn" type="button" value="' . $btn(15,'Url') . '" name="codeUri" title="' . $ttl(15,'Ссылка') . '" style="width:40px;text-decoration:underline" /> ';
-    echo '<input class="btn" type="button" value="' . $btn(16,'Url=') . '" name="codeUr" title="' . $ttl(16,'Ссылка с текстом') . '" style="width:40px;text-decoration:underline" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(15,'Url') . '" name="codeUri" title="' . $ttl(15,'Url') . '" style="width:40px;text-decoration:underline" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(16,'Url=') . '" name="codeUr" title="' . $ttl(16,'Url=') . '" style="width:40px;text-decoration:underline" /> ';
 
-    echo '<input class="btn" type="button" value="' . $btn(17,'PHP') . '" name="codeCode" title="' . $ttl(17,'PHP-код') . ' (Ctrl+K)" style="width:46px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(17,'PHP') . '" name="codeCode" title="' . $ttl(17,'PHP') . ' (Ctrl+K)" style="width:46px" /> ';
     echo '<input class="btn" type="button" value="' . $btn(18,'Flash') . '" name="codeFlash" title="' . $ttl(18,'Flash') . ' (Ctrl+F)" style="width:50px" /> ';
-    echo '<input class="btn" type="button" value="' . $btn(19,'YT') . '" name="codeYT" title="' . $ttl(19,'Видео') . '" style="width:50px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(19,'YT') . '" name="codeYT" title="' . $ttl(19,'YT') . '" style="width:50px" /> ';
     echo '<input class="btn" type="button" value="' . $btn(20,'MM') . '" name="codeMM" title="' . $ttl(20,'MM') . '" style="width:50px" /> ';
-    echo '<input class="btn" type="button" value="' . $btn(21,'LI') . '" name="codeOpt" title="' . $ttl(21,'Список') . ' (Ctrl+0)" style="width:30px" /> ';
+    echo '<input class="btn" type="button" value="' . $btn(21,'LI') . '" name="codeOpt" title="' . $ttl(21,'LI') . ' (Ctrl+0)" style="width:30px" /> ';
 
     if ($isEdit) {
         echo '<input class="btn" type="button" value="' . $btn(25,'UDesk') . '" onclick="textbb_udesck(\'' . htmlspecialchars($id_area, ENT_QUOTES, 'UTF-8') . '\')" title="' . $ttl(25,'UDesk') . '" style="width:60px" /> ';
     }
 
-    echo '<input class="btn" type="button" value="' . $btn(26,'Смайлы') . '" name="Smailes" title="' . $ttl(26,'Смайлы') . '" style="width:60px" onclick="window.open(\'smilies.php?form=' . rawurlencode($form) . '&text=' . rawurlencode($name) . '\', \'height=500,width=450,resizable=no,scrollbars=yes\'); return false;" /> ';
+    $smilesTitle = $tracker_lang['smilies'] ?? 'Смайлы';
+    echo '<input class="btn" type="button" value="' . $btn(26,$smilesTitle) . '" name="Smailes" title="' . $ttl(26,$smilesTitle) . '" style="width:60px" onclick="window.open(\'smilies.php?form=' . rawurlencode($form) . '&text=' . rawurlencode($name) . '\', \'height=500,width=450,resizable=no,scrollbars=yes\'); return false;" /> ';
 
     echo '</div>';
 
-    // ====== Textarea ======
     echo '<textarea class="resizable" id="' . htmlspecialchars($id_area, ENT_QUOTES, 'UTF-8') . '" name="' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '" style="width:100%;" rows="' . (int)$rows . '" onfocus="storeCaret(this);" onselect="storeCaret(this);" onclick="storeCaret(this);" onkeyup="storeCaret(this);">'
         . $content
         . '</textarea>';
 
-    // ====== Привязка BBCode ======
     echo '<script type="text/javascript">';
     echo 'var bbcode = new BBCode(document.' . $form . '.' . $name . ');';
     echo 'var ctrl = "ctrl";';
@@ -257,28 +255,31 @@ function textbbcode($form, $name, $content = false, $id_area = 'area')
     echo 'bbcode.addTag("codeBR","br","","",ctrl);';
     echo 'bbcode.addTag("codeSpoiler","spoiler",null,"S",ctrl);';
     echo 'bbcode.addTag("codeMM","[mcom=#529EDC:#F5F5F5]","/mcom","",ctrl);';
-    echo 'bbcode.addTag("fontFace",function(e){var v=e.value;e.selectedIndex=0;return "font="+v}, "/font");';
-    echo 'bbcode.addTag("codeColor",function(e){var v=e.value;e.selectedIndex=0;return "color="+v}, "/color");';
-    echo 'bbcode.addTag("codeSize",function(e){var v=e.value;e.selectedIndex=0;return "size="+v}, "/size");';
-    echo 'bbcode.addTag("codeAlign",function(e){var v=e.value;e.selectedIndex=0;return "align="+v}, "/align");';
+
+    // ВАЖНО: для селектов мы используем change в bbcode.js,
+    // а тут добавим защиту от пустого значения, чтобы не схлопывать/не вставлять мусор
+    echo 'bbcode.addTag("fontFace",function(e){var v=e.value; if(!v){return ""} e.selectedIndex=0; return "font="+v}, "/font");';
+    echo 'bbcode.addTag("codeColor",function(e){var v=e.value; if(!v){return ""} e.selectedIndex=0; return "color="+v}, "/color");';
+    echo 'bbcode.addTag("codeSize",function(e){var v=e.value; if(!v){return ""} e.selectedIndex=0; return "size="+v}, "/size");';
+    echo 'bbcode.addTag("codeAlign",function(e){var v=e.value; if(!v){return ""} e.selectedIndex=0; return "align="+v}, "/align");';
     echo '</script>';
 
     echo '</div><div id="prevsmalie" align="center" name="' . htmlspecialchars($form, ENT_QUOTES, 'UTF-8') . ':' . htmlspecialchars($id_area, ENT_QUOTES, 'UTF-8') . '"></div>';
     echo '</td></tr>';
 
-    // Preview + reset (если не details.php)
     if (!$isDetails) {
         $preview = $tracker_lang['preview'] ?? 'Предпросмотр';
         $reset   = $tracker_lang['reset'] ?? 'Сброс';
         echo '<tr><td style="margin:0;padding:0" align="center" class="b">'
-            . '<input type="button" name="preview" class="btn" title="ALT+ENTER ' . $preview . '" value="' . $preview . '" onclick="javascript:ajaxpreview(\'' . addslashes($id_area) . '\');" /> '
-            . '<input type="reset" class="btn" value="' . $reset . '" />'
+            . '<input type="button" name="preview" class="btn" title="ALT+ENTER ' . htmlspecialchars($preview, ENT_QUOTES, 'UTF-8') . '" value="' . htmlspecialchars($preview, ENT_QUOTES, 'UTF-8') . '" onclick="javascript:ajaxpreview(\'' . addslashes($id_area) . '\');" /> '
+            . '<input type="reset" class="btn" value="' . htmlspecialchars($reset, ENT_QUOTES, 'UTF-8') . '" />'
             . '</td></tr>'
             . '<tr><td id="preview" style="margin:0;padding:0" class="a"></td></tr>';
     }
 
     echo '</table>';
 }
+
 
 function get_row_count($table, $suffix = "") {
 	if ($suffix)
