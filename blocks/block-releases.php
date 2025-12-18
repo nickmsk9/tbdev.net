@@ -1,42 +1,115 @@
 <?php
+declare(strict_types=1);
+
 if (!defined('BLOCK_FILE')) {
- Header("Location: ../index.php");
- exit;
+    header("Location: ../index.php");
+    exit;
 }
 
-global $rootpath;
+$blocktitle = "Новые раздачи";
 
-$count = get_row_count('indexreleases');
-$blocktitle = "Новые раздачи".(get_user_class() >= UC_MODERATOR ? "<font class=\"small\"> - [<a class=\"altlink\" href=\"indexadd.php\"><b>�����</b></a>]</font>" : "");
+// сколько показывать
+$perpage = 5;
 
-$content .= "<table cellspacing=\"0\" cellpadding=\"5\" width=\"100%\"><tr><td>";
+// считаем кол-во (для pager)
+$countRes = sql_query("SELECT COUNT(*) AS c FROM torrents WHERE visible = 'yes'") or sqlerr(__FILE__, __LINE__);
+$countRow = mysqli_fetch_assoc($countRes);
+$count = (int)($countRow['c'] ?? 0);
 
-if (!$count) {
-	$content .= "Новых загрузок нет...";
+$content = '';
+$content .= '<table cellspacing="0" cellpadding="5" width="100%"><tr><td>';
+
+if ($count <= 0) {
+    $content .= 'Новых загрузок нет...';
 } else {
-	$perpage = 5;
-	list($pagertop, $pagerbottom, $limit) = pager($perpage, $count, $_SERVER["PHP_SELF"] . "?" );
-	$content .= $pagertop;
-	$content .= "</td></tr>";
-	$res = sql_query("SELECT i.*, c.id AS catid, c.name AS catname, c.image AS catimage FROM indexreleases AS i LEFT JOIN categories AS c ON i.cat = c.id ORDER BY id DESC $limit") or sqlerr(__FILE__, __LINE__);
-	while ($release = mysqli_fetch_array($res)) {
-		$catid = $release["catid"];
-		$catname = $release["catname"];
-		$catimage = $release["catimage"];
-		$content .= "<tr><td>";
-		$content .= "<table width=\"100%\" class=\"main\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\">";
-		$content .= "<tr><td class=\"colhead\" colspan=\"2\" align=\"center\">".htmlspecialchars_uni($release["name"]).(get_user_class() >= UC_MODERATOR ? "<font class=\"small\"> - [<a class=\"altlink_white\" href=\"indexedit.php?action=edit&id=$release[id]&returnto=" . urlencode($_SERVER['PHP_SELF']) . "\"><b>�������������</b></a>][<a class=\"altlink_white\" href=\"indexdelete.php?action=delete&id=$release[id]&returnto=" . urlencode($_SERVER['PHP_SELF']) . "\"><b>�������</b></a>]</font>" : "")."</td></tr>";
-		$content .= "<tr valign=\"top\"><td align=\"center\" width=\"160\"><a href=\"details.php?id=$release[torrentid]\" alt=\"$release[name]\" title=\"$release[name]\"><img src=\"$release[poster]\" width=\"160\" border=\"0\" /></a></td>";
-		$content .= "<td><div align=\"left\">".(!empty($catimage) ? "<a href=\"browse.php?cat=$catid\"><img src=\"pic/cats/$catimage\" alt=\"$catname\" title=\"$catname\" align=\"right\" border=\"0\" /></a>" : "<span align=\"right\" style=\"float: right;\">$catname</span>").format_comment($release["top"])."<br /></div><div align=\"left\"><hr align=\"left\" width=\"85%\" color=\"#000000\" size=\"1\"></div><div align=\"left\">".format_comment($release["center"])."<br /></div><div align=\"left\"><hr align=\"left\" width=\"85%\" color=\"#000000\" size=\"1\"></div><div align=\"left\">".format_comment($release["bottom"])."</div><div align=\"right\">".($release["imdb"] ? "[<a href=\"$release[imdb]\" class=\"online\">IMDB</a>] " : "")."[<a href=\"details.php?id=$release[torrentid]\" alt=\"$release[name]\" title=\"$release[name]\"><b>������</b></a>]</div></td>";
-		$content .= "</tr>";
-		$content .= "</table>";
-		$content .= "</td></tr>";
-	}
-	$content .= "<tr><td>";
-	$content .= $pagerbottom;
-	$content .= "</td></tr>";
+    list($pagertop, $pagerbottom, $limit) = pager($perpage, $count, $_SERVER["PHP_SELF"] . "?");
+
+    $content .= $pagertop;
+    $content .= "</td></tr>";
+
+    // Берём последние торренты из torrents
+    $res = sql_query("
+        SELECT
+            t.id, t.name, t.added, t.category,
+            t.seeders, t.leechers, t.times_completed,
+            t.image1,
+            c.id AS catid, c.name AS catname, c.image AS catimage
+        FROM torrents AS t
+        LEFT JOIN categories AS c ON t.category = c.id
+        WHERE t.visible = 'yes'
+        ORDER BY t.id DESC
+        $limit
+    ") or sqlerr(__FILE__, __LINE__);
+
+    while ($t = mysqli_fetch_assoc($res)) {
+        $tid = (int)($t['id'] ?? 0);
+        $name = (string)($t['name'] ?? '');
+
+        $seeders = (int)($t['seeders'] ?? 0);
+        $leechers = (int)($t['leechers'] ?? 0);
+        $completed = (int)($t['times_completed'] ?? 0);
+
+        $catid = (int)($t['catid'] ?? 0);
+        $catname = (string)($t['catname'] ?? '');
+        $catimage = (string)($t['catimage'] ?? '');
+
+        // Постер: берём из torrents.image1 (если у тебя хранится иначе — поменяй тут)
+        $poster = (string)($t['image1'] ?? '');
+
+        $titleAttr = htmlspecialchars_uni($name);
+
+        $content .= "<tr><td>";
+        $content .= "<table width=\"100%\" class=\"main\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\">";
+
+        // Заголовок
+        $content .= "<tr><td class=\"colhead\" colspan=\"2\" align=\"center\">"
+            . "<a class=\"altlink_white\" href=\"details.php?id={$tid}\"><b>{$titleAttr}</b></a>"
+            . "</td></tr>";
+
+        // Левая колонка (постер)
+        if ($poster !== '') {
+            // если в image1 хранится имя файла из torrents/images/
+            // если у тебя хранится полный URL — оставь как есть
+            $posterSrc = (str_starts_with($poster, 'http://') || str_starts_with($poster, 'https://'))
+                ? $poster
+                : "torrents/images/" . $poster;
+
+            $posterHtml = "<a href=\"details.php?id={$tid}\" title=\"{$titleAttr}\">"
+                . "<img src=\"" . htmlspecialchars_uni($posterSrc) . "\" width=\"160\" border=\"0\" />"
+                . "</a>";
+        } else {
+            $posterHtml = "<a href=\"details.php?id={$tid}\" title=\"{$titleAttr}\">"
+                . "<img src=\"pic/noposter.png\" width=\"160\" border=\"0\" />"
+                . "</a>";
+        }
+
+        $content .= "<tr valign=\"top\">";
+        $content .= "<td align=\"center\" width=\"160\">{$posterHtml}</td>";
+
+        // Правая колонка
+        $catHtml = $catimage !== ''
+            ? "<a href=\"browse.php?cat={$catid}\"><img src=\"pic/cats/" . htmlspecialchars_uni($catimage) . "\" alt=\"" . htmlspecialchars_uni($catname) . "\" title=\"" . htmlspecialchars_uni($catname) . "\" align=\"right\" border=\"0\" /></a>"
+            : "<span style=\"float:right;\">" . htmlspecialchars_uni($catname) . "</span>";
+
+        $content .= "<td>";
+        $content .= "<div align=\"left\">{$catHtml}</div>";
+
+        // Статы (важно: показываем и “мёртвые” тоже)
+        $content .= "<div align=\"left\">";
+        $content .= "<b>Сиды:</b> {$seeders} &nbsp; ";
+        $content .= "<b>Личи:</b> {$leechers} &nbsp; ";
+        $content .= "<b>Скачали:</b> {$completed}";
+        $content .= "</div>";
+
+        $content .= "<div align=\"right\">[<a href=\"details.php?id={$tid}\" title=\"{$titleAttr}\"><b>Открыть</b></a>]</div>";
+        $content .= "</td>";
+
+        $content .= "</tr>";
+        $content .= "</table>";
+        $content .= "</td></tr>";
+    }
+
+    $content .= "<tr><td>{$pagerbottom}</td></tr>";
 }
 
 $content .= "</table>";
-
-?>
