@@ -1,95 +1,178 @@
 <?php
-	/* 	Torrent UDP Scraper
-		v1.2
-		
-		2010 by Johannes Zinnau
-		johannes@johnimedia.de
-		
-		Licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License
-		http://creativecommons.org/licenses/by-sa/3.0/
-		
-		It would be very nice if you send me your changes on this class, so that i can include them if they are improve it.
-		Thanks!
-		
-		Usage:
-		try{
-			$timeout = 2;
-			
-			$scraper = new udptscraper($timeout);
-			$ret = $scraper->scrape('udp://tracker.tld:port',array('0000000000000000000000000000000000000000'));
-			
-			print_r($ret);
-		}catch(ScraperException $e){
-			echo('Error: ' . $e->getMessage() . "<br />\n");
-			echo('Connection error: ' . ($e->isConnectionError() ? 'yes' : 'no') . "<br />\n");
-		}
-	*/
-	
-	require_once(dirname(__FILE__) . '/tscraper.php');
-	
-	class udptscraper extends tscraper{
-		
-		/* 	$url: Tracker url like: udp://tracker.tld:port or udp://tracker.tld:port/announce
-			$infohash: Infohash string or array (max 74 items). 40 char long infohash. 
-			*/
-		public function scrape($url, $infohash){
-			if(!is_array($infohash)){ $infohash = array($infohash); }
-			foreach($infohash as $hash){
-				if(!preg_match('#^[a-f0-9]{40}$#i',$hash)){ throw new ScraperException('Invalid infohash: ' . $hash . '.'); }
-			}
-			if(count($infohash) > 74){ throw new ScraperException('Too many infohashes provided.'); }
-			if(!preg_match('%udp://([^:/]*)(?::([0-9]*))?(?:/)?%si', $url, $m)){ throw new ScraperException('Invalid tracker url.'); }
-			$tracker = 'udp://' . $m[1];
-			$port = isset($m[2]) ? $m[2] : 80;
-			
-			$transaction_id = mt_rand(0,65535);
-			$fp = fsockopen($tracker, $port, $errno, $errstr);
-			if(!$fp){ throw new ScraperException('Could not open UDP connection: ' . $errno . ' - ' . $errstr,0,true); }
-			stream_set_timeout($fp, $this->timeout);
-			
-			$current_connid = "\x00\x00\x04\x17\x27\x10\x19\x80";
-			
-			//Connection request
-			$packet = $current_connid . pack("N", 0) . pack("N", $transaction_id);
-			fwrite($fp,$packet);
-			
-			//Connection response
-			$ret = fread($fp, 16);
-			if(strlen($ret) < 1){ throw new ScraperException('No connection response.',0,true); }
-			if(strlen($ret) < 16){ throw new ScraperException('Too short connection response.'); }
-			$retd = unpack("Naction/Ntransid",$ret);
-			if($retd['action'] != 0 || $retd['transid'] != $transaction_id){
-				throw new ScraperException('Invalid connection response.');
-			}
-			$current_connid = substr($ret,8,8);
-			
-			//Scrape request
-			$hashes = '';
-			foreach($infohash as $hash){ $hashes .= pack('H*', $hash); }
-			$packet = $current_connid . pack("N", 2) . pack("N", $transaction_id) . $hashes;
-			fwrite($fp,$packet);
-			
-			//Scrape response
-			$readlength = 8 + (12 * count($infohash));
-			$ret = fread($fp, $readlength);
-			if(strlen($ret) < 1){ throw new ScraperException('No scrape response.',0,true); }
-			if(strlen($ret) < 8){ throw new ScraperException('Too short scrape response.'); }
-			$retd = unpack("Naction/Ntransid",$ret);
-			// Todo check for error string if response = 3
-			if($retd['action'] != 2 || $retd['transid'] != $transaction_id){
-				throw new ScraperException('Invalid scrape response.');
-			}
-			if(strlen($ret) < $readlength){ throw new ScraperException('Too short scrape response.'); }
-			$torrents = array();
-			$index = 8;
-			foreach($infohash as $hash){
-				$retd = unpack("Nseeders/Ncompleted/Nleechers",substr($ret,$index,12));
-				$retd['infohash'] = $hash;
-				$torrents[$hash] = $retd;
-				$index = $index + 12;
-			}
-			
-			return($torrents);
-		}
-	}
-?>
+declare(strict_types=1);
+
+require_once __DIR__ . '/tscraper.php';
+
+class udptscraper extends tscraper
+{
+    /**
+     * UDP scrape
+     *
+     * @param string          $url      URL трекера: udp://tracker.tld:port или udp://tracker.tld:port/announce
+     * @param string|string[] $infohash  Infohash (40 hex) или массив (макс. 74)
+     * @return array<string, array<string,int|string>>
+     * @throws ScraperException
+     */
+    public function scrape(string $url, string|array $infohash): array
+    {
+        $hashes = is_array($infohash) ? array_values($infohash) : [$infohash];
+
+        if (!$hashes) {
+            throw new ScraperException('Список infohash пуст.');
+        }
+
+        foreach ($hashes as $hash) {
+            if (!preg_match('~^[a-f0-9]{40}$~i', (string)$hash)) {
+                throw new ScraperException('Некорректный infohash: ' . $hash . '.');
+            }
+        }
+
+        if (count($hashes) > 74) {
+            throw new ScraperException('Слишком много infohash (максимум 74).');
+        }
+
+        // Парсим udp://host:port/...
+        if (!preg_match('~^udp://([^:/]+)(?::(\d+))?(?:/.*)?$~i', trim($url), $m)) {
+            throw new ScraperException('Некорректный URL трекера.');
+        }
+
+        $host = $m[1];
+        $port = isset($m[2]) && $m[2] !== '' ? (int)$m[2] : 80;
+        if ($port < 1 || $port > 65535) {
+            throw new ScraperException('Некорректный порт трекера.');
+        }
+
+        // Открываем UDP сокет
+        $errno = 0;
+        $errstr = '';
+        $fp = @fsockopen('udp://' . $host, $port, $errno, $errstr);
+        if (!$fp) {
+            throw new ScraperException('Не удалось открыть UDP-соединение: ' . $errno . ' - ' . $errstr, 0, true);
+        }
+
+        stream_set_timeout($fp, $this->timeout);
+
+        // Протокол UDP tracker: connect_id (8 bytes) фиксированный
+        $connId = "\x00\x00\x04\x17\x27\x10\x19\x80";
+
+        // ====== 1) CONNECT ======
+        $transactionId = random_int(0, 0x7fffffff);
+
+        // action=0 (connect)
+        $packet = $connId . pack('N', 0) . pack('N', $transactionId);
+        $this->writeAll($fp, $packet);
+
+        // Ответ connect: 16 байт (action(4) + transId(4) + connId(8))
+        $ret = $this->readExact($fp, 16, 'ответ на CONNECT');
+
+        $head = unpack('Naction/Ntransid', substr($ret, 0, 8));
+        if (!is_array($head) || ($head['action'] ?? -1) !== 0 || ($head['transid'] ?? -1) !== $transactionId) {
+            fclose($fp);
+            throw new ScraperException('Некорректный ответ CONNECT.');
+        }
+
+        $connId = substr($ret, 8, 8);
+
+        // ====== 2) SCRAPE ======
+        $transactionId = random_int(0, 0x7fffffff);
+
+        // action=2 (scrape)
+        $infohashBin = '';
+        foreach ($hashes as $hash) {
+            $infohashBin .= pack('H*', (string)$hash);
+        }
+
+        $packet = $connId . pack('N', 2) . pack('N', $transactionId) . $infohashBin;
+        $this->writeAll($fp, $packet);
+
+        // Ответ scrape: 8 + 12*n (action+transId + (seeders, completed, leechers)*n)
+        $readLength = 8 + (12 * count($hashes));
+        $ret = $this->readExact($fp, $readLength, 'ответ на SCRAPE');
+
+        $head = unpack('Naction/Ntransid', substr($ret, 0, 8));
+        if (!is_array($head) || ($head['transid'] ?? -1) !== $transactionId) {
+            fclose($fp);
+            throw new ScraperException('Некорректный ответ SCRAPE (transaction id не совпал).');
+        }
+
+        // action=3 — ошибка трекера (может идти строка ошибки)
+        if (($head['action'] ?? -1) === 3) {
+            fclose($fp);
+            throw new ScraperException('Трекер вернул ошибку (action=3).', 0, true);
+        }
+
+        if (($head['action'] ?? -1) !== 2) {
+            fclose($fp);
+            throw new ScraperException('Некорректный ответ SCRAPE (action не равен 2).');
+        }
+
+        $torrents = [];
+        $index = 8;
+
+        foreach ($hashes as $hash) {
+            $chunk = substr($ret, $index, 12);
+            if (strlen($chunk) !== 12) {
+                fclose($fp);
+                throw new ScraperException('Ответ SCRAPE слишком короткий.');
+            }
+
+            // По UDP-протоколу: seeders, completed, leechers — 32-bit BE
+            $d = unpack('Nseeders/Ncompleted/Nleechers', $chunk);
+            $torrents[(string)$hash] = [
+                'infohash'   => (string)$hash,
+                'seeders'    => (int)($d['seeders'] ?? 0),
+                'completed'  => (int)($d['completed'] ?? 0),
+                'leechers'   => (int)($d['leechers'] ?? 0),
+            ];
+
+            $index += 12;
+        }
+
+        fclose($fp);
+        return $torrents;
+    }
+
+    /**
+     * Дочитать ровно $length байт из сокета или упасть с понятной ошибкой
+     */
+    private function readExact($fp, int $length, string $stage): string
+    {
+        $data = '';
+        $remaining = $length;
+
+        while ($remaining > 0 && !feof($fp)) {
+            $chunk = fread($fp, $remaining);
+            if ($chunk === false || $chunk === '') {
+                break;
+            }
+            $data .= $chunk;
+            $remaining -= strlen($chunk);
+        }
+
+        if (strlen($data) < 1) {
+            throw new ScraperException('Нет данных: ' . $stage . '.', 0, true);
+        }
+        if (strlen($data) < $length) {
+            throw new ScraperException('Слишком короткий ' . $stage . '.', 0, true);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Надёжная запись в сокет (на случай частичной записи)
+     */
+    private function writeAll($fp, string $data): void
+    {
+        $len = strlen($data);
+        $written = 0;
+
+        while ($written < $len) {
+            $w = fwrite($fp, substr($data, $written));
+            if ($w === false || $w === 0) {
+                throw new ScraperException('Не удалось отправить пакет по UDP.', 0, true);
+            }
+            $written += $w;
+        }
+    }
+}
