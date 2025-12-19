@@ -1276,22 +1276,26 @@ function pager($rpp, $count, $href, $opts = array())
     $rpp   = (int)$rpp;
     $count = (int)$count;
 
-    if ($rpp <= 0) {
-        $rpp = 1;
-    }
-    if ($count < 0) {
-        $count = 0;
+    if ($rpp <= 0) $rpp = 1;
+    if ($count < 0) $count = 0;
+
+    // Если нечего листать — не показываем "Страницы:" вообще
+    if ($count === 0) {
+        return array('', '', "LIMIT 0,$rpp");
     }
 
-    $pages = ($count > 0) ? (int)ceil($count / $rpp) : 0;
+    $pages = (int)ceil($count / $rpp);
+
+    // Если всего одна страница — тоже не показываем пагинацию
+    if ($pages <= 1) {
+        return array('', '', "LIMIT 0,$rpp");
+    }
 
     // page default
     if (!empty($opts['lastpagedefault'])) {
-        $pagedefault = ($count > 0) ? (int)floor(($count - 1) / $rpp) : 0;
+        $pagedefault = (int)floor(($count - 1) / $rpp);
+        if ($pagedefault < 0) $pagedefault = 0;
     } else {
-        $pagedefault = 0;
-    }
-    if ($pagedefault < 0) {
         $pagedefault = 0;
     }
 
@@ -1302,13 +1306,9 @@ function pager($rpp, $count, $href, $opts = array())
         $page = ($p >= 0) ? $p : $pagedefault;
     }
 
-    if ($pages > 0) {
-        $mp = $pages - 1;
-        if ($page > $mp) $page = $mp;
-        if ($page < 0)   $page = 0;
-    } else {
-        $page = 0;
-    }
+    $mp = $pages - 1;
+    if ($page > $mp) $page = $mp;
+    if ($page < 0)   $page = 0;
 
     // UI pieces (same structure/classes)
     $cellSpacer = '<td class="pagebr">&nbsp;</td>';
@@ -1316,35 +1316,20 @@ function pager($rpp, $count, $href, $opts = array())
     $pagerRight = '';
 
     // prev / next
-    if ($pages > 0) {
-        $mp = $pages - 1;
-
-        if ($page >= 1) {
-            $pagerLeft .= '<td class="pager">'
-                . '<a href="' . $href . 'page=' . ($page - 1) . '" style="text-decoration: none;"><b>«</b></a>'
-                . '</td>' . $cellSpacer;
-        }
-
-        if ($page < $mp) {
-            $pagerRight .= '<td class="pager">'
-                . '<a href="' . $href . 'page=' . ($page + 1) . '" style="text-decoration: none;"><b>»</b></a>'
-                . '</td>';
-        }
+    if ($page >= 1) {
+        $pagerLeft .= '<td class="pager">'
+            . '<a href="' . $href . 'page=' . ($page - 1) . '" style="text-decoration: none;"><b>«</b></a>'
+            . '</td>' . $cellSpacer;
     }
 
-    // If nothing to page through
-    if ($count <= 0 || $pages <= 1) {
-        $start = $page * $rpp;
-        if ($start < 0) $start = 0;
-        return array(
-            '<table class="main"><tr>' . $pagerLeft . $pagerRight . '</tr></table>' . "\n",
-            '<table class="main"><tr>' . $pagerLeft . $pagerRight . '</tr></table>' . "\n",
-            "LIMIT $start,$rpp"
-        );
+    if ($page < $mp) {
+        $pagerRight .= '<td class="pager">'
+            . '<a href="' . $href . 'page=' . ($page + 1) . '" style="text-decoration: none;"><b>»</b></a>'
+            . '</td>';
     }
 
     // Build list of page indexes to show (fast, no full loop)
-    $dotspace = 3; // как раньше: по 3 вокруг
+    $dotspace = 3;
     $show = array();
 
     // first 3
@@ -1352,7 +1337,7 @@ function pager($rpp, $count, $href, $opts = array())
 
     // around current
     $from = max(0, $page - $dotspace);
-    $to   = min($pages - 1, $page + $dotspace);
+    $to   = min($mp, $page + $dotspace);
     for ($i = $from; $i <= $to; $i++) $show[$i] = true;
 
     // last 3
