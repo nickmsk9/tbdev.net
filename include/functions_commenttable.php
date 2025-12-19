@@ -80,8 +80,9 @@ function commenttable($rows, $redaktor = "comment") {
             print("<a name=\"comm" . $row["id"] . "\"><i>[Анонимный]</i></a>\n");
         }
 
-        $avatar = ($CURUSER["avatars"] == "yes" ? htmlspecialchars_uni($row["avatar"]) : "");
-        if (!$avatar) {
+ $avatar = (isset($CURUSER["avatars"]) && $CURUSER["avatars"] == "yes" && !empty($row["avatar"])) 
+            ? htmlspecialchars_uni($row["avatar"]) 
+            : "";        if (!$avatar) {
             $avatar = "pic/default_avatar.gif";
         }
         
