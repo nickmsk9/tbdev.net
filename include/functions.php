@@ -1271,84 +1271,139 @@ function deletetorrent($id) {
 	unlink($torrent_dir.'/'.$id.'.torrent');
 }
 
-function pager($rpp, $count, $href, $opts = array()) {
-	$pages = ceil($count / $rpp);
+function pager($rpp, $count, $href, $opts = array())
+{
+    $rpp   = (int)$rpp;
+    $count = (int)$count;
 
-	if (!isset($opts['lastpagedefault']))
-		$pagedefault = 0;
-	else {
-		$pagedefault = floor(($count - 1) / $rpp);
-		if ($pagedefault < 0)
-			$pagedefault = 0;
-	}
+    if ($rpp <= 0) {
+        $rpp = 1;
+    }
+    if ($count < 0) {
+        $count = 0;
+    }
 
-	if (isset($_GET['page'])) {
-		$page = 0 + (int) $_GET['page'];
-		if ($page < 0)
-			$page = $pagedefault;
-	}
-	else
-		$page = $pagedefault;
+    $pages = ($count > 0) ? (int)ceil($count / $rpp) : 0;
 
-	$pager = "<td class=\"pager\">��������:</td><td class=\"pagebr\">&nbsp;</td>";
-	$pager2 = "";
-	$bregs = "";
+    // page default
+    if (!empty($opts['lastpagedefault'])) {
+        $pagedefault = ($count > 0) ? (int)floor(($count - 1) / $rpp) : 0;
+    } else {
+        $pagedefault = 0;
+    }
+    if ($pagedefault < 0) {
+        $pagedefault = 0;
+    }
 
-	$mp = $pages - 1;
-	$as = "<b>�</b>";
-	if ($page >= 1) {
-		$pager .= "<td class=\"pager\">";
-		$pager .= "<a href=\"{$href}page=" . ($page - 1) . "\" style=\"text-decoration: none;\">$as</a>";
-		$pager .= "</td><td class=\"pagebr\">&nbsp;</td>";
-	}
+    // current page
+    $page = $pagedefault;
+    if (isset($_GET['page'])) {
+        $p = (int)$_GET['page'];
+        $page = ($p >= 0) ? $p : $pagedefault;
+    }
 
-	$as = "<b>�</b>";
-	if ($page < $mp && $mp >= 0) {
-		$pager2 .= "<td class=\"pager\">";
-		$pager2 .= "<a href=\"{$href}page=" . ($page + 1) . "\" style=\"text-decoration: none;\">$as</a>";
-		$pager2 .= "</td>$bregs";
-	} else
-		$pager2 .= $bregs;
+    if ($pages > 0) {
+        $mp = $pages - 1;
+        if ($page > $mp) $page = $mp;
+        if ($page < 0)   $page = 0;
+    } else {
+        $page = 0;
+    }
 
-	if ($count) {
-		$pagerarr = array();
-		$dotted = 0;
-		$dotspace = 3;
-		$dotend = $pages - $dotspace;
-		$curdotend = $page - $dotspace;
-		$curdotstart = $page + $dotspace;
-		for ($i = 0; $i < $pages; $i++) {
-			if (($i >= $dotspace && $i <= $curdotend) || ($i >= $curdotstart && $i < $dotend)) {
-				if (!$dotted)
-				   $pagerarr[] = "<td class=\"pager\">...</td><td class=\"pagebr\">&nbsp;</td>";
-				$dotted = 1;
-				continue;
-			}
-			$dotted = 0;
-			$start = $i * $rpp + 1;
-			$end = $start + $rpp - 1;
-			if ($end > $count)
-				$end = $count;
+    // UI pieces (same structure/classes)
+    $cellSpacer = '<td class="pagebr">&nbsp;</td>';
+    $pagerLeft  = '<td class="pager">Страницы:</td>' . $cellSpacer;
+    $pagerRight = '';
 
-			 $text = $i+1;
-			if ($i != $page)
-				$pagerarr[] = "<td class=\"pager\"><a title=\"$start&nbsp;-&nbsp;$end\" href=\"{$href}page=$i\" style=\"text-decoration: none;\"><b>$text</b></a></td><td class=\"pagebr\">&nbsp;</td>";
-			else
-				$pagerarr[] = "<td class=\"highlight\"><b>$text</b></td><td class=\"pagebr\">&nbsp;</td>";
+    // prev / next
+    if ($pages > 0) {
+        $mp = $pages - 1;
 
-				  }
-		$pagerstr = join("", $pagerarr);
-		$pagertop = "<table class=\"main\"><tr>$pager $pagerstr $pager2</tr></table>\n";
-		$pagerbottom = "����� $count �� $i ��������� �� $rpp �� ������ ��������.<br /><br /><table class=\"main\">$pager $pagerstr $pager2</table>\n";
-	}
-	else {
-		$pagertop = $pager;
-		$pagerbottom = $pagertop;
-	}
+        if ($page >= 1) {
+            $pagerLeft .= '<td class="pager">'
+                . '<a href="' . $href . 'page=' . ($page - 1) . '" style="text-decoration: none;"><b>«</b></a>'
+                . '</td>' . $cellSpacer;
+        }
 
-	$start = $page * $rpp;
+        if ($page < $mp) {
+            $pagerRight .= '<td class="pager">'
+                . '<a href="' . $href . 'page=' . ($page + 1) . '" style="text-decoration: none;"><b>»</b></a>'
+                . '</td>';
+        }
+    }
 
-	return array($pagertop, $pagerbottom, "LIMIT $start,$rpp");
+    // If nothing to page through
+    if ($count <= 0 || $pages <= 1) {
+        $start = $page * $rpp;
+        if ($start < 0) $start = 0;
+        return array(
+            '<table class="main"><tr>' . $pagerLeft . $pagerRight . '</tr></table>' . "\n",
+            '<table class="main"><tr>' . $pagerLeft . $pagerRight . '</tr></table>' . "\n",
+            "LIMIT $start,$rpp"
+        );
+    }
+
+    // Build list of page indexes to show (fast, no full loop)
+    $dotspace = 3; // как раньше: по 3 вокруг
+    $show = array();
+
+    // first 3
+    for ($i = 0; $i < 3 && $i < $pages; $i++) $show[$i] = true;
+
+    // around current
+    $from = max(0, $page - $dotspace);
+    $to   = min($pages - 1, $page + $dotspace);
+    for ($i = $from; $i <= $to; $i++) $show[$i] = true;
+
+    // last 3
+    for ($i = max(0, $pages - 3); $i < $pages; $i++) $show[$i] = true;
+
+    $idx = array_keys($show);
+    sort($idx, SORT_NUMERIC);
+
+    $pagerarr = array();
+    $prev = null;
+
+    foreach ($idx as $i) {
+        if ($prev !== null && $i > $prev + 1) {
+            $pagerarr[] = '<td class="pager">...</td>' . $cellSpacer;
+        }
+
+        $startRange = $i * $rpp + 1;
+        $endRange   = min($count, $startRange + $rpp - 1);
+        $text       = (string)($i + 1);
+
+        if ($i !== $page) {
+            $pagerarr[] =
+                '<td class="pager">'
+                . '<a title="' . $startRange . '&nbsp;-&nbsp;' . $endRange . '" href="' . $href . 'page=' . $i . '" style="text-decoration: none;"><b>' . $text . '</b></a>'
+                . '</td>' . $cellSpacer;
+        } else {
+            $pagerarr[] = '<td class="highlight"><b>' . $text . '</b></td>' . $cellSpacer;
+        }
+
+        $prev = $i;
+    }
+
+    $pagerstr = implode('', $pagerarr);
+
+    $pagertop =
+        '<table class="main"><tr>'
+        . $pagerLeft . $pagerstr . $pagerRight
+        . '</tr></table>' . "\n";
+
+    $pagerbottom =
+        'Всего ' . $count . ' в ' . $pages . ' ' . ($pages === 1 ? 'странице' : 'страницах')
+        . ' по ' . $rpp . ' ' . ($rpp === 1 ? 'записи' : 'записей')
+        . ' на каждой странице.<br /><br />'
+        . '<table class="main"><tr>'
+        . $pagerLeft . $pagerstr . $pagerRight
+        . '</tr></table>' . "\n";
+
+    $start = $page * $rpp;
+    if ($start < 0) $start = 0;
+
+    return array($pagertop, $pagerbottom, "LIMIT $start,$rpp");
 }
 
 function downloaderdata($res) {
