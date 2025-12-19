@@ -1,163 +1,185 @@
 <?php
-/* lightbenc.php
+declare(strict_types=1);
 
+final class lightbenc
+{
+    public static function bdecode(string $s, int &$pos = 0): mixed
+    {
+        $len = strlen($s);
+        if ($pos < 0 || $pos >= $len) {
+            return null;
+        }
 
-	Dear Bram Cohen, 
-		You are an arse
-	WHAT were you smoking ?
-	
-	
+        $c = $s[$pos];
 
-This implementation should use one order of magnitude less memory then the TBdev version.
-The bdecoding speed is similar to TBdev, bencoding is faster, and much faster then bdecoding.
-	
-Call the bdecode() function with the bencoded string:
+        switch ($c) {
+            case 'd': { // словарь
+                $pos++;
+                $retval = [];
 
-$str="d7:oneListl8:a stringe10:oneIntegeri34ee";
-var_dump(bdecode($str));
+                while ($pos < $len && $s[$pos] !== 'e') {
+                    $key = self::bdecode($s, $pos);
+                    $val = self::bdecode($s, $pos);
 
-array(3) {
-  ["oneList"]=>
-  array(1) {
-    [0]=>
-    string(8) "a string"
-  }
-  ["oneInteger"]=>
-  int(34)
-  ["isDct"]=>
-  bool(true)
+                    // ключ и значение обязаны быть валидными
+                    if ($key === null || $val === null) {
+                        return null;
+                    }
+
+                    // ключи в bencode — строки
+                    $retval[(string)$key] = $val;
+                }
+
+                if ($pos >= $len || $s[$pos] !== 'e') {
+                    return null; // нет закрывающего 'e'
+                }
+
+                // служебная метка
+                $retval['isDct'] = true;
+
+                $pos++; // пропускаем 'e'
+                return $retval;
+            }
+
+            case 'l': { // список
+                $pos++;
+                $retval = [];
+
+                while ($pos < $len && $s[$pos] !== 'e') {
+                    $val = self::bdecode($s, $pos);
+                    if ($val === null) {
+                        return null;
+                    }
+                    $retval[] = $val;
+                }
+
+                if ($pos >= $len || $s[$pos] !== 'e') {
+                    return null;
+                }
+
+                $pos++;
+                return $retval;
+            }
+
+            case 'i': { // целое число
+                $pos++;
+
+                $end = strpos($s, 'e', $pos);
+                if ($end === false) {
+                    return null;
+                }
+
+                $numStr = substr($s, $pos, $end - $pos);
+                // пустое / мусор — ошибка
+                if ($numStr === '' || !preg_match('~^-?\d+$~', $numStr)) {
+                    return null;
+                }
+
+                $pos = $end + 1; // за 'e'
+                return (int)$numStr;
+            }
+
+            default: { // строка: <len>:<data>
+                $colon = strpos($s, ':', $pos);
+                if ($colon === false) {
+                    return null;
+                }
+
+                $digits = $colon - $pos;
+                // защита от мусора/переполнения: длина числа ограничена
+                if ($digits <= 0 || $digits > 20) {
+                    return null;
+                }
+
+                $lenStr = substr($s, $pos, $digits);
+                if ($lenStr === '' || !ctype_digit($lenStr)) {
+                    return null;
+                }
+
+                $strLen = (int)$lenStr;
+                $pos = $colon + 1;
+
+                if ($strLen < 0 || ($pos + $strLen) > $len) {
+                    return null;
+                }
+
+                $str = substr($s, $pos, $strLen);
+                $pos += $strLen;
+
+                return (string)$str;
+            }
+        }
+    }
+
+    /**
+     * BEncode (PHP -> bencode)
+     *
+     * @param mixed $d
+     * @return string|null
+     */
+    public static function bencode(mixed $d): ?string
+    {
+        if (is_array($d)) {
+            $isDict = (isset($d['isDct']) && is_bool($d['isDct']) && $d['isDct'] === true);
+
+            $ret = $isDict ? 'd' : 'l';
+
+            if ($isDict) {
+                // По спецификации словари должны быть отсортированы по ключам (битторнадо реально может "подавиться")
+                ksort($d, SORT_STRING);
+            }
+
+            foreach ($d as $key => $value) {
+                if ($isDict) {
+                    // пропускаем служебный ключ, только если он действительно наш
+                    if ($key === 'isDct' && is_bool($value)) {
+                        continue;
+                    }
+                    $k = (string)$key;
+                    $ret .= strlen($k) . ':' . $k;
+                }
+
+                if (is_string($value)) {
+                    $ret .= strlen($value) . ':' . $value;
+                } elseif (is_int($value)) {
+                    $ret .= 'i' . $value . 'e';
+                } else {
+                    $encoded = self::bencode($value);
+                    if ($encoded === null) {
+                        return null;
+                    }
+                    $ret .= $encoded;
+                }
+            }
+
+            return $ret . 'e';
+        }
+
+        // fallback: одиночная строка/число
+        if (is_string($d)) {
+            return strlen($d) . ':' . $d;
+        }
+        if (is_int($d)) {
+            return 'i' . $d . 'e';
+        }
+
+        return null;
+    }
+
+    /**
+     * Декодирование bencode из файла
+     *
+     * @param string $filename
+     * @return mixed|null
+     */
+    public static function bdecode_file(string $filename): mixed
+    {
+        $data = @file_get_contents($filename);
+        if ($data === false) {
+            return null;
+        }
+
+        $pos = 0;
+        return self::bdecode($data, $pos);
+    }
 }
-
-The returned value is a nested data type with the following type of elements:
- - ints    (test type with is_integer($x))
- - strings (test type with is_string($x))
- - lists   (test type with is_array($x) && !isset($x[isDct])
- - dicts   (test type with is_array($x) && isset($x[isDct])
- 
-All elements have the native PHP type, except for the dictionary which is an array with an "isDct" key.
-This is necessary since PHP makes no distinction between flat and associative arrays. Note that the isDct
-key is allways set as a bool, so that even if the dictionary contains an actual "isDct" value, the 
-functions behave transparently, i.e. they don't strip out or overwrite actual "isDct" keys.
-
-As such, this implementation is not a drop-in replacement of the TBDev code, hence the new function names
-For all practical purposes, it's just as flexible, and very easy to use. For example:
-
-// decode the torrent file
-$dict= bdecode_file($torrentfilename);
-// change announce url
-$dict['announce']='http://inferno.demonoid.com'; 
-// add private tracker flag
-$dict['info']['private']=1;
-// compute infohash
-$infohash = pack("H*", sha1(bencode($dict["info"])));
-// recreate the torrent file
-$torrentfile=bencode($dict);
-
-After calling bencode(), the passed nested array will have all it's dictionaries sorted by key.
-The bencoded data generated by bencode() will have sorted dictionaries, but bdecode() does not require 
-this in the input stream, and will keep the order unchanged.
-
-This implementation is hereby released under the GFYPL, version 1.00.
-
-
-	The Go Fuck Yourself Public License, version 1.00
-		
-	Article 1
-	You can go fuck yourself.
-	
-	END OF ALL TERMS AND CONDITIONS
-
-*/
-class lightbenc {
-	static function bdecode($s, &$pos=0) {
-		if($pos>=strlen($s)) {
-			return null;
-		}
-		switch($s[$pos]){
-		case 'd':
-			$pos++;
-			$retval=array();
-			while ($s[$pos]!='e'){
-				$key=self::bdecode($s, $pos);
-				$val=self::bdecode($s, $pos);
-				if ($key===null || $val===null)
-					break;
-				$retval[$key]=$val;
-			}
-			$retval["isDct"]=true;
-			$pos++;
-			return $retval;
-	
-		case 'l':
-			$pos++;
-			$retval=array();
-			while ($s[$pos]!='e'){
-				$val=self::bdecode($s, $pos);
-				if ($val===null)
-					break;
-				$retval[]=$val;
-			}
-			$pos++;
-			return $retval;
-	
-		case 'i':
-			$pos++;
-			$digits=strpos($s, 'e', $pos)-$pos;
-			$val=(int)substr($s, $pos, $digits);
-			$pos+=$digits+1;
-			return $val;
-	
-	//	case "0": case "1": case "2": case "3": case "4":
-	//	case "5": case "6": case "7": case "8": case "9":
-		default:
-			$digits=strpos($s, ':', $pos)-$pos;
-			if ($digits<0 || $digits >20)
-				return null;
-			$len=(int)substr($s, $pos, $digits);
-			$pos+=$digits+1;
-			$str=substr($s, $pos, $len);
-			$pos+=$len;
-			//echo "pos: $pos str: [$str] len: $len digits: $digits\n";
-			return (string)$str;
-		}
-		return null;
-	}
-	
-	static function bencode(&$d){
-		if(is_array($d)){
-			$ret="l";
-			if($d["isDct"]){
-				$isDict=1;
-				$ret="d";
-				// this is required by the specs, and BitTornado actualy chokes on unsorted dictionaries
-				ksort($d, SORT_STRING);
-			}
-			foreach($d as $key=>$value) {
-				if($isDict){
-					// skip the isDct element, only if it's set by us
-					if($key=="isDct" and is_bool($value)) continue;
-					$ret.=strlen($key).":".$key;
-				}
-				if (is_string($value)) {
-					$ret.=strlen($value).":".$value;
-				} elseif (is_int($value)){
-					$ret.="i${value}e";
-				} else {
-					$ret.=self::bencode ($value);
-				}
-			}
-			return $ret."e";
-		} elseif (is_string($d)) // fallback if we're given a single bencoded string or int
-			return strlen($d).":".$d;
-		elseif (is_int($d))
-			return "i${d}e";
-		else 
-			return null;
-	}
-	
-	static function bdecode_file($filename){
-		$f=file_get_contents($filename, FILE_BINARY);
-		return bdecode($f);
-	}
-}
-?>
