@@ -133,11 +133,6 @@ if ($count <= 0) {
 
         $content .= '<td>';
 
-        // описание
-        if ($preview !== '') {
-            $content .= '<br /><div align="left">' . $preview . '</div>';
-        }
-
         // категория справа, статы слева
         $content .= '<table width="100%" cellspacing="0" cellpadding="0" border="0"><tr valign="top">';
         $content .= '<td align="left">';
@@ -148,6 +143,10 @@ if ($count <= 0) {
         $content .= '<td align="right">' . $catHtml . '</td>';
         $content .= '</tr></table>';
 
+        // описание
+        if ($preview !== '') {
+            $content .= '<br /><div align="left">' . $preview . '</div>';
+        }
 
         $content .= '<br /><div align="right">[<a href="details.php?id=' . $tid . '" title="' . $safeTitle . '"><b>Открыть</b></a>]</div>';
 
