@@ -1,39 +1,39 @@
 <?php
-	/* 	Torrent Scraper Base Class
-		v1.0
-		
-		2010 by Johannes Zinnau
-		johannes@johnimedia.de
-		
-		Licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License
-		http://creativecommons.org/licenses/by-sa/3.0/
-		
-		It would be very nice if you send me your changes on this class, so that i can include them if they are improve it.
-		Thanks!
-		
-		Usage:
-		See udptscraper.php or httptscraper.php
-	*/
+declare(strict_types=1);
 
-	class ScraperException extends Exception {
-		private $connectionerror;
-		
-		public function __construct($message,$code=0,$connectionerror=false){
-			$this->connectionerror = $connectionerror;
-			parent::__construct($message, $code);
-		}
-		
-		public function isConnectionError(){
-			return($this->connectionerror);
-		}
-	}
-	
-	abstract class tscraper {
-		protected $timeout;
-		
-		public function __construct($timeout=2){
-			$this->timeout = $timeout;
-		}
-	}
+class ScraperException extends Exception
+{
+    /** Ошибка связана с соединением (недоступен трекер, таймаут и т.п.) */
+    private bool $connectionerror;
 
-?>
+    /**
+     * @param string $message          Сообщение об ошибке
+     * @param int    $code             Код ошибки
+     * @param bool   $connectionerror  Является ли ошибка ошибкой соединения
+     */
+    public function __construct(string $message, int $code = 0, bool $connectionerror = false)
+    {
+        $this->connectionerror = $connectionerror;
+        parent::__construct($message, $code);
+    }
+
+    /** Возвращает true, если ошибка относится к соединению */
+    public function isConnectionError(): bool
+    {
+        return $this->connectionerror;
+    }
+}
+
+abstract class tscraper
+{
+    /** Таймаут соединения (сек.) */
+    protected int $timeout;
+
+    /**
+     * @param int $timeout Таймаут (сек.)
+     */
+    public function __construct(int $timeout = 2)
+    {
+        $this->timeout = max(1, $timeout);
+    }
+}
