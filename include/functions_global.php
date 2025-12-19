@@ -918,10 +918,25 @@ function write_log($text, $color = "transparent", $type = "tracker") {
 }
 
 function getWord($number, $suffix) {
-	$keys = array(2, 0, 1, 1, 1, 2);
-	$mod = $number % 100;
-	$suffix_key = ($mod > 7 && $mod < 20) ? 2: $keys[min($mod % 10, 5)];
-	return $suffix[$suffix_key];
+    // Проверяем, что $suffix является массивом и содержит нужные элементы
+    if (!is_array($suffix) || count($suffix) < 3) {
+        return '';
+    }
+    
+    $keys = array(2, 0, 1, 1, 1, 2);
+    $mod = $number % 100;
+    
+    // Проверяем граничные значения
+    $mod_10 = $mod % 10;
+    $key_index = ($mod > 7 && $mod < 20) ? 2 : $keys[min($mod_10, 5)];
+    
+    // Проверяем существование ключа в массиве
+    if (!isset($suffix[$key_index])) {
+        // Возвращаем элемент по умолчанию или первый доступный
+        return $suffix[0] ?? (isset($suffix[1]) ? $suffix[1] : $suffix[2] ?? '');
+    }
+    
+    return $suffix[$key_index];
 }
 
 function get_et($ts) {
