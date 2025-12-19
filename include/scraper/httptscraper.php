@@ -1,96 +1,146 @@
 <?php
-	/* 	Torrent HTTP Scraper
-		v1.0
-		
-		2010 by Johannes Zinnau
-		johannes@johnimedia.de
-		
-		Licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License
-		http://creativecommons.org/licenses/by-sa/3.0/
-		
-		It would be very nice if you send me your changes on this class, so that i can include them if they are improve it.
-		Thanks!
-		
-		Usage:
-		try{
-			$timeout = 2;
-			//Read only 4MiB of the scrape response
-			$maxread = 1024 * 4;
-			
-			$scraper = new httptscraper($timeout,$maxread);
-			$ret = $scraper->scrape('http://tracker.tld:port/announce',array('0000000000000000000000000000000000000000'));
-			
-			print_r($ret);
-		}catch(ScraperException $e){
-			echo('Error: ' . $e->getMessage() . "<br />\n");
-			echo('Connection error: ' . ($e->isConnectionError() ? 'yes' : 'no') . "<br />\n");
-		}
-	*/
-	
-	require_once(dirname(__FILE__) . '/tscraper.php');
-	require_once(dirname(__FILE__) . '/lightbenc.php');
-	
-	class httptscraper extends tscraper{
-		protected $maxreadsize;
-		
-		public function __construct($timeout=2,$maxreadsize=4096){
-			$this->maxreadsize = $maxreadsize;
-			parent::__construct($timeout);
-		}
-		
-		/* 	$url: Tracker url like: http://tracker.tld:port/announce or http://tracker.tld:port/scrape
-			$infohash: Infohash string or array. 40 char long infohash. 
-			*/
-		public function scrape($url,$infohash){
-			if(!is_array($infohash)){ $infohash = array($infohash); }
-			foreach($infohash as $hash){
-				if(!preg_match('#^[a-f0-9]{40}$#i',$hash)){ throw new ScraperException('Invalid infohash: ' . $hash . '.'); }
-			}
-			$url = trim($url);		
-			if (preg_match('%(http://.*?/)announce([^/]*)$%i', $url, $m)){ 
-				$url = $m[1] . 'scrape' . $m[2];
-			}else if (preg_match('%(http://.*?/)scrape([^/]*)$%i', $url, $m)){ 
-			}else{
-				throw new ScraperException('Invalid tracker url.');
-			}
-			
-			$sep = preg_match ('/\?.{1,}?/i', $url) ? '&' : '?';
-			$requesturl = $url;
-			foreach($infohash as $hash){
-				$requesturl .= $sep . 'info_hash=' . rawurlencode(pack('H*', $hash));
-				$sep = '&';
-			}
-			
-			ini_set('default_socket_timeout',$this->timeout);
-			$rh = @fopen($requesturl,'r');
-			if(!$rh){ throw new ScraperException('Could not open HTTP connection.',0,true); }
-			stream_set_timeout($rh, $this->timeout);
-			
-			$return = '';
-			$pos = 0;
-			while (!feof($rh) && $pos < $this->maxreadsize){
-				$return .= fread($rh,1024);
-			}
-			fclose($rh);
-			
-			if(!substr($return, 0, 1) == 'd'){ throw new ScraperException('Invalid scrape response.'); }
-			$arr_scrape_data = lightbenc::bdecode($return);
-			
-			$torrents = array();
-			foreach($infohash as $hash){
-				$ehash = pack('H*', $hash);
-				if (isset($arr_scrape_data['files'][$ehash])){
-					$torrents[$hash] = array(	'infohash'=>$hash,
-												'seeders'=>(int) $arr_scrape_data['files'][$ehash]['complete'],
-												'completed'=>(int) $arr_scrape_data['files'][$ehash]['downloaded'],
-												'leechers'=>(int) $arr_scrape_data['files'][$ehash]['incomplete']
-												);
-				}else{
-					$torrents[$hash] = false;
-				}
-			}
-			
-			return($torrents);
-		}
-	}
-?>
+declare(strict_types=1);
+
+require_once __DIR__ . '/tscraper.php';
+require_once __DIR__ . '/lightbenc.php';
+
+class httptscraper extends tscraper
+{
+    /** Максимальный объём чтения ответа трекера (в байтах) */
+    protected int $maxreadsize;
+
+    /**
+     * @param int $timeout     Таймаут соединения (сек.)
+     * @param int $maxreadsize Максимальный размер ответа
+     */
+    public function __construct(int $timeout = 2, int $maxreadsize = 4096)
+    {
+        $this->maxreadsize = max(512, $maxreadsize);
+        parent::__construct($timeout);
+    }
+
+    /**
+     * Скрапинг данных с трекера
+     *
+     * @param string          $url      URL трекера вида:
+     *                                  http(s)://tracker.tld:port/announce
+     *                                  или http(s)://tracker.tld:port/scrape
+     * @param string|string[] $infohash  Infohash (40 hex символов) или массив
+     *
+     * @return array Массив с данными по каждому infohash
+     * @throws ScraperException
+     */
+    public function scrape(string $url, string|array $infohash): array
+    {
+        $hashes = is_array($infohash) ? array_values($infohash) : [$infohash];
+
+        if (!$hashes) {
+            throw new ScraperException('Список infohash пуст.');
+        }
+
+        // Проверка корректности infohash
+        foreach ($hashes as $hash) {
+            if (!preg_match('~^[a-f0-9]{40}$~i', (string)$hash)) {
+                throw new ScraperException('Некорректный infohash: ' . $hash);
+            }
+        }
+
+        $url = trim($url);
+
+        // Преобразование announce -> scrape (поддержка http и https)
+        if (preg_match('~^(https?://.*?/)(announce)([^/]*)$~i', $url, $m)) {
+            $url = $m[1] . 'scrape' . $m[3];
+        } elseif (preg_match('~^(https?://.*?/)(scrape)([^/]*)$~i', $url)) {
+            // Уже scrape
+        } else {
+            throw new ScraperException('Некорректный URL трекера.');
+        }
+
+        // Формирование URL запроса
+        $sep = str_contains($url, '?') ? '&' : '?';
+        $requesturl = $url;
+
+        foreach ($hashes as $hash) {
+            // hex → бинарные 20 байт → urlencode
+            $requesturl .= $sep . 'info_hash=' . rawurlencode(pack('H*', (string)$hash));
+            $sep = '&';
+        }
+
+        // Таймаут для потоков
+        @ini_set('default_socket_timeout', (string)$this->timeout);
+
+        $context = stream_context_create([
+            'http' => [
+                'method'        => 'GET',
+                'timeout'       => $this->timeout,
+                'user_agent'    => 'TBDev-MultiTrackerScraper/1.0',
+                'header'        => "Accept: */*\r\nConnection: close\r\n",
+                'ignore_errors' => true,
+            ],
+            'ssl' => [
+                'verify_peer'      => true,
+                'verify_peer_name' => true,
+            ],
+        ]);
+
+        $rh = @fopen($requesturl, 'rb', false, $context);
+        if (!$rh) {
+            throw new ScraperException('Не удалось установить HTTP-соединение с трекером.', 0, true);
+        }
+
+        stream_set_timeout($rh, $this->timeout);
+
+        $response = '';
+        $read = 0;
+
+        // Чтение ответа с ограничением по размеру
+        while (!feof($rh) && $read < $this->maxreadsize) {
+            $chunk = fread($rh, min(1024, $this->maxreadsize - $read));
+            if ($chunk === false || $chunk === '') {
+                break;
+            }
+            $response .= $chunk;
+            $read += strlen($chunk);
+        }
+
+        fclose($rh);
+
+        // Bencode-ответ всегда начинается с "d"
+        if ($response === '' || substr($response, 0, 1) !== 'd') {
+            throw new ScraperException('Некорректный ответ scrape-запроса.');
+        }
+
+        $scrapeData = lightbenc::bdecode($response);
+
+        if (
+            !is_array($scrapeData) ||
+            !isset($scrapeData['files']) ||
+            !is_array($scrapeData['files'])
+        ) {
+            throw new ScraperException('Неверная структура данных scrape-ответа.');
+        }
+
+        $torrents = [];
+
+        // Обработка каждого infohash
+        foreach ($hashes as $hash) {
+            $ehash = pack('H*', (string)$hash);
+
+            if (isset($scrapeData['files'][$ehash]) && is_array($scrapeData['files'][$ehash])) {
+                $file = $scrapeData['files'][$ehash];
+
+                $torrents[$hash] = [
+                    'infohash'  => (string)$hash,
+                    'seeders'   => (int)($file['complete'] ?? 0),
+                    'completed' => (int)($file['downloaded'] ?? 0),
+                    'leechers'  => (int)($file['incomplete'] ?? 0),
+                ];
+            } else {
+                // Трекер не вернул данные по данному infohash
+                $torrents[$hash] = false;
+            }
+        }
+
+        return $torrents;
+    }
+}
