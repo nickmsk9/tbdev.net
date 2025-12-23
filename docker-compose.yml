@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tbdev-app
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - memcached
+      - db
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-tbdev
+    ports:
+      - "8100:80"
+    volumes:
+      - ./:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: mysql-tbdev
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tbdev
+    ports:
+      - "3309:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-tbdev
+    platform: linux/amd64
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8101:80"
+    depends_on:
+      - db
+
+  memcached:
+    image: memcached:latest
+    container_name: memcached-tbdev
+    ports:
+      - "11213:11211"
+
+volumes:
+  mysql-data:
