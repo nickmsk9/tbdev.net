@@ -57,6 +57,8 @@ $CURUSER += [
     'topicsperpage'  => 0,
     'postsperpage'   => 0,
     'avatars'        => 'yes',
+    'hidecomments'   => 'no',
+    'torrent_columns'=> 'category,size,comments,seeders,leechers,uploader,added',
     'info'           => '',
     'passkey'        => '',
     'passhash'       => '',
@@ -69,7 +71,7 @@ $CURUSER['country'] = (int)($CURUSER['country'] ?? 0);
 foreach ([
     'username','email','theme','language','acceptpms','parked','deletepms','savepms',
     'notifs','avatar','gender','birthday',
-    'website','info','passkey','passhash','passkey_ip'
+    'website','info','passkey','passhash','passkey_ip','hidecomments','torrent_columns'
 ] as $k) {
     $CURUSER[$k] = (string)($CURUSER[$k] ?? '');
 }
@@ -299,6 +301,43 @@ tr($tracker_lang['my_website'], "<input type=\"text\" name=\"website\" size=\"50
 tr($tracker_lang['my_torrents_per_page'], "<input type=\"text\" size=\"10\" name=\"torrentsperpage\" value=\"" . (int)$CURUSER['torrentsperpage'] . "\"> (0 = использовать настройки по умолчанию)", 1);
 tr($tracker_lang['my_topics_per_page'], "<input type=\"text\" size=\"10\" name=\"topicsperpage\" value=\"" . (int)$CURUSER['topicsperpage'] . "\"> (0 = использовать настройки по умолчанию)", 1);
 tr($tracker_lang['my_messages_per_page'], "<input type=\"text\" size=\"10\" name=\"postsperpage\" value=\"" . (int)$CURUSER['postsperpage'] . "\"> (0 = использовать настройки по умолчанию)", 1);
+
+tr(
+    'Скрыть комментарии',
+    '<label><input type="radio" name="hidecomments" value="no"' . ($CURUSER['hidecomments'] === 'no' ? ' checked' : '') . '> Разрешить</label> ' .
+    '<label><input type="radio" name="hidecomments" value="yes"' . ($CURUSER['hidecomments'] === 'yes' ? ' checked' : '') . '> Запретить</label>' .
+    '<br><span class="small">Если вы не хотите видеть комментарии в описании раздачи, включите запрет вывода комментариев пользователей.</span>',
+    1
+);
+
+$selectedColumns = array_filter(explode(',', $CURUSER['torrent_columns']));
+$columnOptions = [
+    'category' => 'Категория (Тип)',
+    'tags' => 'Теги',
+    'size' => 'Размер (байт)',
+    'numfiles' => 'Количество файлов',
+    'views' => 'Просмотров раз',
+    'hits' => 'Взяли раз',
+    'comments' => 'Количество комментариев',
+    'seeders' => 'Количество сидов',
+    'leechers' => 'Количество пиров',
+    'uploader' => 'Раздает',
+    'added' => 'Добавлен',
+];
+$columnInputs = '<table><tr>';
+$columnIndex = 0;
+foreach ($columnOptions as $columnKey => $columnLabel) {
+    if ($columnIndex > 0 && $columnIndex % 2 === 0) {
+        $columnInputs .= '</tr><tr>';
+    }
+    $columnInputs .= '<td class="bottom"><label><input type="checkbox" name="torrent_columns[]" value="' .
+        htmlspecialchars($columnKey, ENT_QUOTES, 'UTF-8') . '"' .
+        (in_array($columnKey, $selectedColumns, true) ? ' checked' : '') . '> ' .
+        htmlspecialchars($columnLabel, ENT_QUOTES, 'UTF-8') . '</label></td>';
+    $columnIndex++;
+}
+$columnInputs .= '</tr></table><span class="small">Выберите столбцы для страницы списка торрент-раздач.</span>';
+tr('Показывать столбцы', $columnInputs, 1);
 
 // Показывать аватары
 tr(

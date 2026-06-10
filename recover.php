@@ -33,9 +33,8 @@ dbconn();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 	if ($use_captcha) {
-		$b = get_row_count("captcha", "WHERE imagehash = ".sqlesc($_POST["imagehash"], true)." AND imagestring = ".sqlesc($_POST["imagestring"], true));
-		sql_query("DELETE FROM captcha WHERE imagehash = ".sqlesc($_POST["imagehash"], true)) or sqlerr(__FILE__,__LINE__);
-		if ($b == 0)
+		require_once __DIR__ . '/include/captcha.php';
+		if (!captcha_validate((string)($_POST['imagehash'] ?? ''), (string)($_POST['imagestring'] ?? '')))
 			stderr("������", "�� ����� ������������ ��� �������������.");
 	}
 

@@ -49,20 +49,38 @@ if (!$count) {
 else {
 ?>
 <table class="embedded" cellspacing="0" cellpadding="3" width="100%">
-<tr><td class="colhead" align="center" colspan="12">Мои торренты</td></tr>
+<tr><td class="colhead" align="center" colspan="20">Мои торренты</td></tr>
 <?
 
 	list($pagertop, $pagerbottom, $limit) = pager(20, $count, "mytorrents.php?");
 
-	$res = sql_query("SELECT torrents.type, torrents.comments, (torrents.leechers + torrents.remote_leechers) AS leechers, (torrents.seeders + torrents.remote_seeders) AS seeders, torrents.multitracker, torrents.last_mt_update, IF(torrents.numratings < $minvotes, NULL, ROUND(torrents.ratingsum / torrents.numratings, 1)) AS rating, torrents.id, categories.name AS cat_name, categories.image AS cat_pic, torrents.name, torrents.info_hash, save_as, filename, numfiles, added, size, views, visible, free, hits, times_completed, category FROM torrents LEFT JOIN categories ON torrents.category = categories.id $where ORDER BY id DESC $limit");
+	$sortColumns = [
+		'1' => 'torrents.name',
+		'2' => 'torrents.numfiles',
+		'3' => 'torrents.comments',
+		'4' => 'torrents.added',
+		'5' => 'torrents.size',
+		'6' => 'torrents.times_completed',
+		'7' => '(torrents.seeders + torrents.remote_seeders)',
+		'8' => '(torrents.leechers + torrents.remote_leechers)',
+		'9' => 'users.username',
+		'11' => 'torrents.category',
+		'12' => 'torrents.views',
+		'13' => 'torrents.hits',
+	];
+	$sortKey = (string)($_GET['sort'] ?? '');
+	$sortColumn = $sortColumns[$sortKey] ?? 'torrents.id';
+	$sortDirection = strtolower((string)($_GET['type'] ?? 'desc')) === 'asc' ? 'ASC' : 'DESC';
 
-	print("<tr><td class=\"index\" colspan=\"12\">");
+	$res = sql_query("SELECT torrents.type, torrents.comments, (torrents.leechers + torrents.remote_leechers) AS leechers, (torrents.seeders + torrents.remote_seeders) AS seeders, torrents.multitracker, torrents.last_mt_update, IF(torrents.numratings < $minvotes, NULL, ROUND(torrents.ratingsum / torrents.numratings, 1)) AS rating, torrents.id, categories.name AS cat_name, categories.image AS cat_pic, torrents.name, torrents.keywords, torrents.info_hash, save_as, filename, numfiles, added, size, views, visible, free, hits, times_completed, category, torrents.owner, users.username, users.class FROM torrents LEFT JOIN categories ON torrents.category = categories.id LEFT JOIN users ON torrents.owner = users.id $where ORDER BY $sortColumn $sortDirection $limit");
+
+	print("<tr><td class=\"index\" colspan=\"20\">");
 	print($pagertop);
 	print("</td></tr>");
 
 	torrenttable($res, "mytorrents");
 
-	print("<tr><td class=\"index\" colspan=\"12\">");
+	print("<tr><td class=\"index\" colspan=\"20\">");
 	print($pagerbottom);
 	print("</td></tr>");
 

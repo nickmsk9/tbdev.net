@@ -28,6 +28,11 @@
 
 // ВАЖНО: Не редактируйте ниже, если не знаете, что делаете!
 
+$composerAutoload = dirname(__DIR__) . '/vendor/autoload.php';
+if (is_file($composerAutoload)) {
+    require_once $composerAutoload;
+}
+
 /*
  * Защита от повторного включения ядра
  * Protection from double including the core

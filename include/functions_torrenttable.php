@@ -40,11 +40,19 @@ function torrenttable($res, $variant = "index")
 
     // --- Normalize CURUSER (avoid undefined keys)
     $CURUSER = is_array($CURUSER ?? null) ? $CURUSER : [];
-    $CURUSER += ['id' => 0, 'class' => 0, 'uploaded' => 0, 'downloaded' => 0];
+    $CURUSER += [
+        'id' => 0,
+        'class' => 0,
+        'uploaded' => 0,
+        'downloaded' => 0,
+        'torrent_columns' => 'category,size,comments,seeders,leechers,uploader,added',
+    ];
 
     $userId    = (int)$CURUSER['id'];
     $userClass = (int)$CURUSER['class'];
     $isMod     = (get_user_class() >= UC_MODERATOR);
+    $selectedColumns = array_filter(explode(',', (string)$CURUSER['torrent_columns']));
+    $showColumn = static fn(string $column): bool => in_array($column, $selectedColumns, true);
 
     // --- WAIT logic (safe)
     $wait = 0;
@@ -91,24 +99,43 @@ function torrenttable($res, $variant = "index")
     $link9  = $toggle($sort, $type, '9');   // uploader
     $link4  = $toggle($sort, $type, '4');   // added
     $link10 = $toggle($sort, $type, '10');  // moderated/changed
+    $link11 = $toggle($sort, $type, '11');  // category
+    $link12 = $toggle($sort, $type, '12');  // views
+    $link13 = $toggle($sort, $type, '13');  // hits
+    $link2  = $toggle($sort, $type, '2');   // files
 
     // --- Column count for colspan
-    $colCount = 2; // Type + Name
+    $colCount = 1; // Name
+    foreach (['category', 'tags', 'size', 'numfiles', 'views', 'hits', 'comments', 'seeders', 'leechers', 'uploader', 'added'] as $column) {
+        if ($showColumn($column)) $colCount++;
+    }
     if ($wait) $colCount++;
     if ($variant === "mytorrents") $colCount++;
-
-    // New right block columns: Комм, Размер, Сидов, Пиров, Залит(added), Раздает(uploader)
-    $colCount += 6;
 
     // Mod/bookmarks extra columns
     if ($isMod && $variant === 'index') $colCount += 2; // Изменен + delete
     if ($variant === 'bookmarks') $colCount += 1;       // delete bookmark
 
     $out = '';
+    $previousDate = '';
+    $newCount = 0;
+    $totals = [
+        'torrents' => 0,
+        'size' => 0,
+        'seeders' => 0,
+        'leechers' => 0,
+        'comments' => 0,
+        'files' => 0,
+    ];
+    $sortedCellClass = static fn(string $column) => $sort === $column ? ' class="row2 torrenttable-sorted"' : '';
 
     // ===================== HEADER =====================
     $out .= "<tr>\n";
-    $out .= '<td class="colhead" align="center">' . $tracker_lang['type'] . "</td>\n";
+    if ($showColumn('category')) {
+        $out .= '<td class="colhead" align="center"><a rel="nofollow" title="Сортировать по категории" href="' .
+            $script . '?' . $oldlink . 'sort=11&type=' . $link11 . '" class="altlink_white">' .
+            $tracker_lang['type'] . "</a></td>\n";
+    }
     $out .= '<td class="colhead" align="left">'
         . '<a href="' . $script . '?' . $oldlink . 'sort=1&type=' . $link1 . '" class="altlink_white">' . $tracker_lang['name'] . '</a>'
         . "</td>\n";
@@ -120,17 +147,16 @@ function torrenttable($res, $variant = "index")
         $out .= '<td class="colhead" align="center">' . $tracker_lang['visible'] . "</td>\n";
     }
 
-    // Right columns you requested
-    $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=3&type=' . $link3 . '" class="altlink_white">' . $tracker_lang['comments'] . "</a></td>\n";
-    $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=5&type=' . $link5 . '" class="altlink_white">' . $tracker_lang['size'] . "</a></td>\n";
-    $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=7&type=' . $link7 . '" class="altlink_white">' . $tracker_lang['seeds'] . "</a></td>\n";
-    $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=8&type=' . $link8 . '" class="altlink_white">' . $tracker_lang['leechers'] . "</a></td>\n";
-
-    // Залит = дата/время added (сортировка по sort=4)
-    $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=4&type=' . $link4 . '" class="altlink_white">Залит</a></td>' . "\n";
-
-    // Раздает = кто залил (uploader) (сортировка по sort=9)
-    $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=9&type=' . $link9 . '" class="altlink_white">Раздает</a></td>' . "\n";
+    if ($showColumn('tags')) $out .= '<td class="colhead" align="center">Теги</td>' . "\n";
+    if ($showColumn('comments')) $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=3&type=' . $link3 . '" class="altlink_white">' . $tracker_lang['comments'] . "</a></td>\n";
+    if ($showColumn('size')) $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=5&type=' . $link5 . '" class="altlink_white">' . $tracker_lang['size'] . "</a></td>\n";
+    if ($showColumn('numfiles')) $out .= '<td class="colhead" align="center"><a rel="nofollow" href="' . $script . '?' . $oldlink . 'sort=2&type=' . $link2 . '" class="altlink_white">Файлы</a></td>' . "\n";
+    if ($showColumn('views')) $out .= '<td class="colhead" align="center"><a rel="nofollow" href="' . $script . '?' . $oldlink . 'sort=12&type=' . $link12 . '" class="altlink_white">Просмотры</a></td>' . "\n";
+    if ($showColumn('hits')) $out .= '<td class="colhead" align="center"><a rel="nofollow" href="' . $script . '?' . $oldlink . 'sort=13&type=' . $link13 . '" class="altlink_white">Взяли</a></td>' . "\n";
+    if ($showColumn('seeders')) $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=7&type=' . $link7 . '" class="altlink_white">' . $tracker_lang['seeds'] . "</a></td>\n";
+    if ($showColumn('leechers')) $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=8&type=' . $link8 . '" class="altlink_white">' . $tracker_lang['leechers'] . "</a></td>\n";
+    if ($showColumn('added')) $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=4&type=' . $link4 . '" class="altlink_white">Добавлен</a></td>' . "\n";
+    if ($showColumn('uploader')) $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=9&type=' . $link9 . '" class="altlink_white">Раздает</a></td>' . "\n";
 
     if ($isMod && $variant === "index") {
         $out .= '<td class="colhead" align="center"><a href="' . $script . '?' . $oldlink . 'sort=10&type=' . $link10 . '" class="altlink_white">Изменен</a></td>' . "\n";
@@ -154,12 +180,30 @@ function torrenttable($res, $variant = "index")
     // ===================== ROWS =====================
     while ($row = mysqli_fetch_assoc($res)) {
         $id = (int)($row['id'] ?? 0);
+        $added = (string)($row['added'] ?? '');
+        $addedTimestamp = strtotime($added) ?: 0;
+        $addedDate = $addedTimestamp > 0 ? date('Y-m-d', $addedTimestamp) : '';
+
+        if ($variant === 'index' && $sort === '' && $addedDate !== '' && $addedDate !== $previousDate) {
+            $out .= '<tr class="torrenttable-day"><td colspan="' . $colCount . '"><b>' .
+                htmlspecialchars(date('d.m.Y', $addedTimestamp), ENT_QUOTES, 'UTF-8') .
+                '</b></td></tr>' . "\n";
+            $previousDate = $addedDate;
+        }
+
+        $totals['torrents']++;
+        $totals['size'] += (int)($row['size'] ?? 0);
+        $totals['seeders'] += (int)($row['seeders'] ?? 0);
+        $totals['leechers'] += (int)($row['leechers'] ?? 0);
+        $totals['comments'] += (int)($row['comments'] ?? 0);
+        $totals['files'] += (int)($row['numfiles'] ?? 0);
 
         $sticky = ((string)($row['not_sticky'] ?? 'yes') === 'no');
-        $out .= '<tr' . ($sticky ? ' class="highlight"' : '') . ">\n";
+        $out .= '<tr id="torrent-row-' . $id . '"' . ($sticky ? ' class="highlight"' : '') . ">\n";
 
         // ---- TYPE (category)
-        $out .= '<td align="center" style="padding: 0px">';
+        if ($showColumn('category')) {
+        $out .= '<td align="center" style="padding:0"' . $sortedCellClass('11') . '>';
         if (!empty($row['cat_name'])) {
             $catId   = (int)($row['category'] ?? 0);
             $catName = (string)($row['cat_name'] ?? '');
@@ -174,6 +218,7 @@ function torrenttable($res, $variant = "index")
             $out .= '-';
         }
         $out .= "</td>\n";
+        }
 
         // ---- NAME + icons (same behaviour, just safer)
         $dispname = (string)($row['name'] ?? '');
@@ -186,7 +231,9 @@ function torrenttable($res, $variant = "index")
             $freepic = '<img src="' . $pic_base_url . '/silverdownload.gif" title="' . htmlspecialchars($tracker_lang['silver'], ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($tracker_lang['silver'], ENT_QUOTES, 'UTF-8') . '">';
         }
 
-        $out .= '<td align="left">';
+        $out .= '<td align="left"' . $sortedCellClass('1') . '>';
+        $out .= '<button type="button" class="torrent-details-toggle" aria-expanded="false" aria-controls="torrent-details-' .
+            $id . '" onclick="return toggleTorrentDetails(' . $id . ',this)" title="Показать подробности">+</button> ';
         if ($sticky) $out .= 'Важный: ';
 
         $out .= '<a href="details.php?';
@@ -238,6 +285,7 @@ function torrenttable($res, $variant = "index")
         // "new" flag
         if ((int)($row['readtorrent'] ?? 1) === 0 && $variant === "index") {
             $out .= '<b><font color="red" size="1">[новый]</font></b>';
+            $newCount++;
         }
 
         $out .= "</td>\n";
@@ -267,51 +315,72 @@ function torrenttable($res, $variant = "index")
             $out .= "</td>\n";
         }
 
+        if ($showColumn('tags')) {
+            $tagLinks = [];
+            foreach (array_filter(array_map('trim', explode(',', (string)($row['keywords'] ?? '')))) as $tag) {
+                $tagLinks[] = '<a rel="nofollow" href="browse.php?search=' . rawurlencode($tag) . '">' .
+                    htmlspecialchars($tag, ENT_QUOTES, 'UTF-8') . '</a>';
+            }
+            $out .= '<td align="center">' . ($tagLinks ? implode(', ', $tagLinks) : '-') . "</td>\n";
+        }
+
         // ---- Комм.
+        if ($showColumn('comments')) {
         $comments = (int)($row['comments'] ?? 0);
         if ($comments > 0) {
             $href = ($variant === 'index')
                 ? 'details.php?id=' . $id . '&amp;hit=1&amp;tocomm=1'
                 : 'details.php?id=' . $id . '&amp;page=0#startcomments';
-            $out .= '<td align="center"><b><a href="' . $href . '">' . $comments . "</a></b></td>\n";
+            $out .= '<td align="center"' . $sortedCellClass('3') . '><b><a href="' . $href . '">' . $comments . "</a></b></td>\n";
         } else {
-            $out .= '<td align="center">0</td>' . "\n";
+            $out .= '<td align="center"' . $sortedCellClass('3') . '>0</td>' . "\n";
+        }
         }
 
         // ---- Размер
-        $out .= '<td align="center">' . str_replace(" ", "<br />", mksize((int)($row['size'] ?? 0))) . "</td>\n";
+        if ($showColumn('size')) $out .= '<td align="center"' . $sortedCellClass('5') . '>' . str_replace(" ", "<br />", mksize((int)($row['size'] ?? 0))) . "</td>\n";
+        if ($showColumn('numfiles')) $out .= '<td align="center"' . $sortedCellClass('2') . '>' . (int)($row['numfiles'] ?? 0) . "</td>\n";
+        if ($showColumn('views')) $out .= '<td align="center"' . $sortedCellClass('12') . '>' . (int)($row['views'] ?? 0) . "</td>\n";
+        if ($showColumn('hits')) $out .= '<td align="center"' . $sortedCellClass('13') . '>' . (int)($row['hits'] ?? 0) . "</td>\n";
 
         // ---- Сидов
+        if ($showColumn('seeders')) {
         $seeders = (int)($row['seeders'] ?? 0);
         if ($seeders > 0) {
             if ($variant === "index") {
                 $leechers = (int)($row['leechers'] ?? 0);
                 $slr = ($leechers > 0) ? ($seeders / $leechers) : 1;
-                $out .= '<td align="center" id="torrent-seeders-' . $id . '"><b><a href="details.php?id=' . $id . '&amp;hit=1&amp;toseeders=1"><font color='
+                $out .= '<td align="center" id="torrent-seeders-' . $id . '"' . $sortedCellClass('7') . '><b><a href="details.php?id=' . $id . '&amp;hit=1&amp;toseeders=1"><font color='
                     . get_slr_color($slr) . '>' . $seeders . "</font></a></b></td>\n";
             } else {
-                $out .= '<td align="center" id="torrent-seeders-' . $id . '"><b><a class="' . linkcolor($seeders) . '" href="details.php?id=' . $id . '&amp;dllist=1#seeders">' . $seeders . "</a></b></td>\n";
+                $out .= '<td align="center" id="torrent-seeders-' . $id . '"' . $sortedCellClass('7') . '><b><a class="' . linkcolor($seeders) . '" href="details.php?id=' . $id . '&amp;dllist=1#seeders">' . $seeders . "</a></b></td>\n";
             }
         } else {
-            $out .= '<td align="center" id="torrent-seeders-' . $id . '"><span class="' . linkcolor(0) . '">0</span></td>' . "\n";
+            $out .= '<td align="center" id="torrent-seeders-' . $id . '"' . $sortedCellClass('7') . '><span class="' . linkcolor(0) . '">0</span></td>' . "\n";
+        }
         }
 
         // ---- Пиров
+        if ($showColumn('leechers')) {
         $leechers = (int)($row['leechers'] ?? 0);
         if ($leechers > 0) {
             if ($variant === "index") {
-                $out .= '<td align="center" id="torrent-leechers-' . $id . '"><b><a href="details.php?id=' . $id . '&amp;hit=1&amp;todlers=1">' . number_format($leechers) . "</a></b></td>\n";
+                $out .= '<td align="center" id="torrent-leechers-' . $id . '"' . $sortedCellClass('8') . '><b><a href="details.php?id=' . $id . '&amp;hit=1&amp;todlers=1">' . number_format($leechers) . "</a></b></td>\n";
             } else {
-                $out .= '<td align="center" id="torrent-leechers-' . $id . '"><b><a class="' . linkcolor($leechers) . '" href="details.php?id=' . $id . '&amp;dllist=1#leechers">' . $leechers . "</a></b></td>\n";
+                $out .= '<td align="center" id="torrent-leechers-' . $id . '"' . $sortedCellClass('8') . '><b><a class="' . linkcolor($leechers) . '" href="details.php?id=' . $id . '&amp;dllist=1#leechers">' . $leechers . "</a></b></td>\n";
             }
         } else {
-            $out .= '<td align="center" id="torrent-leechers-' . $id . '">0</td>' . "\n";
+            $out .= '<td align="center" id="torrent-leechers-' . $id . '"' . $sortedCellClass('8') . '>0</td>' . "\n";
+        }
         }
 
         // ---- Залит = дата/время added
-        $added = (string)($row['added'] ?? '');
-        // если хочешь перенос строки как раньше — можно str_replace(" ", "<br />", ...)
-        $out .= '<td align="center"><nobr>' . htmlspecialchars($added, ENT_QUOTES, 'UTF-8') . "</nobr></td>\n";
+        if ($showColumn('added')) {
+            $elapsed = $addedTimestamp > 0 ? get_elapsed_time($addedTimestamp) . ' назад' : '-';
+            $out .= '<td align="center"' . $sortedCellClass('4') . '><span title="' .
+                htmlspecialchars($added, ENT_QUOTES, 'UTF-8') . '">' .
+                htmlspecialchars($elapsed, ENT_QUOTES, 'UTF-8') . '</span></td>' . "\n";
+        }
 
         // ---- Раздает = uploader (owner -> users)
         $uploaderCell = "<i>(unknown)</i>";
@@ -320,7 +389,7 @@ function torrenttable($res, $variant = "index")
             $uclass = (int)($row['class'] ?? 0);
             $uploaderCell = '<a href="userdetails.php?id=' . $ownerId . '"><b>' . get_user_class_color($uclass, $uname) . '</b></a>';
         }
-        $out .= '<td align="center">' . $uploaderCell . "</td>\n";
+        if ($showColumn('uploader')) $out .= '<td align="center"' . $sortedCellClass('9') . '>' . $uploaderCell . "</td>\n";
 
         // ---- bookmarks checkbox
         if ($variant === "bookmarks") {
@@ -340,12 +409,35 @@ function torrenttable($res, $variant = "index")
         }
 
         $out .= "</tr>\n";
+
+        $details = [];
+        $details[] = '<b>Добавлен:</b> ' . htmlspecialchars($added ?: '-', ENT_QUOTES, 'UTF-8');
+        $details[] = '<b>Размер:</b> ' . mksize((int)($row['size'] ?? 0));
+        $details[] = '<b>Файлов:</b> ' . (int)($row['numfiles'] ?? 0);
+        $details[] = '<b>Просмотров:</b> ' . (int)($row['views'] ?? 0);
+        $details[] = '<b>Скачиваний:</b> ' . (int)($row['hits'] ?? 0);
+        $details[] = '<b>Сиды / пиры:</b> ' . (int)($row['seeders'] ?? 0) . ' / ' . (int)($row['leechers'] ?? 0);
+        if (!empty($row['keywords'])) {
+            $details[] = '<b>Теги:</b> ' . htmlspecialchars((string)$row['keywords'], ENT_QUOTES, 'UTF-8');
+        }
+        $out .= '<tr id="torrent-details-' . $id . '" class="torrent-details-row" hidden><td colspan="' .
+            $colCount . '"><div>' . implode(' &nbsp; | &nbsp; ', $details) . '</div></td></tr>' . "\n";
     }
 
     $out .= "</tbody>\n";
 
     // ===================== FOOTER ROWS =====================
-    if ($variant === "index" && $userId > 0) {
+    if ($totals['torrents'] > 0) {
+        $out .= '<tr class="torrenttable-summary"><td colspan="' . $colCount . '" align="center">' .
+            '<b>Раздач:</b> ' . number_format($totals['torrents']) .
+            ' &nbsp; <b>Размер:</b> ' . mksize($totals['size']) .
+            ' &nbsp; <b>Файлов:</b> ' . number_format($totals['files']) .
+            ' &nbsp; <b>Комментариев:</b> ' . number_format($totals['comments']) .
+            ' &nbsp; <b>Сиды / пиры:</b> ' . number_format($totals['seeders']) . ' / ' .
+            number_format($totals['leechers']) . '</td></tr>' . "\n";
+    }
+
+    if ($variant === "index" && $userId > 0 && $newCount > 0) {
         $out .= '<tr><td class="colhead" colspan="' . $colCount . '" align="center"><a href="markread.php" class="altlink_white">Все торренты прочитаны</a></td></tr>' . "\n";
     }
 
@@ -360,6 +452,28 @@ function torrenttable($res, $variant = "index")
     if (($isMod && $variant === "index") || $variant === "bookmarks") {
         $out .= "</form>\n";
     }
+
+    $out .= <<<'HTML'
+<style>
+.torrent-details-toggle{width:20px;height:20px;padding:0;line-height:16px;cursor:pointer}
+.torrent-details-row td{padding:8px 12px;background:#f7f7f7;text-align:left}
+.torrenttable-day td{padding:5px 10px;background:#e9e9e9;text-align:left}
+.torrenttable-summary td{padding:7px;background:#f2f2f2}
+.torrenttable-sorted{box-shadow:inset 0 0 0 9999px rgba(255,196,92,.12)}
+</style>
+<script>
+function toggleTorrentDetails(id, button) {
+    var row = document.getElementById('torrent-details-' + id);
+    if (!row) return false;
+    var opening = row.hidden;
+    row.hidden = !opening;
+    button.textContent = opening ? '−' : '+';
+    button.setAttribute('aria-expanded', opening ? 'true' : 'false');
+    button.title = opening ? 'Скрыть подробности' : 'Показать подробности';
+    return false;
+}
+</script>
+HTML;
 
     if ($variant === 'index' && $userId > 0) {
         $out .= <<<'HTML'

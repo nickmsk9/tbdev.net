@@ -41,13 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             stderr($tracker_lang['error'] ?? 'Ошибка', 'Пожалуйста, заполните код безопасности.');
         }
         
-        $b = get_row_count('captcha', 
-            'WHERE imagehash = ' . sqlesc($imagehash) . 
-            ' AND imagestring = ' . sqlesc($imagestring));
-        
-        sql_query('DELETE FROM captcha WHERE imagehash = ' . sqlesc($imagehash));
-        
-        if ($b == 0) {
+        require_once __DIR__ . '/include/captcha.php';
+        if (!captcha_validate((string)$imagehash, (string)$imagestring)) {
             stderr($tracker_lang['error'] ?? 'Ошибка', 'Вы ввели неправильный код подтверждения.');
         }
     }
@@ -164,7 +159,7 @@ EOD;
             Этот процесс предотвращает автоматическую регистрацию.</p>
             <img id="captcha" src="captcha.php?imagehash=<?=$hash_escaped; ?>" alt="Captcha" 
                  ondblclick="this.src='captcha.php?imagehash=<?=$hash_escaped; ?>&amp;' + Math.random();" /><br />
-            <span style="color: red;">Код чувствителен к регистру</span><br />
+            <span style="color: green;">Код не чувствителен к регистру</span><br />
             Кликните два раза на картинке, чтобы обновить картинку.
             <input type="hidden" name="imagehash" value="<?=$hash_escaped; ?>" />
         </td>

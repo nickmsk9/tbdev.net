@@ -210,6 +210,22 @@ $updateset[] = "torrentsperpage = " . max(0, min(100, intval($_POST["torrentsper
 $updateset[] = "topicsperpage = " . max(0, min(100, intval($_POST["topicsperpage"] ?? $CURUSER['topicsperpage'] ?? 0)));
 $updateset[] = "postsperpage = " . max(0, min(100, intval($_POST["postsperpage"] ?? $CURUSER['postsperpage'] ?? 0)));
 
+$hidecomments = (string)($_POST['hidecomments'] ?? 'no');
+$updateset[] = "hidecomments = " . sqlesc($hidecomments === 'yes' ? 'yes' : 'no');
+
+$allowedTorrentColumns = [
+    'category', 'tags', 'size', 'numfiles', 'views', 'hits',
+    'comments', 'seeders', 'leechers', 'uploader', 'added',
+];
+$torrentColumns = array_values(array_intersect(
+    $allowedTorrentColumns,
+    array_map('strval', (array)($_POST['torrent_columns'] ?? []))
+));
+if (!$torrentColumns) {
+    $torrentColumns = ['category', 'size', 'comments', 'seeders', 'leechers', 'uploader', 'added'];
+}
+$updateset[] = "torrent_columns = " . sqlesc(implode(',', $torrentColumns));
+
 if (is_theme($theme))
 	$updateset[] = "theme = ".sqlesc($theme);
 if ($country === 0 || get_row_count('countries', 'WHERE id = ' . $country) === 1)

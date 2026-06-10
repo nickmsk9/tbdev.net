@@ -726,6 +726,7 @@ SELECTOR;
     print("<h1>{$tracker_lang['comments_for']} <a href=\"details.php?id={$id}\">" . htmlspecialchars_uni((string)$row['name']) . "</a></h1>\n");
 }
 
+if ((string)($CURUSER['hidecomments'] ?? 'no') !== 'yes') {
 print("<p><a name=\"startcomments\"></a></p>\n");
 
 // ---- comments count (FIX) ----
@@ -809,6 +810,9 @@ if ($count === 0) {
         print("<input type=\"submit\" class=\"btn\" value=\"Разместить комментарий\" />");
         print("</td></tr></form></table>");
     }
+}
+} else {
+    stdmsg('Комментарии скрыты', 'Показ комментариев отключен в настройках вашего профиля.');
 }
 
 stdfoot();

@@ -87,20 +87,6 @@ CREATE TABLE `bookmarks` (
 ) ENGINE=MyISAM;
 
 #
-# Structure for the `captcha` table :
-#
-
-DROP TABLE IF EXISTS `captcha`;
-
-CREATE TABLE `captcha` (
-  `imagehash` varchar(32) NOT NULL default '',
-  `imagestring` varchar(8) NOT NULL default '',
-  `dateline` bigint(30) NOT NULL default '0',
-  KEY `imagehash` (`imagehash`),
-  KEY `dateline` (`dateline`)
-) ENGINE=MyISAM;
-
-#
 # Structure for the `categories` table :
 #
 
@@ -109,10 +95,10 @@ DROP TABLE IF EXISTS `categories`;
 CREATE TABLE `categories` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `sort` int(10) NOT NULL default '0',
-  `name` varchar(30) NOT NULL default '',
+  `name` varchar(100) NOT NULL default '',
   `image` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 #
 # Structure for the `checkcomm` table :
@@ -709,6 +695,8 @@ CREATE TABLE `users` (
   `torrentsperpage` int(3) unsigned NOT NULL default '0',
   `topicsperpage` int(3) unsigned NOT NULL default '0',
   `postsperpage` int(3) unsigned NOT NULL default '0',
+  `hidecomments` enum('yes','no') NOT NULL default 'no',
+  `torrent_columns` varchar(255) NOT NULL default 'category,size,comments,seeders,leechers,uploader,added',
   `deletepms` enum('yes','no') NOT NULL default 'yes',
   `savepms` enum('yes','no') NOT NULL default 'no',
   `gender` enum('1','2','3') NOT NULL default '1',
@@ -764,23 +752,24 @@ COMMIT;
 #
 
 INSERT INTO `categories` (`id`, `sort`, `name`, `image`) VALUES
-  (1,10,'Программы ISO','appzpciso.gif'),
-  (2,20,'Программы PDA','appzpda.gif'),
-  (3,30,'Программы AUDIO','appzaudio.gif'),
-  (4,40,'Программы MISC','appzmisc.gif'),
-  (5,50,'Игры PC','gamespc.gif'),
-  (6,60,'Игры PS2','gamesps2.gif'),
-  (7,70,'Игры X-Box','gamesxbox.gif'),
-  (8,80,'Игры PSP','gamespsp.gif'),
-  (9,90,'Документальное','docs.gif'),
-  (10,100,'Музыка','music.gif'),
-  (11,110,'Сериалы','tv.gif'),
-  (12,120,'Аниме','anime.gif'),
-  (13,130,'Фильмы XviD','moviesxvid.gif'),
-  (14,140,'Фильмы HDTV','movieshdtv.gif'),
-  (15,150,'Фильмы DVD','moviesdvd.gif'),
-  (16,160,'Книги','ebooks.gif'),
-  (17,170,'XXX','xxx.gif');
+  (1,10,'Образы CD/DVD/HD','cat_iso.gif'),
+  (4,120,'Разное','cat_other.gif'),
+  (5,50,'Игры PC','cat_games.gif'),
+  (6,60,'Мультимедиа','cat_mult.gif'),
+  (8,80,'PSP / PS2 / PS3 / Xbox','cat_psp.gif'),
+  (10,100,'Музыка и аудиокниги','cat_music.gif'),
+  (11,110,'Сериалы','cat_serial.gif'),
+  (12,120,'Аниме','cat_anime.gif'),
+  (13,130,'Фильмы / AVI','cat_avi.gif'),
+  (14,140,'Фильмы / HDTV / HD / Blu-Ray','cat_hd-film.gif'),
+  (15,150,'DVD / Фильмы','cat_dvd.gif'),
+  (16,160,'Книги / PDF / DjVu','cat_book.gif'),
+  (18,170,'Клипы / Музыкальное видео','cat_clips.gif'),
+  (22,190,'TV / Документальное','cat_tv.gif'),
+  (24,30,'Софт Unix / Linux','cat_linux.gif'),
+  (25,90,'Картинки / Обои','cat_image.gif'),
+  (26,40,'Софт Windows','cat_windows.gif'),
+  (27,200,'PDA / Phone / Android / Palm','cat_pda.gif');
 
 COMMIT;
 

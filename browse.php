@@ -43,6 +43,11 @@ $cleansearchstr = htmlspecialchars_uni($searchstr);
 if (empty($cleansearchstr))
     unset($cleansearchstr);
 
+$alpha = '';
+if (isset($_GET['a']) && preg_match('/^[A-ZА-ЯЁ]$/u', (string)$_GET['a'])) {
+    $alpha = (string)$_GET['a'];
+}
+
 // sorting by MarkoStamcar
 
 if (isset($_GET['sort']) && isset($_GET['type'])) {
@@ -81,6 +86,15 @@ if (isset($_GET['sort']) && isset($_GET['type'])) {
         case '10':
             if (get_user_class() >= UC_MODERATOR)
                 $column = "moderatedby";
+            break;
+        case '11':
+            $column = "category";
+            break;
+        case '12':
+            $column = "views";
+            break;
+        case '13':
+            $column = "hits";
             break;
         default:
             $column = "id";
@@ -198,6 +212,11 @@ if (count($wherecatina) > 1)
     $wherecatin = implode(",", $wherecatina); elseif (count($wherecatina) == 1)
     $wherea[] = "category = $wherecatina[0]";
 
+if ($alpha !== '') {
+    $wherea[] = "LEFT(t.name, 1) = " . sqlesc($alpha);
+    $addparam .= "a=" . urlencode($alpha) . "&amp;";
+}
+
 $wherebase = $wherea;
 
 if (isset($cleansearchstr)) {
@@ -262,13 +281,17 @@ if ($count) {
         $addparam = $pagerlink;
     }
     list($pagertop, $pagerbottom, $limit) = pager($torrentsperpage, $count, "browse.php?" . $addparam);
-    $query = "SELECT t.id, t.moderated, t.moderatedby, t.category, (t.leechers + t.remote_leechers) AS leechers, (t.seeders + t.remote_seeders) AS seeders, t.multitracker, t.last_mt_update, t.free, t.name, t.info_hash, t.times_completed, t.size, t.added, t.comments, t.numfiles, t.filename, t.not_sticky, t.owner," . "IF(t.numratings < $minvotes, NULL, ROUND(t.ratingsum / t.numratings, 1)) AS rating, c.name AS cat_name, c.image AS cat_pic, u.username, u.class" . ($CURUSER ? ", EXISTS(SELECT * FROM readtorrents WHERE readtorrents.userid = " . sqlesc($CURUSER["id"]) . " AND readtorrents.torrentid = t.id) AS readtorrent" : ", 1 AS readtorrent") . " FROM torrents AS t LEFT JOIN categories AS c ON t.category = c.id LEFT JOIN users AS u ON t.owner = u.id $where $orderby $limit";
+    $query = "SELECT t.id, t.moderated, t.moderatedby, t.category, (t.leechers + t.remote_leechers) AS leechers, (t.seeders + t.remote_seeders) AS seeders, t.multitracker, t.last_mt_update, t.free, t.name, t.keywords, t.info_hash, t.times_completed, t.size, t.views, t.hits, t.added, t.comments, t.numfiles, t.filename, t.not_sticky, t.owner," . "IF(t.numratings < $minvotes, NULL, ROUND(t.ratingsum / t.numratings, 1)) AS rating, c.name AS cat_name, c.image AS cat_pic, u.username, u.class" . ($CURUSER ? ", EXISTS(SELECT * FROM readtorrents WHERE readtorrents.userid = " . sqlesc($CURUSER["id"]) . " AND readtorrents.torrentid = t.id) AS readtorrent" : ", 1 AS readtorrent") . " FROM torrents AS t LEFT JOIN categories AS c ON t.category = c.id LEFT JOIN users AS u ON t.owner = u.id $where $orderby $limit";
     $res = sql_query($query) or sqlerr(__FILE__, __LINE__);
 } else
     unset($res);
 if (isset($cleansearchstr))
     stdhead($tracker_lang['search_results_for'] . " \"$cleansearchstr\""); else
     stdhead($tracker_lang['browse']);
+
+require __DIR__ . '/include/browse_view.php';
+stdfoot();
+exit;
 
 ?>
 

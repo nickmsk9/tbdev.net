@@ -156,11 +156,10 @@ if ($a != 0)
     bark("E-mail адрес " . htmlspecialchars_uni($email) . " уже зарегистрирован в системе.");
 
 if ($use_captcha && $users) {
-    if (!$_POST['imagestring'])
+    require_once __DIR__ . '/include/captcha.php';
+    if (empty($_POST['imagestring']))
         bark("Вы должны ввести код подтверждения.");
-    $b = get_row_count("captcha", "WHERE imagehash = " . sqlesc($_POST["imagehash"], true) . " AND imagestring = " . sqlesc($_POST["imagestring"], true));
-    sql_query("DELETE FROM captcha WHERE imagehash = " . sqlesc($_POST["imagehash"], true)) or die(mysql_error());
-    if ($b == 0)
+    if (!captcha_validate((string)($_POST['imagehash'] ?? ''), (string)$_POST['imagestring']))
         bark("Вы ввели неправильный код подтверждения.");
 }
 

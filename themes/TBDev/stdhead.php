@@ -457,43 +457,35 @@ if (!empty($CURUSER) && is_array($CURUSER)) {
 
 blok_menu($welcome_text.$medaldon.$warn, $userbar, "155");
 
-// ---------- Меню ----------
-$mainmenu =
-	'<a class="menu" href="index.php">&nbsp;'.($tracker_lang['homepage'] ?? 'Главная').'</a>'.
-	'<a class="menu" href="browse.php">&nbsp;'.($tracker_lang['browse'] ?? 'Торренты').'</a>'.
-	'<a class="menu" href="log.php">&nbsp;'.($tracker_lang['log'] ?? 'Журнал').'</a>'.
-	'<a class="menu" href="rules.php">&nbsp;'.($tracker_lang['rules'] ?? 'Правила').'</a>'.
-	'<a class="menu" href="faq.php">&nbsp;'.($tracker_lang['faq'] ?? 'ЧаВо').'</a>'.
-	'<a class="menu" href="topten.php">&nbsp;'.($tracker_lang['topten'] ?? 'Топ').'</a>'.
-	'<a class="menu" href="formats.php">&nbsp;'.($tracker_lang['formats'] ?? 'Форматы').'</a>';
-
-blok_menu($tracker_lang['main_menu'] ?? 'Главное меню', $mainmenu, "155");
-
 if (!empty($CURUSER)) {
 
 	$usermenu =
-		'<a class="menu" href="my.php">&nbsp;'.($tracker_lang['my'] ?? 'Моё').'</a>'.
-		'<a class="menu" href="userdetails.php?id='.(int)$CURUSER['id'].'">&nbsp;'.($tracker_lang['profile'] ?? 'Профиль').'</a>'.
-		'<a class="menu" href="bookmarks.php">&nbsp;'.($tracker_lang['bookmarks'] ?? 'Закладки').'</a>'.
-		'<a class="menu" href="mybonus.php">&nbsp;'.($tracker_lang['my_bonus'] ?? 'Мой бонус').'</a>'.
-		'<a class="menu" href="invite.php">&nbsp;'.($tracker_lang['invite'] ?? 'Инвайты').'</a>'.
-		'<a class="menu" href="users.php">&nbsp;'.($tracker_lang['users'] ?? 'Пользователи').'</a>'.
-		'<a class="menu" href="friends.php">&nbsp;'.($tracker_lang['personal_lists'] ?? 'Списки').'</a>'.
-		'<a class="menu" href="subnet.php">&nbsp;'.($tracker_lang['neighbours'] ?? 'Соседи').'</a>'.
-		'<a class="menu" href="mytorrents.php">&nbsp;'.($tracker_lang['my_torrents'] ?? 'Мои торренты').'</a>'.
-		'<a class="menu" href="logout.php">&nbsp;'.($tracker_lang['logout'] ?? 'Выйти').'!</a>';
+		'<a class="menu" href="my.php">&nbsp;Панель управления</a>'.
+		'<a class="menu" href="mytorrents.php">&nbsp;Мои торренты</a>'.
+		'<a class="menu" href="userdetails.php?id='.(int)$CURUSER['id'].'">&nbsp;Профиль</a>'.
+		'<a class="menu" href="bookmarks.php">&nbsp;Закладки</a>'.
+		'<a class="menu" href="message.php">&nbsp;Слежение</a>'.
+		'<a class="menu" href="log.php">&nbsp;Мои события</a>'.
+		'<a class="menu" href="search.php">&nbsp;Цикличность поиска</a>'.
+		'<a class="menu" href="mybonus.php">&nbsp;Мой бонус '.number_format((float)($CURUSER['bonus'] ?? 0), 2, '.', '').'</a>'.
+		'<a class="menu" href="mysimpaty.php">&nbsp;Мои респекты</a>'.
+		'<a class="menu" href="invite.php">&nbsp;Пригласить</a>'.
+		'<a class="menu" href="users.php">&nbsp;Пользователи</a>'.
+		'<a class="menu" href="smilies.php">&nbsp;Смайлы</a>'.
+		'<a class="menu" href="formats.php">&nbsp;Обменник</a>'.
+		'<a class="menu" href="friends.php">&nbsp;Мои друзья</a>'.
+		'<a class="menu" href="subnet.php">&nbsp;Сетевые соседи</a>'.
+		'<a class="menu" href="getrss.php">&nbsp;Новости RSS</a>';
 
-	blok_menu($tracker_lang['user_menu'] ?? 'Меню пользователя', $usermenu, "155");
+	blok_menu('Персональное меню', $usermenu, "155");
 }
 
-$bt_clients = '&nbsp;&nbsp;<a href="https://www.bittorrent.com/downloads/" target="_blank"><font class=small color=green>'.$tracker_lang['official'].'</font></a><br />'
-  			.'&nbsp;&nbsp;<a href="https://www.qbittorrent.org/download" target="_blank"><font class=small color=green>qBittorrent</font></a><br />'
-  			.'&nbsp;&nbsp;<a href="https://transmissionbt.com/download" target="_blank"><font class=small color=green>Transmission</font></a><br />'
-  			.'&nbsp;&nbsp;<a href="https://deluge-torrent.org/download/" target="_blank"><font class=small color=green>Deluge</font></a><br />'
-  			.'&nbsp;&nbsp;<a href="https://www.biglybt.com/download/" target="_blank"><font class=small color=green>BiglyBT</font></a><br />'
-  			.'&nbsp;&nbsp;<a href="https://www.bitcomet.com/en" target="_blank"><font class=small color=green>BitComet</font></a><br />'
-  			.'<hr width=100% color=#ffc58c size=1>'
-			.'<font class=small color=red>&nbsp;&nbsp;'.$tracker_lang['clients_recomened_by_us'].'</font>';
+$bt_clients =
+	'<a class="menu" href="https://www.qbittorrent.org/download" target="_blank" rel="noopener">&nbsp;qBittorrent</a>'.
+	'<a class="menu" href="https://www.transmissionbt.com/download" target="_blank" rel="noopener">&nbsp;Transmission</a>'.
+	'<a class="menu" href="https://www.deluge-torrent.org/download/" target="_blank" rel="noopener">&nbsp;Deluge</a>'.
+	'<a class="menu" href="https://www.biglybt.com/download/" target="_blank" rel="noopener">&nbsp;BiglyBT</a>'.
+	'<div class="small" style="padding:6px 8px;color:#666">Используйте актуальную стабильную версию. Для приватных раздач отключите DHT и PEX.</div>';
 
 blok_menu($tracker_lang['torrent_clients'], $bt_clients, "155");
 

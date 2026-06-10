@@ -1,0 +1,8 @@
+{
+    "name": "tbdev/tracker",
+    "description": "Local dependencies for the TBDev tracker",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "dapphp/securimage": "^4.0"
+    }
+}

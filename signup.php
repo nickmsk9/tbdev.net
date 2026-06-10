@@ -196,7 +196,7 @@ if ($use_captcha && $users) {
 			<td class=\"block\"><a href=\"captcha_mp3.php?imagehash=$hash\"><img src=\"themes/$ss_uri/images/listen.gif\" style=\"cursor: pointer;\" border=\"0\" /></a></td>
 		</tr>
 	</table>
-	<font color=\"red\">Код чувствителен к регистру</font><br />Кликните два раза на картинке, что-бы обновить картинку.<input type=\"hidden\" name=\"imagehash\" value=\"$hash\" />", 1);
+	<font color=\"green\">Код не чувствителен к регистру</font><br />Кликните два раза на картинке, чтобы обновить ее.<input type=\"hidden\" name=\"imagehash\" value=\"$hash\" />", 1);
 }
 
 if ($allow_invite_signup) {

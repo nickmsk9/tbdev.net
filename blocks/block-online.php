@@ -14,7 +14,7 @@ $blocktitle = 'Кто в онлайне';
 $onlineTimeout = 300;
 $onlineFrom = time() - $onlineTimeout;
 
-function h(string $value): string
+function block_online_h(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
@@ -35,7 +35,7 @@ if ($latest = mysqli_fetch_assoc($resLatest)) {
     $latestName = (string)$latest['username'];
 
     if ($latestId > 0 && $latestName !== '') {
-        $latestNameHtml = h($latestName);
+        $latestNameHtml = block_online_h($latestName);
 
         $latestUser = !empty($CURUSER)
             ? '<a class="online" href="userdetails.php?id=' . $latestId . '">' . $latestNameHtml . '</a>'
@@ -93,7 +93,7 @@ while ($row = mysqli_fetch_assoc($resOnline)) {
 
     $seenIds[$uid] = true;
 
-    $usernameHtml = h($username);
+    $usernameHtml = block_online_h($username);
     $coloredUsername = get_user_class_color($class, $usernameHtml);
 
     $onlineUsers[] = '<a class="online" href="userdetails.php?id=' . $uid . '">' . $coloredUsername . '</a>';

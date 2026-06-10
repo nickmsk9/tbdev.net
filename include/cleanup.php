@@ -405,8 +405,6 @@ if (!function_exists('docleanup')) {
 
     function cleanup_temp_data(): void
     {
-        $captcha_time = time() - 86400;
-        sql_query("DELETE FROM captcha WHERE dateline < $captcha_time") or sqlerr(__FILE__, __LINE__);
 
         $session_time = time() - 3600;
         sql_query("DELETE FROM sessions WHERE time < $session_time") or sqlerr(__FILE__, __LINE__);
