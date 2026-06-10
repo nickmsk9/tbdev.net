@@ -1,9 +1,8 @@
 <?php
 
-$mysql_host = "db";
+$mysql_host = "localhost";
 $mysql_user = "root";
-$mysql_pass = "root";
+$mysql_pass = "";
 $mysql_db = "tbdev";
-$mysql_charset = "utf8";
+$mysql_charset = "utf8mb4";
 
-?>
