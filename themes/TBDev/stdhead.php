@@ -354,7 +354,7 @@ $w = "width=\"90%\"";
 
 <? $fn = substr($_SERVER['PHP_SELF'], strrpos($_SERVER['PHP_SELF'], "/") + 1); ?>
 
-<td valign="top" width="155">
+<td valign="top" width="180">
 <?php
 show_blocks('l');
 
@@ -396,13 +396,13 @@ if (!empty($CURUSER) && is_array($CURUSER)) {
 	$ip = $_SERVER['REMOTE_ADDR'] ?? '';
 
 	$userbar =
-		'<center><a href="my.php"><img src="'.$h($avatar).'" width="100" alt="Аватар" title="Аватар" border="0"></a></center>
+		'<center><a href="my.php"><img src="'.$h($avatar).'" width="120" alt="Аватар" title="Аватар" border="0"></a></center>
+		<font color="blue">'.($tracker_lang['pm'] ?? 'Сообщения').':</font>&nbsp;'.$message_in.' '.$message_out.'<br>
 		<br>
 		<font color="1900D1">'.($tracker_lang['ratio'] ?? 'Ратио').':</font>&nbsp;'.($ratio ?? '---').'<br>
 		<font color="green">'.($tracker_lang['uploaded'] ?? 'Отдано').':</font>&nbsp;'.($uped ?? '0').'<br>
 		<font color="red">'.($tracker_lang['downloaded'] ?? 'Скачано').':</font>&nbsp;'.($downed ?? '0').'<br>
 		<font color="darkblue">'.($tracker_lang['bonus'] ?? 'Бонус').':</font>&nbsp;<a href="mybonus.php" class="online"><font color="black">'.$bonus.'</font></a><br>
-		<font color="blue">'.($tracker_lang['pm'] ?? 'Сообщения').':</font>&nbsp;'.$message_in.' '.$message_out.'<br>
 		'.($tracker_lang['torrents'] ?? 'Торренты').':&nbsp;
 		<img alt="'.($tracker_lang['seeding'] ?? 'Раздаю').'" title="'.($tracker_lang['seeding'] ?? 'Раздаю').'" src="./themes/'.$h($ss_uri).'/images/arrowup.gif">&nbsp;<font color="green"><span class="smallfont">'.(int)($activeseed ?? 0).'</span></font>&nbsp;
 		<img alt="'.($tracker_lang['leeching'] ?? 'Качаю').'" title="'.($tracker_lang['leeching'] ?? 'Качаю').'" src="./themes/'.$h($ss_uri).'/images/arrowdown.gif">&nbsp;<font color="red"><span class="smallfont">'.(int)($activeleech ?? 0).'</span></font><br>
@@ -484,12 +484,6 @@ if (!empty($CURUSER)) {
 		'<a class="menu" href="logout.php">&nbsp;'.($tracker_lang['logout'] ?? 'Выйти').'!</a>';
 
 	blok_menu($tracker_lang['user_menu'] ?? 'Меню пользователя', $usermenu, "155");
-
-	$msgMenu =
-		'<a class="menu" href="message.php">&nbsp;'.($tracker_lang['inbox'] ?? 'Входящие').'</a>'.
-		'<a class="menu" href="message.php?action=viewmailbox&amp;box=-1">&nbsp;'.($tracker_lang['outbox'] ?? 'Исходящие').'</a>';
-
-	blok_menu($tracker_lang['messages'] ?? 'Сообщения', $msgMenu, "155");
 }
 
 $bt_clients = '&nbsp;&nbsp;<a href="https://www.bittorrent.com/downloads/" target="_blank"><font class=small color=green>'.$tracker_lang['official'].'</font></a><br />'

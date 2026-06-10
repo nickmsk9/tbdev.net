@@ -91,7 +91,7 @@ function insert_smilies_frame(): void
 // ---------------------------------------------------------------------------------------------------------
 // Block menu function: Print out menu block!
 
-function blok_menu(string $title, string $content, string $width = "155"): void
+function blok_menu(string $title, string $content, string $width = "200"): void
 {
     global $ss_uri;
 

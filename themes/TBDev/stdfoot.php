@@ -9,7 +9,7 @@ if (!defined('UC_SYSOP')) {
 // центральные/нижние блоки 
 show_blocks('d');
 ?>
-<td valign="top" width="155">
+<td valign="top" width="180">
 <?php
 show_blocks('r');
 ?>
