@@ -7,20 +7,15 @@ if (!defined('BLOCK_FILE')) {
     exit;
 }
 
-global $tracker_lang;
+global $tracker_lang, $content;
 
-$blocktitle = $tracker_lang['help_seed'] ?? 'Помогите раздачам';
+$content = $content ?? '';
 
-$title = htmlspecialchars($blocktitle, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-
-$content .= '
+$content .= <<<HTML
 <table width="100%" cellspacing="0" cellpadding="5">
     <tr>
-        <td class="colhead" align="center">' . $title . '</td>
-    </tr>
-    <tr>
         <td class="text">
-';
+HTML;
 
 $sql = "
     SELECT id, name, seeders, leechers

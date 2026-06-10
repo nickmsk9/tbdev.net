@@ -1,26 +1,90 @@
 <?php
 
 if (!defined('BLOCK_FILE')) {
-header("Location: ../index.php");
-exit;
+    header('Location: ../index.php');
+    exit;
 }
 
-global $tracker_lang;
-$con = sql_query("SELECT userid FROM peers GROUP by userid");
-$connected = mysqli_num_rows($con);
-$blocktitle = "Нагрузка сервера";
-$avgload = get_server_load();
-if (strtolower(substr(PHP_OS, 0, 3)) != 'win')
-	$percent = $avgload * 4;
-else
-	$percent = $avgload;
-if ($percent <= 50) $pic = "loadbargreen.gif";
-elseif ($percent <= 70) $pic = "loadbaryellow.gif";
-else $pic = "loadbarred.gif";
-	$width = $percent * 4;
-$content .= "<center>
-<table class=\"main\" border=\"0\" width=\"402\"><tr><td style=\"padding: 0px; background-repeat: repeat-x\" title=\"Загрузка: $percent%, нагрузка (LA): $avgload\">"
-."<img height=\"15\" width=\"$width\" src=\"pic/$pic\" alt=\"Загрузка: $percent%, нагрузка (LA): $avgload\" title=\"Загрузка: $percent%, нагрузка (LA): $avgload\">"
-."</td></tr></table>"
-."<b>На данный момент подключено $connected пользователей.</b></center>";
+global $tracker_lang, $pic_base_url;
+
+$blocktitle = 'Нагрузка сервера';
+
+/**
+ * Активные пользователи в peers.
+ * Так быстрее и правильнее, чем SELECT userid ... GROUP BY + mysqli_num_rows().
+ */
+$res = sql_query("SELECT COUNT(DISTINCT userid) AS connected FROM peers");
+$row = mysqli_fetch_assoc($res);
+$connected = (int)($row['connected'] ?? 0);
+
+$avgload = (float)get_server_load();
+
+/**
+ * Для Unix LA обычно пересчитывали в проценты через *4.
+ * На Windows оставляем как есть.
+ */
+if (strtolower(substr(PHP_OS, 0, 3)) !== 'win') {
+    $percent = $avgload * 4;
+} else {
+    $percent = $avgload;
+}
+
+$percent = (int)round($percent);
+
+/**
+ * Чтобы полоска не вылезала за таблицу.
+ */
+$barPercent = max(0, min(100, $percent));
+
+if ($barPercent <= 50) {
+    $pic = 'loadbargreen.gif';
+} elseif ($barPercent <= 70) {
+    $pic = 'loadbaryellow.gif';
+} else {
+    $pic = 'loadbarred.gif';
+}
+
+$title = 'Загрузка: ' . $percent . '%, нагрузка (LA): ' . htmlspecialchars((string)$avgload, ENT_QUOTES, 'UTF-8');
+
+$content .= "
+<table width='100%' border='0' cellspacing='1' cellpadding='3' class='blok'>
+    <tr>
+        <td class='rowhead' align='left' width='35%'>
+            Активных подключений
+        </td>
+        <td class='row1' align='left'>
+            <b>" . number_format($connected) . "</b> пользователей
+        </td>
+    </tr>
+    <tr>
+        <td class='rowhead' align='left'>
+            Нагрузка сервера
+        </td>
+        <td class='row1' align='left' title='{$title}'>
+            <table width='100%' border='0' cellspacing='0' cellpadding='0'>
+                <tr>
+                    <td width='45' align='center'>
+                        <b>{$percent}%</b>
+                    </td>
+                    <td align='left'>
+                        <table width='100%' border='0' cellspacing='0' cellpadding='0'>
+                            <tr>
+                                <td style='padding:0; height:15px; background:#fdefce; border:1px solid #e0d1bc;'>
+                                    <img
+                                        src='pic/{$pic}'
+                                        width='{$barPercent}%'
+                                        height='15'
+                                        alt='{$title}'
+                                        title='{$title}'
+                                        style='display:block;'
+                                    >
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>";
 ?>

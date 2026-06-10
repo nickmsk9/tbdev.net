@@ -1,162 +1,228 @@
 <?php
+
 declare(strict_types=1);
 
 if (!defined('BLOCK_FILE')) {
-    header("Location: ../index.php");
+    header('Location: ../index.php');
     exit;
 }
 
-$blocktitle = "Новые раздачи";
+global $content;
 
-// сколько показывать
+$content = $content ?? '';
+
+$blocktitle = 'Новые раздачи';
 $perpage = 5;
 
-// считаем кол-во (для pager)
-$countRes = sql_query("SELECT COUNT(*) AS c FROM torrents WHERE visible = 'yes' AND banned = 'no'") or sqlerr(__FILE__, __LINE__);
-$countRow = mysqli_fetch_assoc($countRes);
-$count = (int)($countRow['c'] ?? 0);
+$h = static function (?string $value): string {
+    $value = (string)$value;
 
-// маленький быстрый “превью” текста (без тяжёлых BBCode-парсеров)
-$make_preview = static function (string $text, int $max = 220): string {
-    $text = trim($text);
-    if ($text === '') {
-        return '';
+    if (function_exists('htmlspecialchars_uni')) {
+        return htmlspecialchars_uni($value);
     }
 
-    // Убираем самые частые BBCode-теги (быстро)
-    $text = preg_replace('~\[(?:/?)(?:b|i|u|s|quote|code|spoiler|url|img|color|size|center|left|right|align|font|list|\*)[^\]]*\]~i', '', $text) ?? $text;
-    $text = preg_replace("~\r\n|\r~", "\n", $text) ?? $text;
-    $text = preg_replace("~\n{3,}~", "\n\n", $text) ?? $text;
-    $text = trim($text);
-
-    if ($text === '') {
-        return '';
-    }
-
-    // mbstring обычно включён; если нет — fallback
-    if (function_exists('mb_strlen') && function_exists('mb_substr')) {
-        if (mb_strlen($text, 'UTF-8') > $max) {
-            $text = mb_substr($text, 0, $max, 'UTF-8') . '…';
-        }
-    } else {
-        if (strlen($text) > $max) {
-            $text = substr($text, 0, $max) . '...';
-        }
-    }
-
-    return htmlspecialchars_uni($text);
+    return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 };
 
-$content = '';
-$content .= '<table cellspacing="0" cellpadding="5" width="100%">';
+$num = static function (int $value): string {
+    return number_format($value, 0, '.', ' ');
+};
 
-if ($count <= 0) {
-    $content .= '<tr><td>Новых загрузок нет...</td></tr>';
-} else {
-    $limit = 'LIMIT ' . (int)$perpage;
+$startsWithHttp = static function (string $value): bool {
+    return strncmp($value, 'http://', 7) === 0 || strncmp($value, 'https://', 8) === 0;
+};
 
-    // Берём последние торренты из torrents
-    $res = sql_query("
-        SELECT
-            t.id, t.name, t.added, t.category,
-            (t.seeders + t.remote_seeders) AS seeders,
-            (t.leechers + t.remote_leechers) AS leechers,
-            t.times_completed,
-            t.image1,
-            t.descr,
-            c.id AS catid, c.name AS catname, c.image AS catimage
-        FROM torrents AS t
-        LEFT JOIN categories AS c ON t.category = c.id
-        WHERE t.visible = 'yes' AND t.banned = 'no'
-        ORDER BY t.id DESC
-        $limit
-    ") or sqlerr(__FILE__, __LINE__);
+$makePreview = static function (string $text, int $max = 900) use ($h): string {
+    $text = trim($text);
 
-    while ($t = mysqli_fetch_assoc($res)) {
-        $tid = (int)($t['id'] ?? 0);
-        $name = (string)($t['name'] ?? '');
-
-        $seeders = (int)($t['seeders'] ?? 0);
-        $leechers = (int)($t['leechers'] ?? 0);
-        $completed = (int)($t['times_completed'] ?? 0);
-
-        $catid = (int)($t['catid'] ?? 0);
-        $catname = (string)($t['catname'] ?? '');
-        $catimage = (string)($t['catimage'] ?? '');
-
-        $poster = (string)($t['image1'] ?? '');
-        $descr  = (string)($t['descr'] ?? '');
-
-        $safeTitle = htmlspecialchars_uni($name);
-
-        // Постер
-        if ($poster !== '') {
-            $posterSrc = (str_starts_with($poster, 'http://') || str_starts_with($poster, 'https://'))
-                ? $poster
-                : "torrents/images/" . $poster;
-
-            $posterHtml = '<a href="details.php?id=' . $tid . '" title="' . $safeTitle . '">'
-                . '<img src="' . htmlspecialchars_uni($posterSrc) . '" width="160" border="0" />'
-                . '</a>';
-        } else {
-            $posterHtml = '<a href="details.php?id=' . $tid . '" title="' . $safeTitle . '">'
-                . '<img src="pic/noposter.png" width="160" border="0" />'
-                . '</a>';
-        }
-
-        // Иконка категории (аккуратно в правой колонке, справа)
-        $catHtml = '';
-        if ($catimage !== '') {
-            $catHtml = '<a href="browse.php?cat=' . $catid . '">'
-                . '<img src="pic/cats/' . htmlspecialchars_uni($catimage) . '"'
-                . ' alt="' . htmlspecialchars_uni($catname) . '"'
-                . ' title="' . htmlspecialchars_uni($catname) . '" border="0" />'
-                . '</a>';
-        } elseif ($catname !== '') {
-            $catHtml = htmlspecialchars_uni($catname);
-        }
-
-        $preview = $make_preview($descr, 240);
-
-        $content .= '<tr><td>';
-
-        $content .= '<table width="100%" class="main" border="1" cellspacing="0" cellpadding="5">';
-
-        // Заголовок
-        $content .= '<tr><td class="colhead" colspan="2" align="center">'
-            . '<a class="altlink_white" href="details.php?id=' . $tid . '"><b>' . $safeTitle . '</b></a>'
-            . '</td></tr>';
-
-        $content .= '<tr valign="top">';
-        $content .= '<td align="center" width="160">' . $posterHtml . '</td>';
-
-        $content .= '<td>';
-
-        // категория справа, статы слева
-        $content .= '<table width="100%" cellspacing="0" cellpadding="0" border="0"><tr valign="top">';
-        $content .= '<td align="left">';
-        $content .= '<b>Сиды:</b> ' . $seeders . ' &nbsp; ';
-        $content .= '<b>Личи:</b> ' . $leechers . ' &nbsp; ';
-        $content .= '<b>Скачали:</b> ' . $completed;
-        $content .= '</td>';
-        $content .= '<td align="right">' . $catHtml . '</td>';
-        $content .= '</tr></table>';
-
-        // описание
-        if ($preview !== '') {
-            $content .= '<br /><div align="left">' . $preview . '</div>';
-        }
-
-        $content .= '<br /><div align="right">[<a href="details.php?id=' . $tid . '" title="' . $safeTitle . '"><b>Открыть</b></a>]</div>';
-
-        $content .= '</td>';
-        $content .= '</tr>';
-
-        $content .= '</table>';
-
-        $content .= '</td></tr>';
+    if ($text === '') {
+        return '';
     }
 
+    // Быстрая очистка BBCode без тяжёлого парсера.
+    $text = preg_replace(
+        '~\[(?:/?)(?:b|i|u|s|quote|code|spoiler|url|img|color|size|center|left|right|align|font|list|\*)[^\]]*\]~i',
+        '',
+        $text
+    ) ?? $text;
+
+    $text = preg_replace('~\s+~u', ' ', $text) ?? $text;
+    $text = trim($text);
+
+    if ($text === '') {
+        return '';
+    }
+
+    if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+        if (mb_strlen($text, 'UTF-8') > $max) {
+            $text = mb_substr($text, 0, $max, 'UTF-8') . '...';
+        }
+    } elseif (strlen($text) > $max) {
+        $text = substr($text, 0, $max) . '...';
+    }
+
+    return nl2br($h($text));
+};
+
+$sql = "
+    SELECT
+        t.id,
+        t.name,
+        t.added,
+        COALESCE(t.seeders, 0) + COALESCE(t.remote_seeders, 0) AS seeders,
+        COALESCE(t.leechers, 0) + COALESCE(t.remote_leechers, 0) AS leechers,
+        COALESCE(t.times_completed, 0) AS times_completed,
+        t.image1,
+        LEFT(COALESCE(t.descr, ''), 1600) AS descr,
+        c.id AS catid,
+        c.name AS catname
+    FROM torrents AS t
+    LEFT JOIN categories AS c ON c.id = t.category
+    WHERE t.visible = 'yes'
+      AND t.banned = 'no'
+    ORDER BY t.id DESC
+    LIMIT " . (int)$perpage;
+
+$res = sql_query($sql) or sqlerr(__FILE__, __LINE__);
+
+$content .= '
+<table width="100%" cellspacing="0" cellpadding="0">
+';
+
+$hasRows = false;
+
+while ($t = mysqli_fetch_assoc($res)) {
+    $tid = (int)($t['id'] ?? 0);
+    $name = trim((string)($t['name'] ?? ''));
+
+    if ($tid <= 0 || $name === '') {
+        continue;
+    }
+
+    $hasRows = true;
+
+    $safeTitle = $h($name);
+
+    $seeders = (int)($t['seeders'] ?? 0);
+    $leechers = (int)($t['leechers'] ?? 0);
+    $completed = (int)($t['times_completed'] ?? 0);
+
+    $poster = trim((string)($t['image1'] ?? ''));
+    $descr = (string)($t['descr'] ?? '');
+
+    $catid = (int)($t['catid'] ?? 0);
+    $catname = trim((string)($t['catname'] ?? ''));
+
+    $added = (string)($t['added'] ?? '');
+
+    if ($poster !== '') {
+        $posterSrc = $startsWithHttp($poster)
+            ? $poster
+            : 'torrents/images/' . basename($poster);
+    } else {
+        $posterSrc = '/images/default_torrent.png';
+    }
+
+    $categoryHtml = '';
+
+    if ($catid > 0 && $catname !== '') {
+        $categoryHtml = '<div style="float: right;">'
+            . '<a title="' . $h($catname) . '" href="browse.php?cat=' . $catid . '">' . $h($catname) . '</a>'
+            . '</div>';
+    }
+
+    $preview = $makePreview($descr, 900);
+
+    if ($preview === '') {
+        $preview = '<span class="small">Описание отсутствует.</span>';
+    }
+
+    $addedText = '';
+
+    if ($added !== '') {
+        $addedText = '<span class="small">Добавлен: ' . $h($added) . '</span>';
+    }
+
+    $content .= '
+<tr>
+    <td style="padding: 5px 0 5px 0;">
+        <table width="100%" class="main" border="0" cellspacing="0" cellpadding="5">
+            <tr>
+                <td class="colhead" colspan="2" style="text-align: left;">
+                    ' . $categoryHtml . '
+                    <a class="altlink_white" href="details.php?id=' . $tid . '" title="' . $safeTitle . '">' . $safeTitle . '</a>
+                </td>
+            </tr>
+
+            <tr valign="top">
+                <td align="center" width="190">
+                    <a href="details.php?id=' . $tid . '" title="' . $safeTitle . '">
+                        <picture>
+                            <img
+                                class="avatars"
+                                height="250"
+                                width="180"
+                                loading="lazy"
+                                alt="' . $safeTitle . '"
+                                border="0"
+                                onerror="this.src=\'/images/default_torrent.png\';"
+                                src="' . $h($posterSrc) . '">
+                        </picture>
+                    </a>
+                    <br>
+                    <span class="green small">Торрент доступен</span>
+                </td>
+
+                <td class="text">
+                    ' . $preview . '
+                    <br><br>
+                    <a class="alink" href="details.php?id=' . $tid . '" title="' . $safeTitle . '">Открыть раздачу</a>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2" class="embedded">
+                    <table width="100%" class="main" border="0" cellspacing="0" cellpadding="5">
+                        <tr>
+                            <td align="left" width="33%" class="embedded">
+                                Раздают:
+                                <b><span class="green">' . $num($seeders) . '</span></b>,
+                                Качают:
+                                <b><span class="red">' . $num($leechers) . '</span></b>
+                            </td>
+
+                            <td align="center" width="33%" class="embedded">
+                                ' . $addedText . '
+                            </td>
+
+                            <td align="right" width="33%" class="embedded">
+                                Завершено:
+                                <b><span class="green">' . $num($completed) . '</span></b>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
+';
 }
 
-$content .= '</table>';
+mysqli_free_result($res);
+
+if (!$hasRows) {
+    $content .= '
+<tr>
+    <td class="text">
+        Новых загрузок нет...
+    </td>
+</tr>
+';
+}
+
+$content .= '
+</table>
+';
+
+?>
