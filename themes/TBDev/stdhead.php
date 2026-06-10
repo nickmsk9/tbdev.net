@@ -34,6 +34,8 @@ $assetV = (string)($GLOBALS['ASSET_VERSION'] ?? '1');
 	<?php endif; ?>
 
 	<link rel="stylesheet" href="themes/<?= $u($theme) ?>/<?= $u($theme) ?>.css?v=<?= $h($assetV) ?>" type="text/css">
+	<link rel="stylesheet" href="./js/added_style.css" type="text/css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Russo+One">
 
 	<link rel="alternate" type="application/rss+xml" title="Последние торренты" href="<?= $h($baseUrl) ?>/rss.php">
 	<link rel="icon" href="<?= $h($baseUrl) ?>/favicon.ico" sizes="any">
@@ -103,25 +105,19 @@ $navLink = static function (string $href, string $label) use ($h): string {
 };
 
 
-// Фон-картинка (один раз)
-$logoBg = 'themes/'.$u($theme).'/images/logobg.gif';
-$logo   = 'themes/'.$u($theme).'/images/logo.gif';
 ?>
-<table width="90%" class="clear" align="center" border="0" cellspacing="0" cellpadding="0" style="background: transparent;">
+<table width="90%" class="clear" align="center" border="0" cellspacing="0" cellpadding="0">
 	<tr>
-		<td class="embedded" width="50%" background="<?= $h($logoBg) ?>">
-			<a href="<?= $h($baseUrl ?: '/') ?>">
-				<img
-					src="<?= $h($logo) ?>"
-					alt="<?= $h($site) ?>"
-					title="<?= $h($site) ?>"
-					style="border:none"
-					loading="eager"
-				>
-			</a>
-		</td>
-		<td class="embedded" width="50%" align="right" style="text-align:right" background="<?= $h($logoBg) ?>">
-			<!-- правая часть шапки (если надо: баннер/поиск/кнопки) -->
+		<td class="embedded td_one">
+			<div class="logo"></div>
+			<div class="after_logo">
+				<svg viewBox="0 0 100 600" role="img" aria-labelledby="site-name">
+					<text id="site-name" x="50%" y="50%" dy=".35em" text-anchor="middle">
+						<a href="<?= $h($baseUrl ?: '/') ?>"><?= $h($site) ?></a>
+					</text>
+				</svg>
+			</div>
+			<div class="my_block_fiends"></div>
 		</td>
 	</tr>
 </table>
@@ -157,7 +153,9 @@ $logo   = 'themes/'.$u($theme).'/images/logo.gif';
 
 			$items[] = $navLink('contactus.php', (string)($tracker_lang['contactus'] ?? 'Контакты'));
 
-			echo '&nbsp;' . implode("\n\t\t\t&nbsp;&#8226;&nbsp;\n\t\t\t", $items);
+			echo '<ul id="sticky-header" class="topnav"><li>'
+				. implode("</li>\n<li>", $items)
+				. '</li></ul>';
 			?>
 		</td>
 	</tr>
@@ -261,8 +259,8 @@ $sentIcon = "<img height=\"16\" style=\"border:none\" alt=\"Исходящие\"
 		<td class="tablea">
 			<table align="center" style="width:100%" cellspacing="0" cellpadding="0" border="0">
 				<tr>
-					<td class="bottom" align="left">
-						<span class="smallfont">
+					<td class="bottom menu" align="left">
+						<span class="smallfont is_middle">
 							<?= $tracker_lang['welcome_back']; ?>
 							<b>
 								<a href="userdetails.php?id=<?= (int)$CURUSER['id'] ?>">
@@ -288,8 +286,8 @@ $sentIcon = "<img height=\"16\" style=\"border:none\" alt=\"Исходящие\"
 						</span>
 					</td>
 
-					<td class="bottom" align="right">
-						<span class="smallfont">
+					<td class="bottom menu" align="right">
+						<span class="smallfont is_middle">
 							<?= $tracker_lang['clock']; ?>:
 							<span id="clock"><?= $tracker_lang['loading']; ?>...</span>
 

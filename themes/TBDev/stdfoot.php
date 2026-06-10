@@ -37,20 +37,30 @@ if ($phptime < 0) {
 $percentphp = number_format(($phptime / $seconds) * 100, 2, '.', '');
 $percentsql = number_format(($query_time / $seconds) * 100, 2, '.', '');
 
-$secondsStr = substr((string)$seconds, 0, 8);
+$secondsStr = number_format($seconds, 4, '.', '');
+$queryTimeStr = number_format($query_time, 4, '.', '');
+$phpTimeStr = number_format($phptime, 4, '.', '');
 
-// версия
-$ver = (string)(TBVERSION ?? '');
-if (defined('BETA') && BETA && defined('BETA_NOTICE')) {
-	$ver .= (string)BETA_NOTICE;
-}
+// Футер
+$currentYear = date('Y');
+$siteName = htmlspecialchars(
+	(string)($SITENAME ?? 'TBDev v.Core'),
+	ENT_QUOTES | ENT_SUBSTITUTE,
+	'UTF-8'
+);
+$gzipStatus = !empty($use_gzip) ? 'gzip on' : 'gzip off';
+$copyrightTitle = htmlspecialchars(
+	"Движок сайта: TBDev v.Core 2k26 © 2008-{$currentYear}.",
+	ENT_QUOTES | ENT_SUBSTITUTE,
+	'UTF-8'
+);
 
-// футер (вид сохраняем)
-echo "<table class=\"bottom\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"><tr valign=\"top\">\n";
-echo "<td width=\"49%\" class=\"bottom\"><div align=\"center\"><br /><b>"
-	.$ver
-	."<br />"
-	.sprintf((string)($tracker_lang['page_generated'] ?? 'Страница сгенерирована за %s сек. (%d запросов) PHP %s%% / SQL %s%%'), $secondsStr, $queries, $percentphp, $percentsql)
-	."</b></div></td>\n";
-echo "</tr></table>\n";
+echo "<table class=\"bottom site-footer\" width=\"90%\" align=\"center\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n";
+echo "<tr><td colspan=\"3\" class=\"is_foot\">";
+echo "<b>.:{$siteName} <noindex><a href=\"?copyright\" class=\"copyright\" title=\"{$copyrightTitle}\" rel=\"nofollow\">©</a></noindex> "
+	. "{$currentYear} TBDev v.Core:.</b><br />";
+echo "Страничка сгенерирована за {$secondsStr} секунд ({$gzipStatus})<br />";
+echo "<b>{$queries}</b>, <b>{$percentsql}%</b> (queries, {$queryTimeStr} -&gt; sql) - "
+	. "<b>{$percentphp}%</b> ({$phpTimeStr} -&gt; php)";
+echo "</td></tr></table>\n";
 echo "</body></html>\n";

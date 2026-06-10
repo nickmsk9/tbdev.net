@@ -1178,7 +1178,7 @@ function stdhead($title = "", $msgalert = true) {
 } // stdhead
 
 function stdfoot() {
-	global $CURUSER, $ss_uri, $tracker_lang, $queries, $tstart, $query_stat, $querytime;
+	global $CURUSER, $SITENAME, $ss_uri, $tracker_lang, $queries, $tstart, $query_stat, $querytime;
 
 	if (!is_theme($ss_uri) || empty($ss_uri))
 		$ss_uri = select_theme();
