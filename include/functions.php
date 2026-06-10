@@ -1185,12 +1185,33 @@ function stdfoot() {
 
 	require_once('themes/' . $ss_uri . '/template.php');
 	require_once('themes/' . $ss_uri . '/stdfoot.php');
-	if ((DEBUG_MODE || isset($_GET['yuna'])) && count($query_stat)) {
+
+	if ((defined('DEBUG_MODE') && DEBUG_MODE || isset($_GET['yuna'])) && !empty($query_stat)) {
+		print("<table class=\"main\" width=\"90%\" align=\"center\" border=\"0\" cellspacing=\"0\" cellpadding=\"5\">\n");
+		print("<tr><td colspan=\"3\" class=\"colhead\">SQL Debug</td></tr>\n");
+		print("<tr><td class=\"colhead\" width=\"45\">#</td><td class=\"colhead\" width=\"100\">Время</td><td class=\"colhead\">Запрос</td></tr>\n");
+
 		foreach ($query_stat as $key => $value) {
-			print('<div>['.($key+1).'] => <b>'.($value['seconds'] > 0.01 ? '<font color="red" title="������������� �������������� ������. ����� ���������� ��������� �����.">'.$value['seconds'].'</font>' : '<font color="green" title="������ �� ��������� � �����������. ����� ���������� ����������.">'.$value['seconds'].'</font>' ).'</b> ['.htmlspecialchars_uni($value['query']).']</div>'."\n");
+			$seconds = (float)($value['seconds'] ?? 0);
+			$color = $seconds > 0.01 ? 'red' : 'green';
+			$title = $seconds > 0.01 ? 'Медленный SQL-запрос' : 'Время выполнения SQL-запроса';
+			$query = htmlspecialchars_uni((string)($value['query'] ?? ''));
+			$error = htmlspecialchars_uni((string)($value['error'] ?? ''));
+
+			print('<tr>');
+			print('<td class="rowhead">'.($key + 1).'</td>');
+			print('<td class="text"><b><font color="'.$color.'" title="'.$title.'">'.$seconds.'</font></b></td>');
+			print('<td class="text"><span class="smallfont">'.$query.'</span>');
+			if ($error !== '') {
+				print('<br><font color="red"><b>Ошибка:</b> '.$error.'</font>');
+			}
+			print("</td></tr>\n");
 		}
-		print('<br />');
+
+		print("</table><br />\n");
 	}
+
+	print("</body></html>\n");
 }
 
 function genbark($x,$y) {

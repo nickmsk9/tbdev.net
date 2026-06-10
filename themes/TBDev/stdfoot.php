@@ -63,4 +63,3 @@ echo "Страничка сгенерирована за {$secondsStr} секу�
 echo "<b>{$queries}</b>, <b>{$percentsql}%</b> (queries, {$queryTimeStr} -&gt; sql) - "
 	. "<b>{$percentphp}%</b> ({$phpTimeStr} -&gt; php)";
 echo "</td></tr></table>\n";
-echo "</body></html>\n";
