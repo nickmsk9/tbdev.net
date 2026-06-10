@@ -38,7 +38,7 @@ $fields = "info_hash, times_completed, seeders, leechers";
 if (!isset($_GET["info_hash"]))
 	$query = "SELECT $fields FROM torrents ORDER BY info_hash";
 else {
-	if (get_magic_quotes_gpc())
+	if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc())
 		$hash = bin2hex(stripslashes($_GET["info_hash"]));
 	else
 		$hash = bin2hex($_GET["info_hash"]);
@@ -47,7 +47,7 @@ else {
 	$query = "SELECT $fields FROM torrents WHERE info_hash = " . sqlesc($hash);
 }
 
-$res = mysql_query($query) or err(mysql_error());
+$res = sql_query($query) or err(mysqli_error($GLOBALS['___mysqli_ston']));
 
 while ($row = mysqli_fetch_assoc($res)) {
 	$r .= "20:" . pack("H*", ($row["info_hash"])) . "d" .

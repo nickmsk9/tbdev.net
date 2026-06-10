@@ -350,9 +350,9 @@ function userlogin(bool $lightmode = false): void
         goto guest;
     }
 
-    // --- Load user: НЕ SELECT * (меньше данных, быстрее) ---
+    // The rest of TBDev expects the complete user record in $CURUSER.
     $sql = "
-        SELECT id, username, class, override_class, ip, passhash, language, enabled
+        SELECT *
         FROM users
         WHERE id = $id
         LIMIT 1
@@ -1258,8 +1258,16 @@ function logincookie($id, $passhash, $updatedb = 1, $expires = 0x7fffffff) {
 	$subnet[2] = $subnet[3] = 0;
 	$subnet = implode('.', $subnet); // 255.255.0.0
 
-	setcookie(COOKIE_UID, $id, $expires, '/');
-	setcookie(COOKIE_PASSHASH, md5($passhash.COOKIE_SALT.$subnet), $expires, '/');
+	$cookieOptions = array(
+		'expires' => $expires,
+		'path' => '/',
+		'secure' => true,
+		'httponly' => true,
+		'samesite' => 'Lax',
+	);
+
+	setcookie(COOKIE_UID, $id, $cookieOptions);
+	setcookie(COOKIE_PASSHASH, md5($passhash.COOKIE_SALT.$subnet), $cookieOptions);
 
 	if ($updatedb)
 		sql_query('UPDATE users SET last_login = NOW() WHERE id = '.$id);
@@ -1267,7 +1275,20 @@ function logincookie($id, $passhash, $updatedb = 1, $expires = 0x7fffffff) {
 
 function logoutcookie() {
 //	setcookie(COOKIE_UID, '', 0x7fffffff, '/'); // �� ����� ������� ��������������� �.� ������� �������� ������� ����-������� ����
-	setcookie(COOKIE_PASSHASH, '', 0x7fffffff, '/');
+	setcookie(COOKIE_UID, '', array(
+		'expires' => time() - 3600,
+		'path' => '/',
+		'secure' => true,
+		'httponly' => true,
+		'samesite' => 'Lax',
+	));
+	setcookie(COOKIE_PASSHASH, '', array(
+		'expires' => time() - 3600,
+		'path' => '/',
+		'secure' => true,
+		'httponly' => true,
+		'samesite' => 'Lax',
+	));
 }
 
 function loggedinorreturn($nowarn = false) {

@@ -58,12 +58,13 @@ if (!isset($CURUSER) || ($CURUSER["id"] != $row["owner"] && get_user_class() < U
 	if ($row['multitracker'] == 'no')
 		tr($tracker_lang['torrent_file'], "<input type=file name=tfile size=80>\n", 1); // disable torrent update for multitracked ones
 	tr($tracker_lang['torrent_name'], "<input type=\"text\" name=\"name\" value=\"" . $row["name"] . "\" size=\"80\" />", 1);
-	tr($tracker_lang['img_poster'], "<input type=radio name=img1action value='keep' checked>Оставить постер&nbsp&nbsp"."<input type=radio name=img1action value='delete'>Удалить постер&nbsp&nbsp"."<input type=radio name=img1action value='update'>Обновить постер<br /><b>Постер:</b>&nbsp&nbsp<input type=file name=image0 size=80>", 1);
-	tr($tracker_lang['images'],
-		"<input type=radio name=img2action value='keep' checked>Оставить скриншот №1&nbsp&nbsp"."<input type=radio name=img2action value='delete'>Удалить скриншот №1&nbsp&nbsp"."<input type=radio name=img2action value='update'>Обновить скриншот №1<br /><b>Картинка №2:</b>&nbsp&nbsp<input type=file name=image1 size=80><br /><br />".
-		"<input type=radio name=img3action value='keep' checked>Оставить скриншот №2&nbsp&nbsp"."<input type=radio name=img3action value='delete'>Удалить скриншот №2&nbsp&nbsp"."<input type=radio name=img3action value='update'>Обновить скриншот №2<br /><b>Картинка №3:</b>&nbsp&nbsp<input type=file name=image2 size=80><br /><br />".
-		"<input type=radio name=img4action value='keep' checked>Оставить скриншот №3&nbsp&nbsp"."<input type=radio name=img4action value='delete'>Удалить скриншот №3&nbsp&nbsp"."<input type=radio name=img4action value='update'>Обновить скриншот №3<br /><b>Картинка №4:</b>&nbsp&nbsp<input type=file name=image3 size=80><br /><br />".
-		"<input type=radio name=img5action value='keep' checked>Оставить скриншот №4&nbsp&nbsp"."<input type=radio name=img5action value='delete'>Удалить скриншот №4&nbsp&nbsp"."<input type=radio name=img5action value='update'>Обновить скриншот №4<br /><b>Картинка №5:</b>&nbsp&nbsp<input type=file name=image4 size=80>", 1);
+	tr($tracker_lang['img_poster'], "<input type=\"url\" name=\"image1\" size=\"80\" value=\"" . htmlspecialchars((string)$row['image1'], ENT_QUOTES, 'UTF-8') . "\" placeholder=\"https://example.com/poster.jpg\"><br />HTTPS URL", 1);
+	$imageInputs = '';
+	for ($imageNo = 2; $imageNo <= 5; $imageNo++) {
+		$imageInputs .= "<b>URL №" . ($imageNo - 1) . ":</b>&nbsp;<input type=\"url\" name=\"image{$imageNo}\" size=\"80\" value=\"" .
+			htmlspecialchars((string)$row['image' . $imageNo], ENT_QUOTES, 'UTF-8') . "\" placeholder=\"https://example.com/screenshot.jpg\"><br />";
+	}
+	tr($tracker_lang['images'], $imageInputs . 'HTTPS URL', 1);
 if ((strpos($row["ori_descr"], "<") === false) || (strpos($row["ori_descr"], "&lt;") !== false))
   $c = "";
 else

@@ -82,17 +82,20 @@ function validusername($username) {
     return true;
 }
 
-$gender = $_POST["gender"];
-$website = htmlspecialchars_uni($_POST["website"]);
-$country = $_POST["country"];
-$year = $_POST["year"];
-$month = $_POST["month"];
-$day = $_POST["day"];
+$gender = (string)($_POST["gender"] ?? '');
+$website = htmlspecialchars_uni(trim((string)($_POST["website"] ?? '')));
+$country = (int)($_POST["country"] ?? 0);
+$year = (int)($_POST["year"] ?? 0);
+$month = (int)($_POST["month"] ?? 0);
+$day = (int)($_POST["day"] ?? 0);
 
 $email = trim(strtolower($email));
 
-if (empty($wantusername) || empty($wantpassword) || empty($email) || empty($gender) || empty($country))
+if (empty($wantusername) || empty($wantpassword) || empty($email) || !in_array($gender, ['1', '2', '3'], true) || $country <= 0)
     bark("Все поля обязательны для заполнения.");
+
+if (get_row_count('countries', 'WHERE id = ' . $country) != 1)
+    bark("Invalid country.");
 
 if (strlen($wantusername) > 12)
     bark("Извините, имя пользователя слишком длинное (максимум 12 символов)");
@@ -135,9 +138,9 @@ if ($check_for_working_mta) {
 if (!validusername($wantusername))
     bark("Неверное имя пользователя.");
 
-if ($year == '0000' || $month == '00' || $day == '00')
+if ($year < 1920 || !checkdate($month, $day, $year))
     stderr($tracker_lang['error'], "Похоже вы указали неверную дату рождения");
-$birthday = date("$year.$month.$day");
+$birthday = sprintf('%04d-%02d-%02d', $year, $month, $day);
 
 // make sure user agrees to everything...
 if ($_POST["rulesverify"] != "yes" || $_POST["faqverify"] != "yes" || $_POST["ageverify"] != "yes")
@@ -197,7 +200,7 @@ else
 
 // Определяем текущую дату-время
 $current_datetime = get_date_time();
-$birthday_sql = ($birthday === '0000-00-00') ? 'NULL' : sqlesc($birthday);
+$birthday_sql = sqlesc($birthday);
 
 // Формируем SQL запрос
 $fields = "username, passhash, secret, editsecret, gender, country, website, email, status, added, last_access, birthday, invitedby, invitedroot, theme";
@@ -249,7 +252,9 @@ if (!$ret) {
 
 $id = mysqli_insert_id($mysql_link);
 
-sql_query("DELETE FROM invites WHERE invite = '" . mysqli_real_escape_string($mysql_link, $_POST["invite"]) . "'");
+if (!empty($_POST["invite"])) {
+    sql_query("DELETE FROM invites WHERE invite = " . sqlesc((string)$_POST["invite"], true));
+}
 
 write_log("Зарегистрирован новый пользователь $wantusername", "FFFFFF", "tracker");
 

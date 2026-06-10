@@ -123,27 +123,38 @@ function getip() {
     return $_SERVER['REMOTE_ADDR'];
 }
 
-function dbconn() {
+function dbconn($autoclean = false) {
     global $mysql_host, $mysql_user, $mysql_pass, $mysql_db, $mysql_charset;
-    if (!@mysql_connect($mysql_host, $mysql_user, $mysql_pass)) {
-        err('dbconn: mysql_connect: ' . mysql_error());
+
+    $mysqli = @mysqli_connect($mysql_host, $mysql_user, $mysql_pass, $mysql_db);
+    if (!$mysqli) {
+        err('dbconn: mysqli_connect: ' . mysqli_connect_error());
     }
-    mysql_select_db($mysql_db) or err('dbconn: mysql_select_db: ' . mysql_error());
 
-    mysql_query('SET NAMES ' . $mysql_charset);
+    mysqli_set_charset($mysqli, $mysql_charset);
+    $GLOBALS['mysqli'] = $mysqli;
+    $GLOBALS['mysql_link'] = $mysqli;
+    $GLOBALS['___mysqli_ston'] = $mysqli;
 
-    register_shutdown_function('mysql_close');
+    register_shutdown_function(static function () use ($mysqli): void {
+        if ($mysqli instanceof mysqli) {
+            mysqli_close($mysqli);
+        }
+    });
+}
 
+function sql_query($query) {
+    $mysqli = $GLOBALS['___mysqli_ston'] ?? null;
+    if (!$mysqli instanceof mysqli) {
+        return false;
+    }
+    return mysqli_query($mysqli, $query);
 }
 
 function sqlesc($value) {
-    // Stripslashes
-    /*if (get_magic_quotes_gpc()) {
-        $value = stripslashes($value);
-    }*/
-    // Quote if not a number or a numeric string
+    $mysqli = $GLOBALS['___mysqli_ston'] ?? null;
     if (!is_numeric($value)) {
-        $value = "'" . mysql_real_escape_string($value) . "'";
+        $value = "'" . mysqli_real_escape_string($mysqli, (string)$value) . "'";
     }
     return $value;
 }

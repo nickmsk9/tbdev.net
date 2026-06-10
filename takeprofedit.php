@@ -36,8 +36,10 @@ dbconn();
 
 loggedinorreturn();
 
-if (!mkglobal("email:oldpassword:chpassword:passagain"))
-	bark("missing form data");
+$email = trim(strtolower((string)($_POST['email'] ?? $CURUSER['email'] ?? '')));
+$oldpassword = (string)($_POST['oldpassword'] ?? '');
+$chpassword = (string)($_POST['chpassword'] ?? '');
+$passagain = (string)($_POST['passagain'] ?? '');
 
 // $set = array();
 
@@ -68,7 +70,10 @@ if ($email != $CURUSER["email"]) {
 	$changedemail = 1;
 }
 
-$acceptpms = isset($_POST["acceptpms"]) ? $_POST["acceptpms"] : '';
+$acceptpms = (string)($_POST["acceptpms"] ?? $CURUSER["acceptpms"] ?? 'yes');
+if (!in_array($acceptpms, ['yes', 'friends', 'no'], true)) {
+    $acceptpms = 'yes';
+}
 $deletepms = (isset($_POST["deletepms"]) && $_POST["deletepms"] != "") ? "yes" : "no";
 $savepms = (isset($_POST["savepms"]) && $_POST["savepms"] != "") ? "yes" : "no";
 $pmnotif = isset($_POST["pmnotif"]) ? $_POST["pmnotif"] : '';
@@ -77,7 +82,6 @@ $notifs = ($pmnotif == 'yes' ? "[pm]" : "");
 $notifs .= ($emailnotif == 'yes' ? "[email]" : "");
 $r = sql_query("SELECT id FROM categories") or sqlerr(__FILE__, __LINE__);
 $rows = mysqli_num_rows($r);
-$notifs = "";
 
 for ($i = 0; $i < $rows; ++$i)
 {
@@ -139,19 +143,33 @@ if ($avatar) {
 $avatars = (isset($_POST["avatars"]) && $_POST["avatars"] != "") ? "yes" : "no";
 $updateset[] = "avatars = " . sqlesc($avatars);
 
-$parked = isset($_POST["parked"]) ? $_POST["parked"] : 'no';
+$parked = (string)($_POST["parked"] ?? $CURUSER["parked"] ?? 'no');
+if (!in_array($parked, ['yes', 'no'], true)) {
+    $parked = 'no';
+}
 $updateset[] = "parked = " . sqlesc($parked);
 
-$gender = isset($_POST["gender"]) ? $_POST["gender"] : '';
+$gender = (string)($_POST["gender"] ?? $CURUSER["gender"] ?? '1');
+if (!in_array($gender, ['1', '2', '3'], true)) {
+    $gender = in_array((string)($CURUSER["gender"] ?? ''), ['1', '2', '3'], true)
+        ? (string)$CURUSER["gender"]
+        : '1';
+}
 $updateset[] = "gender = " . sqlesc($gender);
 
 ///////////////// BIRTHDAY MOD /////////////////////
-$year = $_POST["year"];
-$month = $_POST["month"];
-$day = $_POST["day"];
-$birthday = date("$year.$month.$day");
+$year = (int)($_POST["year"] ?? 0);
+$month = (int)($_POST["month"] ?? 0);
+$day = (int)($_POST["day"] ?? 0);
+$birthday = (string)($CURUSER['birthday'] ?? '');
+if ($year > 0 || $month > 0 || $day > 0) {
+    if ($year < 1920 || !checkdate($month, $day, $year)) {
+        bark("Invalid birthday.");
+    }
+    $birthday = sprintf('%04d-%02d-%02d', $year, $month, $day);
+}
 ///////////////// BIRTHDAY MOD /////////////////////
-$updateset[] = "birthday = " . sqlesc($birthday);
+$updateset[] = "birthday = " . ($birthday === '' ? 'NULL' : sqlesc($birthday));
 
 if (isset($_POST['resetpasskey']) && $_POST['resetpasskey']) {
     $updateset[] = "passkey=''";
@@ -167,10 +185,10 @@ if (isset($_POST["passkey_ip"])) {
 
 // $ircnick = $_POST["ircnick"];
 // $ircpass = $_POST["ircpass"];
-$info = $_POST["info"];
-$theme = $_POST["theme"];
-$country = $_POST["country"];
-$language = $_POST["language"];
+$info = (string)($_POST["info"] ?? $CURUSER['info'] ?? '');
+$theme = (string)($_POST["theme"] ?? $CURUSER['theme'] ?? '');
+$country = (int)($_POST["country"] ?? $CURUSER['country'] ?? 0);
+$language = (string)($_POST["language"] ?? $CURUSER['language'] ?? '');
 if (!file_exists('./languages/lang_'.$language.'/lang_main.php')) {
     bark('��������� ���� � ������� �����������!');
 }
@@ -185,16 +203,16 @@ if ($privacy != "normal" && $privacy != "low" && $privacy != "strong")
 $updateset[] = "privacy = '$privacy'";
 */
 
-$website = unesc($_POST["website"]);
+$website = unesc((string)($_POST["website"] ?? $CURUSER['website'] ?? ''));
 $updateset[] = "website = " . sqlesc(htmlspecialchars_uni($website));
 
-$updateset[] = "torrentsperpage = " . min(100, intval($_POST["torrentsperpage"]));
-$updateset[] = "topicsperpage = " . min(100, intval($_POST["topicsperpage"]));
-$updateset[] = "postsperpage = " . min(100, intval($_POST["postsperpage"]));
+$updateset[] = "torrentsperpage = " . max(0, min(100, intval($_POST["torrentsperpage"] ?? $CURUSER['torrentsperpage'] ?? 0)));
+$updateset[] = "topicsperpage = " . max(0, min(100, intval($_POST["topicsperpage"] ?? $CURUSER['topicsperpage'] ?? 0)));
+$updateset[] = "postsperpage = " . max(0, min(100, intval($_POST["postsperpage"] ?? $CURUSER['postsperpage'] ?? 0)));
 
 if (is_theme($theme))
 	$updateset[] = "theme = ".sqlesc($theme);
-if (is_valid_id($country))
+if ($country === 0 || get_row_count('countries', 'WHERE id = ' . $country) === 1)
 	$updateset[] = "country = $country";
 
 //$updateset[] = "timezone = $timezone";
@@ -228,10 +246,10 @@ email address had the IP address {$_SERVER["REMOTE_ADDR"]}. Please do not reply.
 
 To complete the update of your user profile, please follow this link:
 
-http://$thishost/confirmemail.php?id={$CURUSER["id"]}&hash=$hash&email=$obemail
+https://$thishost/confirmemail.php?id={$CURUSER["id"]}&hash=$hash&email=$obemail
 
 If you have AOL browser, please click the following link:
-<a href="http://$thishost/confirmemail.php?id={$CURUSER["id"]}&amp;hash=$hash&amp;email=$obemail">http://$thishost/confirmemail.php?id={$CURUSER["id"]}&amp;hash=$hash&amp;email=$obemail</a>
+<a href="https://$thishost/confirmemail.php?id={$CURUSER["id"]}&amp;hash=$hash&amp;email=$obemail">https://$thishost/confirmemail.php?id={$CURUSER["id"]}&amp;hash=$hash&amp;email=$obemail</a>
 
 Your new email address will appear in your profile after you do this. Otherwise
 your profile will remain unchanged.

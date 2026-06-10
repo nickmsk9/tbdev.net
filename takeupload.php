@@ -262,68 +262,20 @@ if ($multi_torrent === 'yes') {
     }
 }
 
-//////////////////////////////
-// Take Image Uploads
-$maxfilesize = (int)$max_image_size;
-
-$allowed_types = [
-    "image/gif"   => "gif",
-    "image/pjpeg" => "jpg",
-    "image/jpeg"  => "jpg",
-    "image/jpg"   => "jpg",
-    "image/png"   => "png",
-];
-
-$uploaddir = "torrents/images/";
-$inames = [];
-
-for ($x = 0; $x < 5; $x++) {
-    $key = 'image' . $x;
-    if (empty($_FILES[$key]['name'])) {
-        continue;
-    }
-
-    $y = $x + 1;
-
-    $mime = (string)($_FILES[$key]['type'] ?? '');
-    if (!array_key_exists($mime, $allowed_types)) {
-        bark("Invalid file type! Image $y (" . htmlspecialchars_uni($mime) . ")");
-    }
-
-    $imgName = (string)($_FILES[$key]['name'] ?? '');
-    if (!preg_match('/^(.+)\.(jpg|jpeg|png|gif)$/si', $imgName)) {
-        bark("Неверное имя файла (не картинка).");
-    }
-
-    $size = (int)($_FILES[$key]['size'] ?? 0);
-    if ($size > $maxfilesize) {
-        bark("Превышен размер файла! Картинка $y - Должна быть меньше " . mksize($maxfilesize));
-    }
-
-    $ifile = (string)($_FILES[$key]['tmp_name'] ?? '');
-    if ($ifile === '' || !is_uploaded_file($ifile)) {
-        bark("Error occured uploading image! - Image $y");
-    }
-
-    $ext = strtolower((string)pathinfo($imgName, PATHINFO_EXTENSION));
-    $ifilename = $next_id . $x . '.' . $ext;
-
-    if (!@copy($ifile, $uploaddir . $ifilename)) {
-        bark("Error occured uploading image! - Image $y");
-    }
-
-    $inames[] = $ifilename;
-}
-
-//////////////////////////////
-
 $torrent = htmlspecialchars_uni(str_replace("_", " ", (string)$torrent));
 
-$image_fields = array_fill(0, 5, 'NULL');
-for ($i = 0; $i < min(5, count($inames)); $i++) {
-    if (!empty($inames[$i])) {
-        $image_fields[$i] = sqlesc($inames[$i]);
+$image_fields = [];
+for ($i = 1; $i <= 5; $i++) {
+    $url = trim((string)($_POST['image' . $i] ?? ''));
+    if ($url !== '') {
+        if (filter_var($url, FILTER_VALIDATE_URL) === false || strtolower((string)parse_url($url, PHP_URL_SCHEME)) !== 'https') {
+            bark("Image $i must be a valid HTTPS URL.");
+        }
+        if (strlen($url) > 2048) {
+            bark("Image $i URL is too long.");
+        }
     }
+    $image_fields[] = sqlesc($url);
 }
 
 // FIX для last_mt_update: ставим нормальную дату или NULL

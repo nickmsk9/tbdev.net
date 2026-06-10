@@ -325,7 +325,10 @@ if (!isset($_GET['page'])) {
 
     // постер
     if (!empty($row['image1'])) {
-        $img1 = "<a href=\"viewimage.php?pic=" . rawurlencode((string)$row['image1']) . "\"><img border=\"0\" src=\"thumbnail.php?" . htmlspecialchars((string)$row['image1'], ENT_QUOTES, 'UTF-8') . "\" /></a>";
+        $poster = (string)$row['image1'];
+        $posterUrl = preg_match('#^https?://#i', $poster) ? $poster : 'torrents/images/' . ltrim($poster, '/');
+        $safePosterUrl = htmlspecialchars($posterUrl, ENT_QUOTES, 'UTF-8');
+        $img1 = "<a href=\"{$safePosterUrl}\" target=\"_blank\" rel=\"noopener\"><img border=\"0\" src=\"{$safePosterUrl}\" style=\"max-width:500px;max-height:1000px\" alt=\"Poster\" /></a>";
         tr($tracker_lang['details_poster'], $img1, 1);
     }
 
@@ -356,6 +359,12 @@ if (!isset($_GET['page'])) {
         if (!empty($row[$k])) {
             $num = $i - 1;
             $file = (string)$row[$k];
+            if (preg_match('#^https?://#i', $file)) {
+                $safeImageUrl = htmlspecialchars($file, ENT_QUOTES, 'UTF-8');
+                $images[] = '<a href="' . $safeImageUrl . '" rel="lightbox" title="Screenshot ' . $num . '">' .
+                    '<img title="Screenshot ' . $num . '" border="0" src="' . $safeImageUrl . '" style="max-width:150px;max-height:120px" /></a>';
+                continue;
+            }
             $images[] =
                 '<a href="torrents/images/' . htmlspecialchars($file, ENT_QUOTES, 'UTF-8') . '" rel="lightbox" title="' . $tracker_lang['details_screenshot'] . ' №' . $num . '">' .
                 '<img title="' . $tracker_lang['details_screenshot'] . ' №' . $num . '" border="0" src="screenshot.php?' . htmlspecialchars($file, ENT_QUOTES, 'UTF-8') . '" /></a>';

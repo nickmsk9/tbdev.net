@@ -66,12 +66,12 @@ if (strlen($passkey) !== 32) {
 //tr($tracker_lang['announce_url'], $announce_urls[0], 1);
 tr($tracker_lang['torrent_file'], "<input type=file name=tfile size=80>\n", 1);
 tr($tracker_lang['torrent_name'], "<input type=\"text\" name=\"name\" size=\"80\" /><br />(".$tracker_lang['taken_from_torrent'].")\n", 1);
-tr($tracker_lang['img_poster'], $tracker_lang['max_file_size'].": 500kb<br />".$tracker_lang['avialable_formats'].": .gif .jpg .png<br /><input type=file name=image0 size=80>\n", 1);
-tr($tracker_lang['images'], $tracker_lang['max_file_size'].": 500kb<br />".$tracker_lang['avialable_formats'].": .gif .jpg .png<br />".
-		"<b>".$tracker_lang['image']." №1:</b>&nbsp&nbsp<input type=file name=image1 size=80><br />".
-		"<b>".$tracker_lang['image']." №2:</b>&nbsp&nbsp<input type=file name=image2 size=80><br />".
-		"<b>".$tracker_lang['image']." №3:</b>&nbsp&nbsp<input type=file name=image3 size=80><br />".
-		"<b>".$tracker_lang['image']." №4:</b>&nbsp&nbsp<input type=file name=image4 size=80>", 1);
+tr($tracker_lang['img_poster'], "<input type=\"url\" name=\"image1\" size=\"80\" placeholder=\"https://example.com/poster.jpg\"><br />HTTPS URL", 1);
+tr($tracker_lang['images'],
+		"<b>".$tracker_lang['image']." №1:</b>&nbsp;<input type=\"url\" name=\"image2\" size=\"80\" placeholder=\"https://example.com/screenshot-1.jpg\"><br />".
+		"<b>".$tracker_lang['image']." №2:</b>&nbsp;<input type=\"url\" name=\"image3\" size=\"80\" placeholder=\"https://example.com/screenshot-2.jpg\"><br />".
+		"<b>".$tracker_lang['image']." №3:</b>&nbsp;<input type=\"url\" name=\"image4\" size=\"80\" placeholder=\"https://example.com/screenshot-3.jpg\"><br />".
+		"<b>".$tracker_lang['image']." №4:</b>&nbsp;<input type=\"url\" name=\"image5\" size=\"80\" placeholder=\"https://example.com/screenshot-4.jpg\"><br />HTTPS URL", 1);
 print("<tr><td class=rowhead style='padding: 3px'>".$tracker_lang['description']."</td><td>");
 textbbcode("upload","descr");
 print("</td></tr>\n");

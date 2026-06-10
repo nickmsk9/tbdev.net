@@ -50,6 +50,35 @@ if (!defined('IN_TRACKER')) {
     @ini_set('ignore_repeated_errors', '1');
     @ignore_user_abort(1);
     @set_time_limit(0);
+
+    if (!function_exists('tracker_is_https')) {
+        function tracker_is_https() {
+            if (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off') {
+                return true;
+            }
+
+            if ((int)($_SERVER['SERVER_PORT'] ?? 0) === 443) {
+                return true;
+            }
+
+            $forwardedProto = strtolower(trim(explode(',', (string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''))[0]));
+            return $forwardedProto === 'https';
+        }
+    }
+
+    if (!tracker_is_https() && PHP_SAPI !== 'cli') {
+        $host = preg_replace('/[^a-z0-9.\-:\[\]]/i', '', (string)($_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? ''));
+        $requestUri = (string)($_SERVER['REQUEST_URI'] ?? '/');
+
+        if ($host !== '') {
+            header('Location: https://' . $host . $requestUri, true, 308);
+            exit;
+        }
+    }
+
+    @ini_set('session.cookie_secure', '1');
+    @ini_set('session.cookie_httponly', '1');
+    @ini_set('session.cookie_samesite', 'Lax');
     @session_start();
     define('ROOT_PATH', dirname(dirname(__FILE__)) . "/");
 
@@ -69,7 +98,7 @@ REF;
         }
 
         // Проверяем referrer
-        if ($http_host AND $_SERVER['HTTP_REFERER']) {
+        if ($http_host AND !empty($_SERVER['HTTP_REFERER'])) {
             $http_host = preg_replace('#:80$#', '', trim($http_host));
             $referrer_parts = @parse_url($_SERVER['HTTP_REFERER']);
             

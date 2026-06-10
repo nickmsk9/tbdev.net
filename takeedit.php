@@ -189,6 +189,20 @@ $dname = (string)$row["save_as"];
 
 // picturemod (5 картинок)
 for ($x = 1; $x <= 5; $x++) {
+    if (array_key_exists('image' . $x, $_POST)) {
+        $url = trim((string)$_POST['image' . $x]);
+        if ($url !== '') {
+            if (filter_var($url, FILTER_VALIDATE_URL) === false || strtolower((string)parse_url($url, PHP_URL_SCHEME)) !== 'https') {
+                bark("Image $x must be a valid HTTPS URL.");
+            }
+            if (strlen($url) > 2048) {
+                bark("Image $x URL is too long.");
+            }
+        }
+        $updateset[] = 'image' . $x . ' = ' . sqlesc($url);
+        continue;
+    }
+
     $action = (string)($_POST['img' . $x . 'action'] ?? '');
     $_GLOBALS['img' . $x . 'action'] = $action;
 

@@ -47,9 +47,39 @@ if (!function_exists("htmlspecialchars_uni")) {
 
 // DEFINE IMPORTANT CONSTANTS
 define ('TIMENOW', time());
+
+if (!function_exists('tracker_is_https')) {
+	function tracker_is_https() {
+		if (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off') {
+			return true;
+		}
+
+		if ((int)($_SERVER['SERVER_PORT'] ?? 0) === 443) {
+			return true;
+		}
+
+		$forwardedProto = strtolower(trim(explode(',', (string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''))[0]));
+		return $forwardedProto === 'https';
+	}
+}
+
+if (!tracker_is_https() && PHP_SAPI !== 'cli') {
+	$host = preg_replace('/[^a-z0-9.\-:\[\]]/i', '', (string)($_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? ''));
+	$requestUri = (string)($_SERVER['REQUEST_URI'] ?? '/');
+
+	if ($host !== '') {
+		header('Location: https://' . $host . $requestUri, true, 308);
+		exit;
+	}
+}
+
+if (tracker_is_https() && !headers_sent()) {
+	header('Strict-Transport-Security: max-age=31536000');
+}
+
 $url = explode('/', htmlspecialchars_uni($_SERVER['PHP_SELF']));
 array_pop($url);
-$DEFAULTBASEURL = (($_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://").htmlspecialchars_uni($_SERVER['HTTP_HOST']).implode('/', $url);
+$DEFAULTBASEURL = "https://".htmlspecialchars_uni($_SERVER['HTTP_HOST']).implode('/', $url);
 $BASEURL = $DEFAULTBASEURL;
 $announce_urls = array();
 $announce_urls[] = "$DEFAULTBASEURL/announce.php";
