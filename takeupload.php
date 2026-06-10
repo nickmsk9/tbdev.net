@@ -31,6 +31,7 @@
 require_once "include/BDecode.php";
 require_once "include/BEncode.php";
 require_once "include/bittorrent.php";
+require_once "include/torrent_tags.php";
 
 ini_set("upload_max_filesize", (string)$max_torrent_size);
 
@@ -127,7 +128,7 @@ if (((string)($_POST['not_sticky'] ?? 'yes')) === 'no' && get_user_class() >= UC
 $multi_torrent = (((string)($_POST['multi'] ?? 'no')) === 'yes') ? 'yes' : 'no';
 
 // SEO
-$keywords = htmlspecialchars_uni((string)($_POST["keywords"] ?? ''));
+$keywords = torrent_tags_keywords((string)($_POST["keywords"] ?? ''));
 $description = htmlspecialchars_uni((string)($_POST["description"] ?? ''));
 
 $info = $dict['info'] ?? [];
@@ -230,6 +231,7 @@ $dict['publisher-url.utf-8'] = "$DEFAULTBASEURL/userdetails.php?id=$curId";
 $infohash = sha1(BEncode($dict['info']));
 
 // если мультитрекер — разбираем announce-list и пишем scrape
+$externalTrackers = [];
 if ($multi_torrent === 'yes') {
     if (empty($dict['announce-list']) && !empty($dict['announce'])) {
         $dict['announce-list'][] = [(string)$dict['announce']];
@@ -237,25 +239,21 @@ if ($multi_torrent === 'yes') {
 
     if (!empty($dict['announce-list']) && is_array($dict['announce-list'])) {
         $parsed_urls = [];
-        foreach ($dict['announce-list'] as $al_url) {
-            if (!is_array($al_url) || empty($al_url[0])) continue;
+        foreach ($dict['announce-list'] as $tier) {
+            $tierUrls = is_array($tier) ? $tier : [$tier];
+            foreach ($tierUrls as $announceUrl) {
+                $u = trim((string)$announceUrl);
+                if ($u === '' || $u === 'http://retracker.local/announce') continue;
+                if (!preg_match('#^(udp|https?)://#si', $u)) continue;
+                if (in_array($u, $parsed_urls, true)) continue;
 
-            $u = trim((string)$al_url[0]);
-            if ($u === '' || $u === 'http://retracker.local/announce') continue;
-            if (!preg_match('#^(udp|http)://#si', $u)) continue;
-            if (in_array($u, $parsed_urls, true)) continue;
+                $url_array = @parse_url($u);
+                $host = (string)($url_array['host'] ?? '');
+                if ($host !== '' && substr($host, -6) === '.local') continue;
 
-            $url_array = @parse_url($u);
-            $host = (string)($url_array['host'] ?? '');
-            if ($host !== '' && substr($host, -6) === '.local') continue;
-
-            $parsed_urls[] = $u;
-
-            sql_query(
-                'REPLACE INTO torrents_scrape (tid, info_hash, url) VALUES (' .
-                implode(', ', array_map('sqlesc', [(string)$next_id, $infohash, $u])) .
-                ')'
-            ) or sqlerr(__FILE__, __LINE__);
+                $parsed_urls[] = $u;
+                $externalTrackers[] = $u;
+            }
         }
     } else {
         stderr($tracker_lang['error'] ?? 'Error', "В торрент файле нет announce-list и не указан announce. Такой мультитрекерный торрент использовать нельзя.");
@@ -280,7 +278,7 @@ for ($i = 1; $i <= 5; $i++) {
 
 // FIX для last_mt_update: ставим нормальную дату или NULL
 $now = get_date_time();
-$last_mt_update_sql = ($multi_torrent === 'yes') ? sqlesc($now) : "NULL";
+$last_mt_update_sql = "NULL";
 
 $sql = "INSERT INTO torrents
     (filename, owner, visible, not_sticky, info_hash, name, keywords, description,
@@ -291,7 +289,7 @@ $sql = "INSERT INTO torrents
     . implode(",", array_map("sqlesc", [
         $fname,
         (string)$curId,
-        "no",
+        "yes",
         $not_sticky,
         $infohash,
         $torrent,
@@ -323,13 +321,13 @@ $sql = "INSERT INTO torrents
 $ret = sql_query($sql);
 
 if (!$ret) {
-    if (mysqli_errno($GLOBALS["___mysqli_ston"]) == 1062) {
+    if (mysqli_errno($mysql_link) == 1062) {
         bark("Торрент уже загружен!");
     }
-    bark("Ошибка MySQL: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+    bark("Ошибка MySQL: " . mysqli_error($mysql_link));
 }
 
-$id = (int)($GLOBALS['mysqli']->insert_id ?? 0);
+$id = (int)mysqli_insert_id($mysql_link);
 
 if ($id <= 0) {
     // запасной вариант: запросом (на всякий)
@@ -342,6 +340,15 @@ if ($id <= 0) {
     bark("Ошибка: не удалось получить ID добавленного торрента");
 }
 
+foreach ($externalTrackers as $trackerUrl) {
+    sql_query(
+        'REPLACE INTO torrents_scrape (tid, info_hash, url) VALUES (' .
+        implode(', ', array_map('sqlesc', [(string)$id, $infohash, $trackerUrl])) .
+        ')'
+    ) or sqlerr(__FILE__, __LINE__);
+}
+
+torrent_tags_sync($id, $keywords);
 
 sql_query(
     'INSERT INTO torrents_descr (tid, descr_hash, descr_parsed) VALUES (' .

@@ -6,141 +6,128 @@ require_once __DIR__ . '/lightbenc.php';
 
 class httptscraper extends tscraper
 {
-    /** Максимальный объём чтения ответа трекера (в байтах) */
     protected int $maxreadsize;
 
-    /**
-     * @param int $timeout     Таймаут соединения (сек.)
-     * @param int $maxreadsize Максимальный размер ответа
-     */
     public function __construct(int $timeout = 2, int $maxreadsize = 4096)
     {
         $this->maxreadsize = max(512, $maxreadsize);
         parent::__construct($timeout);
     }
 
-    /**
-     * Скрапинг данных с трекера
-     *
-     * @param string          $url      URL трекера вида:
-     *                                  http(s)://tracker.tld:port/announce
-     *                                  или http(s)://tracker.tld:port/scrape
-     * @param string|string[] $infohash  Infohash (40 hex символов) или массив
-     *
-     * @return array Массив с данными по каждому infohash
-     * @throws ScraperException
-     */
     public function scrape(string $url, string|array $infohash): array
     {
         $hashes = is_array($infohash) ? array_values($infohash) : [$infohash];
-
         if (!$hashes) {
-            throw new ScraperException('Список infohash пуст.');
+            throw new ScraperException('Список info_hash пуст.');
         }
 
-        // Проверка корректности infohash
         foreach ($hashes as $hash) {
             if (!preg_match('~^[a-f0-9]{40}$~i', (string)$hash)) {
-                throw new ScraperException('Некорректный infohash: ' . $hash);
+                throw new ScraperException('Некорректный info_hash: ' . $hash);
             }
         }
 
-        $url = trim($url);
-
-        // Преобразование announce -> scrape (поддержка http и https)
-        if (preg_match('~^(https?://.*?/)(announce)([^/]*)$~i', $url, $m)) {
-            $url = $m[1] . 'scrape' . $m[3];
-        } elseif (preg_match('~^(https?://.*?/)(scrape)([^/]*)$~i', $url)) {
-            // Уже scrape
-        } else {
-            throw new ScraperException('Некорректный URL трекера.');
-        }
-
-        // Формирование URL запроса
-        $sep = str_contains($url, '?') ? '&' : '?';
-        $requesturl = $url;
+        $url = $this->scrapeUrl(trim($url));
+        $separator = str_contains($url, '?') ? '&' : '?';
+        $requestUrl = $url;
 
         foreach ($hashes as $hash) {
-            // hex → бинарные 20 байт → urlencode
-            $requesturl .= $sep . 'info_hash=' . rawurlencode(pack('H*', (string)$hash));
-            $sep = '&';
+            $requestUrl .= $separator . 'info_hash=' . rawurlencode(pack('H*', (string)$hash));
+            $separator = '&';
         }
-
-        // Таймаут для потоков
-        @ini_set('default_socket_timeout', (string)$this->timeout);
 
         $context = stream_context_create([
             'http' => [
-                'method'        => 'GET',
-                'timeout'       => $this->timeout,
-                'user_agent'    => 'TBDev-MultiTrackerScraper/1.0',
-                'header'        => "Accept: */*\r\nConnection: close\r\n",
+                'method' => 'GET',
+                'timeout' => $this->timeout,
+                'user_agent' => 'TBDev-MultiTrackerScraper/2.0',
+                'header' => "Accept: */*\r\nConnection: close\r\n",
                 'ignore_errors' => true,
             ],
             'ssl' => [
-                'verify_peer'      => true,
+                'verify_peer' => true,
                 'verify_peer_name' => true,
             ],
         ]);
 
-        $rh = @fopen($requesturl, 'rb', false, $context);
-        if (!$rh) {
-            throw new ScraperException('Не удалось установить HTTP-соединение с трекером.', 0, true);
+        $stream = @fopen($requestUrl, 'rb', false, $context);
+        if (!$stream) {
+            throw new ScraperException('Не удалось подключиться к HTTP-трекеру.', 0, true);
         }
 
-        stream_set_timeout($rh, $this->timeout);
+        $responseHeaders = $http_response_header ?? [];
+        if ($responseHeaders && preg_match('~\s(\d{3})\s~', (string)$responseHeaders[0], $match)) {
+            $status = (int)$match[1];
+            if ($status >= 400) {
+                fclose($stream);
+                throw new ScraperException('HTTP-трекер вернул статус ' . $status . '.', 0, true);
+            }
+        }
 
+        stream_set_timeout($stream, $this->timeout);
         $response = '';
-        $read = 0;
-
-        // Чтение ответа с ограничением по размеру
-        while (!feof($rh) && $read < $this->maxreadsize) {
-            $chunk = fread($rh, min(1024, $this->maxreadsize - $read));
+        while (!feof($stream) && strlen($response) < $this->maxreadsize) {
+            $chunk = fread($stream, min(4096, $this->maxreadsize - strlen($response)));
             if ($chunk === false || $chunk === '') {
                 break;
             }
             $response .= $chunk;
-            $read += strlen($chunk);
         }
+        $metadata = stream_get_meta_data($stream);
+        fclose($stream);
 
-        fclose($rh);
-
-        // Bencode-ответ всегда начинается с "d"
-        if ($response === '' || substr($response, 0, 1) !== 'd') {
+        if (!empty($metadata['timed_out'])) {
+            throw new ScraperException('HTTP-трекер не ответил за отведенное время.', 0, true);
+        }
+        if ($response === '' || $response[0] !== 'd') {
             throw new ScraperException('Некорректный ответ scrape-запроса.');
         }
 
         $scrapeData = lightbenc::bdecode($response);
-
-        if (
-            !is_array($scrapeData) ||
-            !isset($scrapeData['files']) ||
-            !is_array($scrapeData['files'])
-        ) {
-            throw new ScraperException('Неверная структура данных scrape-ответа.');
+        if (is_array($scrapeData) && !empty($scrapeData['failure reason'])) {
+            throw new ScraperException('Трекер: ' . (string)$scrapeData['failure reason']);
+        }
+        if (!is_array($scrapeData) || !isset($scrapeData['files']) || !is_array($scrapeData['files'])) {
+            throw new ScraperException('Неверная структура scrape-ответа.');
         }
 
         $torrents = [];
-
-        // Обработка каждого infohash
         foreach ($hashes as $hash) {
-            $ehash = pack('H*', (string)$hash);
-
-            if (isset($scrapeData['files'][$ehash]) && is_array($scrapeData['files'][$ehash])) {
-                $file = $scrapeData['files'][$ehash];
-
-                $torrents[$hash] = [
-                    'infohash'  => (string)$hash,
-                    'seeders'   => (int)($file['complete'] ?? 0),
-                    'completed' => (int)($file['downloaded'] ?? 0),
-                    'leechers'  => (int)($file['incomplete'] ?? 0),
-                ];
-            } else {
-                // Трекер не вернул данные по данному infohash
-                $torrents[$hash] = false;
+            $binaryHash = pack('H*', (string)$hash);
+            $file = $scrapeData['files'][$binaryHash] ?? null;
+            if (!is_array($file)) {
+                $torrents[(string)$hash] = false;
+                continue;
             }
+
+            $torrents[(string)$hash] = [
+                'infohash' => (string)$hash,
+                'seeders' => max(0, (int)($file['complete'] ?? 0)),
+                'completed' => max(0, (int)($file['downloaded'] ?? 0)),
+                'leechers' => max(0, (int)($file['incomplete'] ?? 0)),
+            ];
         }
 
         return $torrents;
+    }
+
+    private function scrapeUrl(string $url): string
+    {
+        if (!preg_match('~^https?://~i', $url)) {
+            throw new ScraperException('Некорректный URL HTTP-трекера.');
+        }
+        if (preg_match('~/(?:scrape)(?=[/?]|$)~i', $url)) {
+            return $url;
+        }
+
+        $converted = preg_replace('~/(?:announce)(?=[/?]|$)~i', '/scrape', $url, 1, $count);
+        if (!$count) {
+            $converted = preg_replace('~/ann(?=[/?]|$)~i', '/scrape', $url, 1, $count);
+        }
+        if (!$count || !is_string($converted)) {
+            throw new ScraperException('Трекер не публикует стандартный scrape URL.');
+        }
+
+        return $converted;
     }
 }

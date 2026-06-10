@@ -99,7 +99,7 @@ if ($action === 'add') {
                      0, " . sqlesc($now) . ", " . sqlesc($ip) . ")"
         ) or sqlerr(__FILE__, __LINE__);
 
-        $newid = (int)mysqli_insert_id();
+        $newid = (int)mysqli_insert_id($mysql_link);
 
         // parsed cache
         $hash = md5($text);
@@ -305,7 +305,7 @@ if ($action === 'delete') {
     $torrentid = (int)$arr['torrent'];
 
     sql_query("DELETE FROM comments WHERE id=$commentid") or sqlerr(__FILE__, __LINE__);
-    $affected = (int)mysqli_affected_rows();
+    $affected = (int)mysqli_affected_rows($mysql_link);
 
     if ($torrentid > 0 && $affected > 0) {
         sql_query("UPDATE torrents SET comments = GREATEST(comments - 1, 0) WHERE id=$torrentid") or sqlerr(__FILE__, __LINE__);

@@ -118,5 +118,3 @@ function commenttable($rows, $redaktor = "comment") {
     }
 }
 ?>
-
-?>

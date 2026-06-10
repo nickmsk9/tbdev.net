@@ -70,10 +70,10 @@ if (isset($_GET['sort']) && isset($_GET['type'])) {
             $column = "times_completed";
             break;
         case '7':
-            $column = "seeders";
+            $column = "seeders + t.remote_seeders";
             break;
         case '8':
-            $column = "leechers";
+            $column = "leechers + t.remote_leechers";
             break;
         case '9':
             $column = "owner";
@@ -185,6 +185,15 @@ if ($all) {
     $addparam = "";
 }
 
+$tagId = (int)($_GET['tag'] ?? 0);
+if ($tagId > 0) {
+    $wherea[] = "EXISTS (
+        SELECT 1 FROM torrent_tag_map AS tag_map
+        WHERE tag_map.torrent_id = t.id AND tag_map.tag_id = $tagId
+    )";
+    $addparam .= "tag=$tagId&amp;";
+}
+
 if (count($wherecatina) > 1)
     $wherecatin = implode(",", $wherecatina); elseif (count($wherecatina) == 1)
     $wherea[] = "category = $wherecatina[0]";
@@ -203,7 +212,7 @@ if (isset($wherecatin) && !empty($wherecatin))
 if ($where != "")
     $where = "WHERE $where";
 
-$res = sql_query("SELECT COUNT(*) FROM torrents AS t $where") or die(mysql_error());
+$res = sql_query("SELECT COUNT(*) FROM torrents AS t $where") or sqlerr(__FILE__, __LINE__);
 $row = mysqli_fetch_array($res);
 $count = $row[0];
 $num_torrents = $count;
@@ -254,7 +263,7 @@ if ($count) {
     }
     list($pagertop, $pagerbottom, $limit) = pager($torrentsperpage, $count, "browse.php?" . $addparam);
     $query = "SELECT t.id, t.moderated, t.moderatedby, t.category, (t.leechers + t.remote_leechers) AS leechers, (t.seeders + t.remote_seeders) AS seeders, t.multitracker, t.last_mt_update, t.free, t.name, t.info_hash, t.times_completed, t.size, t.added, t.comments, t.numfiles, t.filename, t.not_sticky, t.owner," . "IF(t.numratings < $minvotes, NULL, ROUND(t.ratingsum / t.numratings, 1)) AS rating, c.name AS cat_name, c.image AS cat_pic, u.username, u.class" . ($CURUSER ? ", EXISTS(SELECT * FROM readtorrents WHERE readtorrents.userid = " . sqlesc($CURUSER["id"]) . " AND readtorrents.torrentid = t.id) AS readtorrent" : ", 1 AS readtorrent") . " FROM torrents AS t LEFT JOIN categories AS c ON t.category = c.id LEFT JOIN users AS u ON t.owner = u.id $where $orderby $limit";
-    $res = sql_query($query) or die(mysqli_error()); // Внимание: здесь тоже устаревший mysql_error()
+    $res = sql_query($query) or sqlerr(__FILE__, __LINE__);
 } else
     unset($res);
 if (isset($cleansearchstr))

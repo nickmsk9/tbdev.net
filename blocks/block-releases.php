@@ -12,7 +12,7 @@ $blocktitle = "Новые раздачи";
 $perpage = 5;
 
 // считаем кол-во (для pager)
-$countRes = sql_query("SELECT COUNT(*) AS c FROM torrents WHERE visible = 'yes'") or sqlerr(__FILE__, __LINE__);
+$countRes = sql_query("SELECT COUNT(*) AS c FROM torrents WHERE visible = 'yes' AND banned = 'no'") or sqlerr(__FILE__, __LINE__);
 $countRow = mysqli_fetch_assoc($countRes);
 $count = (int)($countRow['c'] ?? 0);
 
@@ -53,22 +53,21 @@ $content .= '<table cellspacing="0" cellpadding="5" width="100%">';
 if ($count <= 0) {
     $content .= '<tr><td>Новых загрузок нет...</td></tr>';
 } else {
-    // ВАЖНО: pager() возвращает <table> с <td>, поэтому мы кладём его в отдельную строку/ячейку
-    list($pagertop, $pagerbottom, $limit) = pager($perpage, $count, $_SERVER["PHP_SELF"] . "?");
-
-    $content .= '<tr><td>' . $pagertop . '</td></tr>';
+    $limit = 'LIMIT ' . (int)$perpage;
 
     // Берём последние торренты из torrents
     $res = sql_query("
         SELECT
             t.id, t.name, t.added, t.category,
-            t.seeders, t.leechers, t.times_completed,
+            (t.seeders + t.remote_seeders) AS seeders,
+            (t.leechers + t.remote_leechers) AS leechers,
+            t.times_completed,
             t.image1,
             t.descr,
             c.id AS catid, c.name AS catname, c.image AS catimage
         FROM torrents AS t
         LEFT JOIN categories AS c ON t.category = c.id
-        WHERE t.visible = 'yes'
+        WHERE t.visible = 'yes' AND t.banned = 'no'
         ORDER BY t.id DESC
         $limit
     ") or sqlerr(__FILE__, __LINE__);
@@ -158,7 +157,6 @@ if ($count <= 0) {
         $content .= '</td></tr>';
     }
 
-    $content .= '<tr><td>' . $pagerbottom . '</td></tr>';
 }
 
 $content .= '</table>';

@@ -628,7 +628,7 @@ DROP TABLE IF EXISTS `torrents_scrape`;
 CREATE TABLE `torrents_scrape` (
   `tid` int(10) unsigned NOT NULL DEFAULT '0',
   `info_hash` varbinary(40) NOT NULL DEFAULT '',
-  `url` varchar(100) NOT NULL DEFAULT '',
+  `url` varchar(240) NOT NULL DEFAULT '',
   `seeders` int(10) unsigned NOT NULL DEFAULT '0',
   `leechers` int(10) unsigned NOT NULL DEFAULT '0',
   `completed` int(10) unsigned NOT NULL DEFAULT '0',
@@ -638,6 +638,30 @@ CREATE TABLE `torrents_scrape` (
   PRIMARY KEY (`info_hash`,`url`),
   KEY `tid` (`tid`)
 ) ENGINE=MyISAM;
+
+#
+# Structure for torrent tags:
+#
+
+DROP TABLE IF EXISTS `torrent_tag_map`;
+DROP TABLE IF EXISTS `torrent_tags`;
+
+CREATE TABLE `torrent_tags` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `name` varchar(50) NOT NULL default '',
+  `name_key` char(40) NOT NULL default '',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_key` (`name_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `torrent_tag_map` (
+  `torrent_id` int(10) unsigned NOT NULL default '0',
+  `tag_id` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY (`torrent_id`,`tag_id`),
+  KEY `tag_id` (`tag_id`),
+  CONSTRAINT `torrent_tag_map_tag_fk`
+    FOREIGN KEY (`tag_id`) REFERENCES `torrent_tags` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
 # Structure for the `users` table :
@@ -979,14 +1003,15 @@ INSERT INTO `orbital_blocks` (`bid`, `bkey`, `title`, `content`, `bposition`, `w
 </tr><tr>
 <td class="block"><a href="logout.php">Выход</a></td>
 </tr></table>', 'r', 1, 1, '', '', 2, '0', 'd', 'all', 'yes'),
-(8, '', 'Статистика', '', 'c', 7, 1, '', 'block-stats.php', 0, '0', 'd', 'ihome,', 'yes'),
-(9, '', 'Помощь, как качать торренты', '', 'c', 6, 1, '', 'block-helpseed.php', 0, '0', 'd', 'ihome,', 'yes'),
+(8, '', 'Статистика', '', 'c', 8, 1, '', 'block-stats.php', 0, '0', 'd', 'ihome,', 'yes'),
+(9, '', 'Помощь, как качать торренты', '', 'c', 7, 1, '', 'block-helpseed.php', 0, '0', 'd', 'ihome,', 'yes'),
 (10, '', 'Общие правила', '<p align="justify">Приветствуем вас на нашем трекере - частном торрент-трекере высокого уровня, где главное - качество и скорость, поэтому мы работаем только с проверенными раздачами и требуем от пользователей поддержания высокого соотношения раздачи к скачке. Основное правило нашего трекера - не только получать, но и отдавать, поддерживайте соотношение раздачи не ниже 1, а лучше стремитесь к показателям 2-3 и выше. И помните, что свободное скачивание без отдачи недопустимо! (Правило)</p>', 'c', 1, 1, '', '', 0, '0', 'd', 'rules,', 'yes'),
 (2, '', 'Новости', '', 'c', 3, 1, '', 'block-news.php', 0, '0', 'd', 'ihome,', 'yes'),
 (3, '', 'Онлайн пользователи', '', 'r', 2, 1, '', 'block-online.php', 0, '0', 'd', 'all', 'yes'),
 (4, '', 'Поиск', '', 'r', 3, 1, '', 'block-search.php', 0, '0', 'd', 'all', 'yes'),
 (5, '', 'Опрос', '', 'c', 4, 1, '', 'block-polls.php', 1, '0', 'd', 'ihome,', 'yes'),
-(6, '', 'Последние раздачи', '', 'c', 5, 1, '', 'block-releases.php', 0, '0', 'd', 'ihome,', 'yes'),
-(11, '', 'Загрузка сервера', '', 'c', 8, 1, '', 'block-server_load.php', 0, '0', 'd', 'ihome,', 'yes');
+(12, '', 'Облако тегов', '', 'c', 5, 1, '', 'block-tags.php', 0, '0', 'd', 'ihome,browse,', 'yes'),
+(6, '', 'Последние раздачи', '', 'c', 6, 1, '', 'block-releases.php', 0, '0', 'd', 'ihome,', 'yes'),
+(11, '', 'Загрузка сервера', '', 'c', 9, 1, '', 'block-server_load.php', 0, '0', 'd', 'ihome,', 'yes');
 
 COMMIT;

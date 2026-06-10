@@ -31,6 +31,7 @@
 require_once "include/BDecode.php";
 require_once "include/BEncode.php";
 require_once "include/bittorrent.php";
+require_once "include/torrent_tags.php";
 
 function bark(string $msg): void
 {
@@ -170,7 +171,7 @@ if ($id <= 0) {
     die();
 }
 
-$res = sql_query("SELECT owner, filename, save_as, image1, image2, image3, image4, image5 FROM torrents WHERE id = $id");
+$res = sql_query("SELECT owner, filename, save_as, keywords, image1, image2, image3, image4, image5 FROM torrents WHERE id = $id");
 $row = mysqli_fetch_assoc($res);
 if (!$row) {
     die();
@@ -370,6 +371,8 @@ if ($descr === '') {
 $updateset[] = "name = " . sqlesc($name);
 $updateset[] = "descr = " . sqlesc($descr);
 $updateset[] = "ori_descr = " . sqlesc($descr);
+$keywords = torrent_tags_keywords((string)($_POST['keywords'] ?? ''));
+$updateset[] = "keywords = " . sqlesc($keywords);
 
 // форматирование описания
 sql_query(
@@ -408,6 +411,7 @@ $updateset[] = "moderated = 'yes'";
 $updateset[] = "moderatedby = " . sqlesc((string)(int)$CURUSER["id"]);
 
 sql_query("UPDATE torrents SET " . join(", ", $updateset) . " WHERE id = $id") or sqlerr(__FILE__, __LINE__);
+torrent_tags_sync($id, $keywords);
 
 // Лог — пишем нормальным UTF-8 текстом (чтобы не ловить Incorrect string value)
 write_log("Торрент '$name' был отредактирован пользователем {$CURUSER['username']}", "F25B61", "torrent");

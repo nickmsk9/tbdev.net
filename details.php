@@ -29,6 +29,8 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/include/bittorrent.php';
+require_once __DIR__ . '/include/torrent_tags.php';
+require_once __DIR__ . '/include/multitracker.php';
 
 dbconn(false);
 if (empty($allow_guests_details)) {
@@ -203,7 +205,10 @@ $res = sql_query("
     SELECT
         td.descr_hash, td.descr_parsed,
         t.multitracker, t.last_mt_update,
-        t.keywords, t.description, t.free, t.seeders, t.banned, t.leechers,
+        t.keywords, t.description, t.free,
+        (t.seeders + t.remote_seeders) AS seeders,
+        t.banned,
+        (t.leechers + t.remote_leechers) AS leechers,
         t.info_hash, t.filename,
         UNIX_TIMESTAMP() - UNIX_TIMESTAMP(t.last_action) AS lastseed,
         t.numratings, t.name,
@@ -322,6 +327,10 @@ if (!isset($_GET['page'])) {
     tr("<nobr>" . htmlspecialchars_uni((string)$row['cat_name']) . "</nobr>", $freepic . $s, 1, 1, "10%");
 
     tr($tracker_lang['info_hash'], htmlspecialchars_uni((string)$row['info_hash']));
+    $tagLinks = torrent_tags_links($id);
+    if ($tagLinks !== '') {
+        tr('Теги', $tagLinks, 1);
+    }
 
     // постер
     if (!empty($row['image1'])) {
@@ -545,43 +554,15 @@ SELECTOR;
         tr("<a name=\"leechers\">{$tracker_lang['details_leeching']}</a><br /><a href=\"details.php?id=$id$keepget\" class=\"sublink\">[{$tracker_lang['close_list']}]</a>", dltable($tracker_lang['details_leeching'], $downloaders, $row), 1);
     }
 
-    // ---- МУЛЬТИТРЕКЕР (FIX) ----
     if (($row['multitracker'] ?? 'no') === 'yes') {
-        if (!empty($announces_a)) {
-            $anns = [];
-            foreach ($announces_a as $announce) {
-                $aUrl = htmlspecialchars_uni((string)($announce['url'] ?? ''));
-                $state = (string)($announce['state'] ?? '');
-                if ($state === 'ok') {
-                    $anns[] = '<li><b>' . $aUrl . '</b> — раздают: <b>' . (int)($announce['seeders'] ?? 0) . '</b>, качают: <b>' . (int)($announce['leechers'] ?? 0) . '</b></li>';
-                } else {
-                    $err = htmlspecialchars_uni((string)($announce['error'] ?? ''));
-                    $anns[] = '<li><span style="color:red"><b>' . $aUrl . '</b></span> — ошибка: ' . $err . '</li>';
-                }
-            }
-
-            $update_link = '';
-            $last_mt_update = (string)($row['last_mt_update'] ?? '0000-00-00 00:00:00');
-            $lastTs = strtotime($last_mt_update);
-            if ($lastTs === false) {
-                $lastTs = 0;
-            }
-
-            if ($lastTs < (TIMENOW - 3600) && !empty($CURUSER)) {
-                $update_link .= '<br />Данные могли устареть. <a href="update_multi.php?id=' . $id . '" onclick="update_multi(); return false;">' . $tracker_lang['details_update_multitracker'] . '</a>';
-            }
-
-            if ($last_mt_update === '0000-00-00 00:00:00' || $lastTs <= 0) {
-                $update_link .= '<br />' . $tracker_lang['details_update_last_mt_update'] . ' <b>' . $tracker_lang['never'] . '</b>';
-            } else {
-                $update_link .= '<br />' . $tracker_lang['details_update_last_mt_update'] . ' <b>' . get_et($lastTs) . '</b> ' . $tracker_lang['ago'];
-            }
-
-            // FIX: implode должен быть по '' а не implode($anns)
-            tr($tracker_lang['details_multitracker'], '<div id="update_multi"><ul style="margin:0;">' . implode('', $anns) . '</ul>' . $update_link . '</div>', 1);
-        } else {
-            tr($tracker_lang['details_multitracker'], 'Мультитрекер включён, но список трекеров пуст.', 1);
-        }
+        $canForceMultitracker = $owned || $moderator;
+        tr(
+            $tracker_lang['details_multitracker'],
+            '<div id="update_multi">' .
+            multitracker_status_html($id, $canForceMultitracker, (int)($CURUSER['id'] ?? 0)) .
+            '</div>',
+            1
+        );
     }
 
     // ---- snatched ----
@@ -719,12 +700,14 @@ SELECTOR;
         ajax.sendAJAX("");
     }
 
-    function update_multi() {
+    function update_multi(force, token) {
         var ajax = new tbdev_ajax('update_multi.php');
         ajax.onShow('');
         ajax.setVar("id", <?= (int)$torrentid ?>);
         ajax.setVar("ajax", "yes");
-        ajax.method = 'GET';
+        ajax.setVar("force", force || 0);
+        ajax.setVar("token", token || '');
+        ajax.method = 'POST';
         ajax.element = 'update_multi';
         ajax.sendAJAX("");
     }

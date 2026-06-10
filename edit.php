@@ -85,6 +85,9 @@ else
 	}
 
 	$s .= "</select>\n";
+	tr('Теги', '<input type="text" name="keywords" size="80" maxlength="255" value="' .
+		htmlspecialchars((string)$row['keywords'], ENT_QUOTES, 'UTF-8') .
+		'" /><br /><font class="small">До 20 тегов, разделяйте запятыми.</font>', 1);
 	tr("Тип", $s, 1);
 	tr("Видимый", "<input type=\"checkbox\" name=\"visible\"" . (($row["visible"] == "yes") ? " checked=\"checked\"" : "" ) . " value=\"1\" />
 					Видимый в торрентах<br /><table border=0 cellspacing=0 cellpadding=0 width=420><tr><td class=embedded>Обратите внимание, что торрент автоматически станет видимым когда появиться раздающий и автоматически перестанет быть видимым (станет мертвяком) когда не будет раздающего некоторое время.

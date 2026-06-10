@@ -32,6 +32,8 @@ if (!defined('IN_TRACKER')) {
     die('Hacking attempt!');
 }
 
+require_once __DIR__ . '/multitracker.php';
+
 function torrenttable($res, $variant = "index")
 {
     global $pic_base_url, $CURUSER, $use_wait, $use_ttl, $ttl_days, $tracker_lang;
@@ -208,14 +210,22 @@ function torrenttable($res, $variant = "index")
             $out .= '<a href="' . htmlspecialchars((string)magnet(true, (string)($row['info_hash'] ?? ''), (string)($row['filename'] ?? ''), (int)($row['size'] ?? 0)), ENT_QUOTES, 'UTF-8') . '"><img src="' . $pic_base_url . '/magnet.png" border="0" alt="' . htmlspecialchars($tracker_lang['magnet'], ENT_QUOTES, 'UTF-8') . '" title="' . htmlspecialchars($tracker_lang['magnet'], ENT_QUOTES, 'UTF-8') . '"></a>' . "\n";
 
             $lastUpd = (string)($row['last_mt_update'] ?? '');
-            $allow_update = ($lastUpd !== '' && strtotime($lastUpd) !== false && strtotime($lastUpd) < (TIMENOW - 3600));
+            $lastUpdTs = strtotime($lastUpd) ?: 0;
+            $allow_update = ($lastUpdTs < (TIMENOW - 3600));
             $suffix = $allow_update ? '_update' : '';
 
             $multi_image = '<img src="' . $pic_base_url . '/multitracker.png" border="0" alt="' . htmlspecialchars($tracker_lang['external_torrent' . $suffix], ENT_QUOTES, 'UTF-8') . '" title="' . htmlspecialchars($tracker_lang['external_torrent' . $suffix], ENT_QUOTES, 'UTF-8') . '" />';
-            if ($allow_update) {
-                $multi_image = '<a href="update_multi.php?id=' . $id . '">' . $multi_image . '</a>';
-            }
             $out .= $multi_image . "\n";
+
+            $rowOwnerId = (int)($row['owner'] ?? 0);
+            $canForce = $userId > 0 && ($userId === $rowOwnerId || $isMod);
+            if ($userId > 0 && ($allow_update || $canForce)) {
+                $force = $canForce ? 1 : 0;
+                $token = multitracker_action_token($id, $userId);
+                $out .= '<button type="button" class="btn" style="font-size:10px;padding:1px 4px;margin-left:3px" ' .
+                    'onclick="return refreshMultitracker(' . $id . ',' . $force . ',\'' . $token . '\',this)" ' .
+                    'title="Принудительно обновить статистику">Обновить</button>';
+            }
         }
 
         // edit icon if owner/mod
@@ -277,25 +287,25 @@ function torrenttable($res, $variant = "index")
             if ($variant === "index") {
                 $leechers = (int)($row['leechers'] ?? 0);
                 $slr = ($leechers > 0) ? ($seeders / $leechers) : 1;
-                $out .= '<td align="center"><b><a href="details.php?id=' . $id . '&amp;hit=1&amp;toseeders=1"><font color='
+                $out .= '<td align="center" id="torrent-seeders-' . $id . '"><b><a href="details.php?id=' . $id . '&amp;hit=1&amp;toseeders=1"><font color='
                     . get_slr_color($slr) . '>' . $seeders . "</font></a></b></td>\n";
             } else {
-                $out .= '<td align="center"><b><a class="' . linkcolor($seeders) . '" href="details.php?id=' . $id . '&amp;dllist=1#seeders">' . $seeders . "</a></b></td>\n";
+                $out .= '<td align="center" id="torrent-seeders-' . $id . '"><b><a class="' . linkcolor($seeders) . '" href="details.php?id=' . $id . '&amp;dllist=1#seeders">' . $seeders . "</a></b></td>\n";
             }
         } else {
-            $out .= '<td align="center"><span class="' . linkcolor(0) . '">0</span></td>' . "\n";
+            $out .= '<td align="center" id="torrent-seeders-' . $id . '"><span class="' . linkcolor(0) . '">0</span></td>' . "\n";
         }
 
         // ---- Пиров
         $leechers = (int)($row['leechers'] ?? 0);
         if ($leechers > 0) {
             if ($variant === "index") {
-                $out .= '<td align="center"><b><a href="details.php?id=' . $id . '&amp;hit=1&amp;todlers=1">' . number_format($leechers) . "</a></b></td>\n";
+                $out .= '<td align="center" id="torrent-leechers-' . $id . '"><b><a href="details.php?id=' . $id . '&amp;hit=1&amp;todlers=1">' . number_format($leechers) . "</a></b></td>\n";
             } else {
-                $out .= '<td align="center"><b><a class="' . linkcolor($leechers) . '" href="details.php?id=' . $id . '&amp;dllist=1#leechers">' . $leechers . "</a></b></td>\n";
+                $out .= '<td align="center" id="torrent-leechers-' . $id . '"><b><a class="' . linkcolor($leechers) . '" href="details.php?id=' . $id . '&amp;dllist=1#leechers">' . $leechers . "</a></b></td>\n";
             }
         } else {
-            $out .= '<td align="center">0</td>' . "\n";
+            $out .= '<td align="center" id="torrent-leechers-' . $id . '">0</td>' . "\n";
         }
 
         // ---- Залит = дата/время added
@@ -349,6 +359,54 @@ function torrenttable($res, $variant = "index")
 
     if (($isMod && $variant === "index") || $variant === "bookmarks") {
         $out .= "</form>\n";
+    }
+
+    if ($variant === 'index' && $userId > 0) {
+        $out .= <<<'HTML'
+<script>
+function refreshMultitracker(id, force, token, button) {
+    var oldText = button.textContent;
+    button.disabled = true;
+    button.textContent = '...';
+    fetch('update_multi.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+        body: new URLSearchParams({
+            id: id,
+            force: force,
+            token: token,
+            ajax: 'yes',
+            format: 'json'
+        })
+    })
+    .then(function (response) {
+        return response.json().then(function (data) {
+            if (!response.ok || !data.ok) {
+                throw new Error(data.message || 'Ошибка обновления');
+            }
+            return data;
+        });
+    })
+    .then(function (data) {
+        var seeders = document.getElementById('torrent-seeders-' + id);
+        var leechers = document.getElementById('torrent-leechers-' + id);
+        if (seeders) seeders.textContent = data.seeders;
+        if (leechers) leechers.textContent = data.leechers;
+        button.textContent = 'Готово';
+        window.setTimeout(function () {
+            button.textContent = oldText;
+            button.disabled = false;
+        }, 1500);
+    })
+    .catch(function (error) {
+        button.textContent = oldText;
+        button.disabled = false;
+        alert(error.message);
+    });
+    return false;
+}
+</script>
+HTML;
     }
 
     echo $out;
