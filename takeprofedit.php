@@ -178,36 +178,6 @@ $updateset[] = "language = " . sqlesc($language);
 //$timezone = 0 + $_POST["timezone"];
 //$dst = ($_POST["dst"] != "" ? "yes" : "no");
 
-$icq = (int) unesc($_POST["icq"]);
-if (strlen($icq) > 10)
-    bark("����, ����� icq ������� �������  (���� - 10)");
-$updateset[] = "icq = " . sqlesc($icq);
-
-$msn = unesc($_POST["msn"]);
-if (strlen($msn) > 30)
-    bark("����, ��� msn ������� �������  (���� - 30)");
-$updateset[] = "msn = " . sqlesc(htmlspecialchars_uni($msn));
-
-$aim = unesc($_POST["aim"]);
-if (strlen($aim) > 30)
-    bark("����, ��� aim ������� �������  (���� - 30)");
-$updateset[] = "aim = " . sqlesc(htmlspecialchars_uni($aim));
-
-$yahoo = unesc($_POST["yahoo"]);
-if (strlen($yahoo) > 30)
-    bark("����, ��� yahoo ������� �������  (���� - 30)");
-$updateset[] = "yahoo = " . sqlesc(htmlspecialchars_uni($yahoo));
-
-$mirc = unesc($_POST["mirc"]);
-if (strlen($mirc) > 30)
-    bark("����, ��� mirc ������� �������  (���� - 30)");
-$updateset[] = "mirc = " . sqlesc(htmlspecialchars_uni($mirc));
-
-$skype = unesc($_POST["skype"]);
-if (strlen($skype) > 20)
-    bark("����, ��� skype ������� �������  (���� - 20)");
-$updateset[] = "skype = " . sqlesc(htmlspecialchars_uni($skype));
-
 /*
 if ($privacy != "normal" && $privacy != "low" && $privacy != "strong")
 	bark("whoops");

@@ -219,8 +219,13 @@ function sql_query(string $query)
     $queries++;
     $query_start_time = microtime(true);
     
-    // Выполняем запрос
-    $result = mysqli_query($mysql_link, $query);
+    // PHP 8.1+ may throw mysqli_sql_exception instead of returning false.
+    try {
+        $result = mysqli_query($mysql_link, $query);
+    } catch (mysqli_sql_exception $exception) {
+        error_log("SQL Error [{$exception->getCode()}]: {$exception->getMessage()} - Query: $query");
+        $result = false;
+    }
     
     $query_end_time = microtime(true);
     $query_time = ($query_end_time - $query_start_time);
@@ -409,14 +414,14 @@ function userlogin(bool $lightmode = false): void
         if ($ban_res && mysqli_num_rows($ban_res) > 0) {
             $ban_info = mysqli_fetch_assoc($ban_res);
             $reason   = $ban_info['reason']   ?? 'Не указана';
-            $disuntil = $ban_info['disuntil'] ?? '0000-00-00 00:00:00';
+            $disuntil = $ban_info['disuntil'] ?? null;
         } else {
             $reason = 'Не указана';
-            $disuntil = '0000-00-00 00:00:00';
+            $disuntil = null;
         }
 
         $message = 'Вы заблокированы.';
-        if ($disuntil !== '0000-00-00 00:00:00') {
+        if (!empty($disuntil)) {
             $message .= '<br />Дата разблокировки: ' . htmlspecialchars($disuntil);
         } else {
             $message .= '<br />Дата разблокировки: бессрочно';
@@ -1188,7 +1193,7 @@ function stdfoot() {
 
 	if ((defined('DEBUG_MODE') && DEBUG_MODE || isset($_GET['yuna'])) && !empty($query_stat)) {
 		print("<table class=\"main\" width=\"90%\" align=\"center\" border=\"0\" cellspacing=\"0\" cellpadding=\"5\">\n");
-		print("<tr><td colspan=\"3\" class=\"colhead\">SQL Debug</td></tr>\n");
+		print("<tr><td colspan=\"3\" class=\"colhead\">SQL Debug (отображение запросов):</td></tr>\n");
 		print("<tr><td class=\"colhead\" width=\"45\">#</td><td class=\"colhead\" width=\"100\">Время</td><td class=\"colhead\">Запрос</td></tr>\n");
 
 		foreach ($query_stat as $key => $value) {

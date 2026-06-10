@@ -308,29 +308,6 @@ if ($user["downloaded"] > 0) {
   print("<tr><td class=\"rowhead\" style=\"vertical-align: middle\">Рейтинг</td><td align=\"left\" valign=\"center\" style=\"padding-top: 1px; padding-bottom: 0px\">$sr</td></tr>\n");
 }
 //}
-if ($user["icq"] || $user["msn"] || $user["aim"] || $user["yahoo"] || $user["skype"])
-{
-?>
-<tr>
-<td class=rowhead><b>Связь</b></td><td align=left>
-<?
-if ($user["icq"])
-    print("<img src=\"http://web.icq.com/whitepages/online?icq=$user[icq]&amp;img=5\" alt=\"icq\" border=\"0\" /> $user[icq] <br />\n");
-if ($user["msn"])
-    print("<img src=\"pic/contact/msn.gif\" alt=\"msn\" border=\"0\" /> $user[msn]<br />\n");
-if ($user["aim"])
-    print("<img src=\"pic/contact/aim.gif\" alt=\"aim\" border=\"0\" /> $user[aim]<br />\n");
-if ($user["yahoo"])
-    print("<img src=\"pic/contact/yahoo.gif\" alt=\"yahoo\" border=\"0\" /> $user[yahoo]<br />\n");
-if ($user["skype"])
-    print("<img src=\"pic/contact/skype.gif\" alt=\"skype\" border=\"0\" /> $user[skype]<br />\n");
-if ($user["mirc"])
-    print("<img src=\"pic/contact/mirc.gif\" alt=\"mirc\" border=\"0\" /> $user[mirc]\n");
-?> 
-</td>
-</tr>
-<?
-}
 if ($user["website"])
 	print("<tr><td class=\"rowhead\">Сайт</td><td align=\"left\"><a href=\"$user[website]\" target=\"_blank\">$user[website]</a></td></tr>\n");
 if (isset($user['donated']) && $user['donated'] > 0 && (get_user_class() >= UC_MODERATOR || $CURUSER["id"] == $user["id"])) {
@@ -340,7 +317,7 @@ if ($user["avatar"])
 	print("<tr><td class=\"rowhead\">Аватар</td><td align=left><img src=\"" . htmlspecialchars_uni($user["avatar"]) . "\"></td></tr>\n");
 print("<tr><td class=\"rowhead\">Класс</td><td align=\"left\"><b>" . get_user_class_color($user["class"], get_user_class_name($user["class"])) . ($user["title"] != "" ? " / <span style=\"color: purple;\">{$user["title"]}</span>" : "") . "</b></td></tr>\n");
 print("<tr><td class=\"rowhead\">Пол</td><td align=\"left\">$gender</td></tr>\n");
-if($user["birthday"]!='0000-00-00') {
+if (!empty($user["birthday"]) && $user["birthday"] != '0000-00-00') {
         print("<tr><td class=\"rowhead\">Возраст</td><td align=\"left\">$age</td></tr>\n");
         $birthday = date("d.m.Y", strtotime($birthday));
         print("<tr><td class=\"rowhead\">Дата Рождения</td><td align=\"left\">$birthday</td></tr>\n");
@@ -489,7 +466,7 @@ if (get_user_class() >= UC_MODERATOR && $user["class"] < get_user_class())
 		print("<input name=\"warned\" value=\"yes\" type=\"radio\" checked>Да<input name=\"warned\" value=\"no\" type=\"radio\">Нет");
 
 		$warneduntil = $user['warneduntil'];
-		if ($warneduntil == '0000-00-00 00:00:00')
+		if (empty($warneduntil))
     		print("<td align=\"center\">Предупреждение на неограниченый срок</td></tr>\n");
 		else {
     		print("<td align=\"center\">Предупреждение действует до<br />" . date('d.m.Y H:i:s', strtotime($warneduntil)));

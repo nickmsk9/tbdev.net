@@ -225,8 +225,8 @@ if ($num > 0) {
 
     while ($arr = mysqli_fetch_assoc($res)) {
         // Обработка дат
-        $added = ($arr['added'] == '0000-00-00 00:00:00') ? '-' : htmlspecialchars($arr['added'], ENT_QUOTES, 'UTF-8');
-        $last_access = ($arr['last_access'] == '0000-00-00 00:00:00') ? '-' : htmlspecialchars($arr['last_access'], ENT_QUOTES, 'UTF-8');
+        $added = empty($arr['added']) ? '-' : htmlspecialchars($arr['added'], ENT_QUOTES, 'UTF-8');
+        $last_access = empty($arr['last_access']) ? '-' : htmlspecialchars($arr['last_access'], ENT_QUOTES, 'UTF-8');
         
         // Расчет рейтинга
         $ratio = "---";

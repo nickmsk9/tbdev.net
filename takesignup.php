@@ -89,30 +89,6 @@ $year = $_POST["year"];
 $month = $_POST["month"];
 $day = $_POST["day"];
 
-$icq = unesc($_POST["icq"]);
-if (strlen($icq) > 10)
-    bark("Жаль, Номер icq слишком длинный (Макс - 10)");
-
-$msn = unesc($_POST["msn"]);
-if (strlen($msn) > 30)
-    bark("Жаль, Ваш msn слишком длинный (Макс - 30)");
-
-$aim = unesc($_POST["aim"]);
-if (strlen($aim) > 30)
-    bark("Жаль, Ваш aim слишком длинный (Макс - 30)");
-
-$yahoo = unesc($_POST["yahoo"]);
-if (strlen($yahoo) > 30)
-    bark("Жаль, Ваш yahoo слишком длинный (Макс - 30)");
-
-$mirc = unesc($_POST["mirc"]);
-if (strlen($mirc) > 30)
-    bark("Жаль, Ваш mirc слишком длинный (Макс - 30)");
-
-$skype = unesc($_POST["skype"]);
-if (strlen($skype) > 20)
-    bark("Жаль, Ваш skype слишком длинный (Макс - 20)");
-
 $email = trim(strtolower($email));
 
 if (empty($wantusername) || empty($wantpassword) || empty($email) || empty($gender) || empty($country))
@@ -221,50 +197,41 @@ else
 
 // Определяем текущую дату-время
 $current_datetime = get_date_time();
+$birthday_sql = ($birthday === '0000-00-00') ? 'NULL' : sqlesc($birthday);
 
 // Формируем SQL запрос
-$fields = "username, passhash, secret, editsecret, gender, country, icq, msn, aim, yahoo, skype, mirc, website, email, status, added, birthday, invitedby, invitedroot, theme";
+$fields = "username, passhash, secret, editsecret, gender, country, website, email, status, added, last_access, birthday, invitedby, invitedroot, theme";
 $values = "'" . mysqli_real_escape_string($mysql_link, $wantusername) . "', ";
 $values .= "'" . mysqli_real_escape_string($mysql_link, $wantpasshash) . "', ";
 $values .= "'" . mysqli_real_escape_string($mysql_link, $secret) . "', ";
 $values .= "'" . mysqli_real_escape_string($mysql_link, $editsecret) . "', ";
 $values .= "'" . mysqli_real_escape_string($mysql_link, $gender) . "', ";
 $values .= "'" . mysqli_real_escape_string($mysql_link, $country) . "', ";
-$values .= "'" . mysqli_real_escape_string($mysql_link, $icq) . "', ";
-$values .= "'" . mysqli_real_escape_string($mysql_link, $msn) . "', ";
-$values .= "'" . mysqli_real_escape_string($mysql_link, $aim) . "', ";
-$values .= "'" . mysqli_real_escape_string($mysql_link, $yahoo) . "', ";
-$values .= "'" . mysqli_real_escape_string($mysql_link, $skype) . "', ";
-$values .= "'" . mysqli_real_escape_string($mysql_link, $mirc) . "', ";
 $values .= "'" . mysqli_real_escape_string($mysql_link, $website) . "', ";
 $values .= "'" . mysqli_real_escape_string($mysql_link, $email) . "', ";
 $values .= "'" . mysqli_real_escape_string($mysql_link, $status) . "', ";
 $values .= "'" . mysqli_real_escape_string($mysql_link, $current_datetime) . "', ";
-$values .= "'" . mysqli_real_escape_string($mysql_link, $birthday) . "', ";
+$values .= "'" . mysqli_real_escape_string($mysql_link, $current_datetime) . "', ";
+$values .= $birthday_sql . ", ";
 $values .= "'" . mysqli_real_escape_string($mysql_link, $inviter) . "', ";
 $values .= "'" . mysqli_real_escape_string($mysql_link, $invitedroot) . "', ";
 $values .= "'" . mysqli_real_escape_string($mysql_link, select_theme()) . "'";
 
 if (!$users) {
-    $fields = "username, passhash, secret, editsecret, gender, country, icq, msn, aim, yahoo, skype, mirc, website, email, status, class, added, birthday, invitedby, invitedroot, theme";
+    $fields = "username, passhash, secret, editsecret, gender, country, website, email, status, class, added, last_access, birthday, invitedby, invitedroot, theme";
     $values = "'" . mysqli_real_escape_string($mysql_link, $wantusername) . "', ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, $wantpasshash) . "', ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, $secret) . "', ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, $editsecret) . "', ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, $gender) . "', ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, $country) . "', ";
-    $values .= "'" . mysqli_real_escape_string($mysql_link, $icq) . "', ";
-    $values .= "'" . mysqli_real_escape_string($mysql_link, $msn) . "', ";
-    $values .= "'" . mysqli_real_escape_string($mysql_link, $aim) . "', ";
-    $values .= "'" . mysqli_real_escape_string($mysql_link, $yahoo) . "', ";
-    $values .= "'" . mysqli_real_escape_string($mysql_link, $skype) . "', ";
-    $values .= "'" . mysqli_real_escape_string($mysql_link, $mirc) . "', ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, $website) . "', ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, $email) . "', ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, $status) . "', ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, UC_SYSOP) . "', ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, $current_datetime) . "', ";
-    $values .= "'" . mysqli_real_escape_string($mysql_link, $birthday) . "', ";
+    $values .= "'" . mysqli_real_escape_string($mysql_link, $current_datetime) . "', ";
+    $values .= $birthday_sql . ", ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, $inviter) . "', ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, $invitedroot) . "', ";
     $values .= "'" . mysqli_real_escape_string($mysql_link, select_theme()) . "'";

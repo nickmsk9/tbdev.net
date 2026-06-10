@@ -222,7 +222,7 @@ if (!function_exists('docleanup')) {
                             AND status = 'confirmed'
                             AND class <= $max_class
                             AND last_access < $dt
-                            AND last_access != '0000-00-00 00:00:00'") or sqlerr(__FILE__, __LINE__);
+                            AND last_access IS NOT NULL") or sqlerr(__FILE__, __LINE__);
         while ($row = mysqli_fetch_assoc($res)) {
             delete_user_data((int)$row['id'], $user_tables);
         }
@@ -280,15 +280,15 @@ if (!function_exists('docleanup')) {
                    FROM users
                    WHERE warned = 'yes'
                      AND warneduntil < NOW()
-                     AND warneduntil != '0000-00-00 00:00:00'") or sqlerr(__FILE__, __LINE__);
+                     AND warneduntil IS NOT NULL") or sqlerr(__FILE__, __LINE__);
 
         sql_query("UPDATE users
                    SET warned = 'no',
-                       warneduntil = '0000-00-00 00:00:00',
+                       warneduntil = NULL,
                        modcomment = CONCAT($modcomment, modcomment)
                    WHERE warned = 'yes'
                      AND warneduntil < NOW()
-                     AND warneduntil != '0000-00-00 00:00:00'") or sqlerr(__FILE__, __LINE__);
+                     AND warneduntil IS NOT NULL") or sqlerr(__FILE__, __LINE__);
     }
 
     function cleanup_expired_bans(): void
@@ -301,12 +301,12 @@ if (!function_exists('docleanup')) {
                    SET u.enabled = 'yes',
                        u.modcomment = CONCAT($modcomment, u.modcomment)
                    WHERE b.disuntil < NOW()
-                     AND b.disuntil != '0000-00-00 00:00:00'") or sqlerr(__FILE__, __LINE__);
+                     AND b.disuntil IS NOT NULL") or sqlerr(__FILE__, __LINE__);
 
         // Чистим записи банов
         sql_query("DELETE FROM users_ban
                    WHERE disuntil < NOW()
-                     AND disuntil != '0000-00-00 00:00:00'") or sqlerr(__FILE__, __LINE__);
+                     AND disuntil IS NOT NULL") or sqlerr(__FILE__, __LINE__);
     }
 
     function auto_promote_demote_users(array $tracker_lang): void

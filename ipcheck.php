@@ -83,11 +83,11 @@ if (get_user_class() >= UC_MODERATOR) {
         
         while ($user = mysqli_fetch_assoc($ros)) {
             // Форматирование дат
-            $registered = ($user['added'] == '0000-00-00 00:00:00') 
+            $registered = empty($user['added']) || $user['added'] == '0000-00-00 00:00:00'
                 ? '-' 
                 : substr($user['added'], 0, 10);
             
-            $lastSeen = ($user['last_access'] == '0000-00-00 00:00:00') 
+            $lastSeen = empty($user['last_access']) || $user['last_access'] == '0000-00-00 00:00:00'
                 ? '-' 
                 : substr($user['last_access'], 0, 10);
             

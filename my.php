@@ -52,12 +52,6 @@ $CURUSER += [
     'avatar'         => '',
     'gender'         => '0',        // 0|1|2
     'birthday'       => '0000-00-00',
-    'icq'            => '',
-    'aim'            => '',
-    'msn'            => '',
-    'yahoo'          => '',
-    'skype'          => '',
-    'mirc'           => '',
     'website'        => '',
     'torrentsperpage'=> 0,
     'topicsperpage'  => 0,
@@ -74,7 +68,7 @@ $CURUSER['country'] = (int)($CURUSER['country'] ?? 0);
 
 foreach ([
     'username','email','theme','language','acceptpms','parked','deletepms','savepms',
-    'notifs','avatar','gender','birthday','icq','aim','msn','yahoo','skype','mirc',
+    'notifs','avatar','gender','birthday',
     'website','info','passkey','passhash','passkey_ip'
 ] as $k) {
     $CURUSER[$k] = (string)($CURUSER[$k] ?? '');
@@ -297,64 +291,6 @@ if ($birthdayRaw === '0000-00-00') {
     );
 }
 ///////////////// BIRTHDAY MOD /////////////////////
-
-print("<tr><td class=\"tablecat\" colspan=\"2\" align=\"left\"><b>".$tracker_lang['my_contact']."</b></td></tr>\n");
-
-// Контакты (все value делаем безопасными строками)
-$icq   = htmlspecialchars_uni($CURUSER["icq"]);
-$aim   = htmlspecialchars_uni($CURUSER["aim"]);
-$msn   = htmlspecialchars_uni($CURUSER["msn"]);
-$yahoo = htmlspecialchars_uni($CURUSER["yahoo"]);
-$skype = htmlspecialchars_uni($CURUSER["skype"]);
-$mirc  = htmlspecialchars_uni($CURUSER["mirc"]);
-
-tr(
-    " ",
-    "<table cellspacing=\"3\" cellpadding=\"0\" width=\"100%\" border=\"0\">
-        <tr>
-            <td style=\"font-size: 11px; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\" colspan=\"2\">
-                ".$tracker_lang['my_contact_descr']."
-            </td>
-        </tr>
-        <tr>
-            <td style=\"font-size: 11px; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\">
-                ".$tracker_lang['my_contact_icq']."<br />
-                <img alt=\"\" src=\"pic/contact/icq.gif\" width=\"17\" height=\"17\">
-                <input maxlength=\"30\" size=\"25\" name=\"icq\" value=\"{$icq}\">
-            </td>
-            <td style=\"font-size: 11px; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\">
-                ".$tracker_lang['my_contact_aim']."<br />
-                <img alt=\"\" src=\"pic/contact/aim.gif\" width=\"17\" height=\"17\">
-                <input maxlength=\"30\" size=\"25\" name=\"aim\" value=\"{$aim}\">
-            </td>
-        </tr>
-        <tr>
-            <td style=\"font-size: 11px; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\">
-                ".$tracker_lang['my_contact_msn']."<br />
-                <img alt=\"\" src=\"pic/contact/msn.gif\" width=\"17\" height=\"17\">
-                <input maxlength=\"50\" size=\"25\" name=\"msn\" value=\"{$msn}\">
-            </td>
-            <td style=\"font-size: 11px; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\">
-                ".$tracker_lang['my_contact_yahoo']."<br />
-                <img alt=\"\" src=\"pic/contact/yahoo.gif\" width=\"17\" height=\"17\">
-                <input maxlength=\"30\" size=\"25\" name=\"yahoo\" value=\"{$yahoo}\">
-            </td>
-        </tr>
-        <tr>
-            <td style=\"font-size: 11px; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\">
-                ".$tracker_lang['my_contact_skype']."<br />
-                <img alt=\"\" src=\"pic/contact/skype.gif\" width=\"17\" height=\"17\">
-                <input maxlength=\"32\" size=\"25\" name=\"skype\" value=\"{$skype}\">
-            </td>
-            <td style=\"font-size: 11px; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\">
-                ".$tracker_lang['my_contact_mirc']."<br />
-                <img alt=\"\" src=\"pic/contact/mirc.gif\" width=\"17\" height=\"17\">
-                <input maxlength=\"30\" size=\"25\" name=\"mirc\" value=\"{$mirc}\">
-            </td>
-        </tr>
-    </table>",
-    1
-);
 
 // Веб-сайт
 tr($tracker_lang['my_website'], "<input type=\"text\" name=\"website\" size=\"50\" value=\"" . htmlspecialchars_uni($CURUSER["website"]) . "\" />", 1);

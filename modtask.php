@@ -60,7 +60,7 @@ if ($action == "edituser") {
 	}
 // Check remote avatar size
 	$resetb = $_POST["resetb"];
-	$birthday = ($resetb=='yes'?", birthday = '0000-00-00'":"");
+	$birthday = ($resetb=='yes'?", birthday = NULL":"");
 	$enabled = $_POST["enabled"];
 	$warned = $_POST["warned"];
 	$warnlength = intval($_POST["warnlength"]);
@@ -134,7 +134,7 @@ if ($action == "edituser") {
 
 	if ($warned && $curwarned != $warned) {
 		$updateset[] = "warned = " . sqlesc($warned);
-		$updateset[] = "warneduntil = '0000-00-00 00:00:00'";
+		$updateset[] = "warneduntil = NULL";
 		$subject = "���� �������������� �����";
 		if ($warned == 'no')
 		{
@@ -149,7 +149,7 @@ if ($action == "edituser") {
 		if ($warnlength == 255) {
 			$modcomment = date("Y-m-d") . " - ������������ ������������� " . $CURUSER['username'] . ".\n�������: $warnpm\n" . $modcomment;
 			$msg = "�� �������� [url=rules.php#warning]��������������[/url] �� ������������� ���� �� $CURUSER[username]" . ($warnpm ? "\n\n�������: $warnpm" : "");
-			$updateset[] = "warneduntil = '0000-00-00 00:00:00'";
+			$updateset[] = "warneduntil = NULL";
 		} else {
 			$warneduntil = get_date_time(gmtime() + $warnlength * 604800);
 			$dur = $warnlength . " �����" . ($warnlength > 1 ? "�" : "�");

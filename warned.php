@@ -68,8 +68,8 @@ for ($i = 0; $i < $num; $i++) {
     $arr = mysqli_fetch_assoc($res);
     
     // Обработка дат
-    $added = ($arr['added'] == '0000-00-00 00:00:00') ? '-' : substr($arr['added'], 0, 10);
-    $last_access = ($arr['last_access'] == '0000-00-00 00:00:00') ? '-' : substr($arr['last_access'], 0, 10);
+    $added = empty($arr['added']) ? '-' : substr($arr['added'], 0, 10);
+    $last_access = empty($arr['last_access']) ? '-' : substr($arr['last_access'], 0, 10);
     $warned_until = htmlspecialchars($arr['warneduntil'] ?? '-');
     
     // Расчет рейтинга

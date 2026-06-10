@@ -618,8 +618,8 @@ if (!empty($_GET) && !isset($_GET['h'])) {
         
         while ($user = mysqli_fetch_assoc($result)) {
             // Форматирование дат
-            $added = $user['added'] == '0000-00-00 00:00:00' ? '---' : substr($user['added'], 0, 10);
-            $last_access = $user['last_access'] == '0000-00-00 00:00:00' ? '---' : substr($user['last_access'], 0, 10);
+            $added = empty($user['added']) ? '---' : substr($user['added'], 0, 10);
+            $last_access = empty($user['last_access']) ? '---' : substr($user['last_access'], 0, 10);
             
             // Проверка IP
             $ip_str = '---';

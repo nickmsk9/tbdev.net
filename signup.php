@@ -178,38 +178,6 @@ while ($ct_a = mysqli_fetch_assoc($ct_r))
 // Теперь используем переменные
 tr($tracker_lang['my_birthdate'], $year.$month.$day ,1);
 tr($tracker_lang['my_country'], "<select name=country>\n$countries\n</select>",1);
-tr($tracker_lang['signup_contact'], "<table cellSpacing=\"3\" cellPadding=\"0\" width=\"100%\" border=\"0\">
-      <tr>
-        <td style=\"font-size: 11px; font-style: normal; font-variant: normal; font-weight: normal; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\">
-        ".$tracker_lang['my_contact_icq']."<br />
-        <img alt src=pic/contact/icq.gif width=\"17\" height=\"17\">
-        <input maxLength=\"30\" size=\"25\" name=\"icq\"></td>
-        <td style=\"font-size: 11px; font-style: normal; font-variant: normal; font-weight: normal; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\">
-        ".$tracker_lang['my_contact_aim']."<br />
-        <img alt src=pic/contact/aim.gif width=\"17\" height=\"17\">
-        <input maxLength=\"30\" size=\"25\" name=\"aim\"></td>
-      </tr>
-      <tr>
-        <td style=\"font-size: 11px; font-style: normal; font-variant: normal; font-weight: normal; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\">
-        ".$tracker_lang['my_contact_msn']."<br />
-        <img alt src=pic/contact/msn.gif width=\"17\" height=\"17\">
-        <input maxLength=\"50\" size=\"25\" name=\"msn\"></td>
-        <td style=\"font-size: 11px; font-style: normal; font-variant: normal; font-weight: normal; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\">
-        ".$tracker_lang['my_contact_yahoo']."<br />
-        <img alt src=pic/contact/yahoo.gif width=\"17\" height=\"17\">
-        <input maxLength=\"30\" size=\"25\" name=\"yahoo\"></td>
-      </tr>
-      <tr>
-        <td style=\"font-size: 11px; font-style: normal; font-variant: normal; font-weight: normal; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\">
-        ".$tracker_lang['my_contact_skype']."<br />
-        <img alt src=pic/contact/skype.gif width=\"17\" height=\"17\">
-        <input maxLength=\"32\" size=\"25\" name=\"skype\"></td>
-        <td style=\"font-size: 11px; font-style: normal; font-variant: normal; font-weight: normal; font-family: verdana, geneva, lucida, 'lucida grande', arial, helvetica, sans-serif\">
-        ".$tracker_lang['my_contact_mirc']."<br />
-        <img alt src=pic/contact/mirc.gif width=\"17\" height=\"17\">
-        <input maxLength=\"30\" size=\"25\" name=\"mirc\"></td>
-      </tr>
-    </table>",1);
 tr($tracker_lang['my_website'], "<input type=\"text\" name=\"website\" size=\"40\" value=\"\" />", 1);
 
 if ($use_captcha && $users) {

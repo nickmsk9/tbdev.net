@@ -6,8 +6,10 @@ error_reporting(E_ALL & ~E_NOTICE);
 require_once('./config.php');
 
 $total = $db->sdImportFromFile('database.sql');
+$total += $db->sdImportFromFile('repair_utf8_names.sql');
+$total += $db->sdImportFromFile('repair_zero_dates.sql');
 
 header('Refresh: 3; url=../signup.php');
-echo "Установка завершена! Выполнено $total запросов к БД!<br />Теперь <font color=\"red\">Вам надо удалить папку install</font>.<br />Сейчас Вас переадресует на страницу регистрации, где Вы после регистрации будете Директором.<script>alert('Не забудьте удалить папку install после установки!');</script>";
+echo "РЈСЃС‚Р°РЅРѕРІРєР° Р·Р°РІРµСЂС€РµРЅР°! Р’С‹РїРѕР»РЅРµРЅРѕ $total Р·Р°РїСЂРѕСЃРѕРІ Рє Р‘Р”!<br />РўРµРїРµСЂСЊ <font color=\"red\">Р’Р°Рј РЅР°РґРѕ СѓРґР°Р»РёС‚СЊ РїР°РїРєСѓ install</font>.<br />РЎРµР№С‡Р°СЃ Р’Р°СЃ РїРµСЂРµР°РґСЂРµСЃСѓРµС‚ РЅР° СЃС‚СЂР°РЅРёС†Сѓ СЂРµРіРёСЃС‚СЂР°С†РёРё, РіРґРµ Р’С‹ РїРѕСЃР»Рµ СЂРµРіРёСЃС‚СЂР°С†РёРё Р±СѓРґРµС‚Рµ Р”РёСЂРµРєС‚РѕСЂРѕРј.<script>alert('РќРµ Р·Р°Р±СѓРґСЊС‚Рµ СѓРґР°Р»РёС‚СЊ РїР°РїРєСѓ install РїРѕСЃР»Рµ СѓСЃС‚Р°РЅРѕРІРєРё!');</script>";
 
 ?>
