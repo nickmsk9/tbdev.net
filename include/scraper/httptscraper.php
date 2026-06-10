@@ -27,7 +27,8 @@ class httptscraper extends tscraper
             }
         }
 
-        $url = $this->scrapeUrl(trim($url));
+        $announceUrl = trim($url);
+        $url = $this->scrapeUrl($announceUrl);
         $separator = str_contains($url, '?') ? '&' : '?';
         $requestUrl = $url;
 
@@ -60,7 +61,7 @@ class httptscraper extends tscraper
             $status = (int)$match[1];
             if ($status >= 400) {
                 fclose($stream);
-                throw new ScraperException('HTTP-трекер вернул статус ' . $status . '.', 0, true);
+                return $this->announceFallback($announceUrl, $hashes);
             }
         }
 
@@ -105,6 +106,63 @@ class httptscraper extends tscraper
                 'seeders' => max(0, (int)($file['complete'] ?? 0)),
                 'completed' => max(0, (int)($file['downloaded'] ?? 0)),
                 'leechers' => max(0, (int)($file['incomplete'] ?? 0)),
+            ];
+        }
+
+        return $torrents;
+    }
+
+    private function announceFallback(string $url, array $hashes): array
+    {
+        if (!preg_match('~^https?://~i', $url)) {
+            throw new ScraperException('Invalid announce URL.');
+        }
+
+        $torrents = [];
+        foreach ($hashes as $hash) {
+            $separator = str_contains($url, '?') ? '&' : '?';
+            $peerId = '-TBDEV0-' . bin2hex(random_bytes(6));
+            $requestUrl = $url . $separator .
+                'info_hash=' . rawurlencode(pack('H*', (string)$hash)) .
+                '&peer_id=' . rawurlencode($peerId) .
+                '&port=1&uploaded=0&downloaded=0&left=0&compact=1&numwant=0&event=stopped';
+
+            $context = stream_context_create([
+                'http' => [
+                    'method' => 'GET',
+                    'timeout' => $this->timeout,
+                    'user_agent' => 'TBDev-MultiTrackerScraper/2.0',
+                    'header' => "Accept: */*\r\nConnection: close\r\n",
+                    'ignore_errors' => true,
+                ],
+                'ssl' => [
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                ],
+            ]);
+
+            $response = @file_get_contents($requestUrl, false, $context);
+            $headers = $http_response_header ?? [];
+            if ($response === false || $response === '') {
+                throw new ScraperException('Unable to receive announce response.', 0, true);
+            }
+            if ($headers && preg_match('~\s(\d{3})\s~', (string)$headers[0], $match) && (int)$match[1] >= 400) {
+                throw new ScraperException('HTTP tracker returned status ' . (int)$match[1] . '.', 0, true);
+            }
+
+            $data = lightbenc::bdecode($response);
+            if (is_array($data) && !empty($data['failure reason'])) {
+                throw new ScraperException('Tracker: ' . (string)$data['failure reason']);
+            }
+            if (!is_array($data) || (!array_key_exists('complete', $data) && !array_key_exists('incomplete', $data))) {
+                throw new ScraperException('Announce response does not contain swarm statistics.');
+            }
+
+            $torrents[(string)$hash] = [
+                'infohash' => (string)$hash,
+                'seeders' => max(0, (int)($data['complete'] ?? 0)),
+                'completed' => max(0, (int)($data['downloaded'] ?? 0)),
+                'leechers' => max(0, (int)($data['incomplete'] ?? 0)),
             ];
         }
 

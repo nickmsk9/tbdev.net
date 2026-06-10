@@ -124,9 +124,10 @@ function multitracker_refresh(int $torrentId): array
         "last_mt_update = " . sqlesc($now),
     ];
 
+    $set[] = "remote_seeders = $seeders";
+    $set[] = "remote_leechers = $leechers";
+
     if ($success > 0) {
-        $set[] = "remote_seeders = $seeders";
-        $set[] = "remote_leechers = $leechers";
         $set[] = "times_completed = GREATEST(times_completed, $completed)";
         if ($seeders > 0) {
             $set[] = "visible = 'yes'";

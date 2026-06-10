@@ -55,8 +55,7 @@ if (!isset($CURUSER) || ($CURUSER["id"] != $row["owner"] && get_user_class() < U
 		print("<input type=\"hidden\" name=\"returnto\" value=\"" . htmlspecialchars_uni($_GET["returnto"]) . "\" />\n");
 	print("<table border=\"1\" cellspacing=\"0\" cellpadding=\"5\">\n");
 	print("<tr><td class=\"colhead\" colspan=\"2\">Редактировать торрент</td></tr>");
-	if ($row['multitracker'] == 'no')
-		tr($tracker_lang['torrent_file'], "<input type=file name=tfile size=80>\n", 1); // disable torrent update for multitracked ones
+	tr($tracker_lang['torrent_file'], "<input type=file name=tfile size=80>\n", 1);
 	tr($tracker_lang['torrent_name'], "<input type=\"text\" name=\"name\" value=\"" . $row["name"] . "\" size=\"80\" />", 1);
 	tr($tracker_lang['img_poster'], "<input type=\"url\" name=\"image1\" size=\"80\" value=\"" . htmlspecialchars((string)$row['image1'], ENT_QUOTES, 'UTF-8') . "\" placeholder=\"https://example.com/poster.jpg\"><br />HTTPS URL", 1);
 	$imageInputs = '';

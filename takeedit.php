@@ -171,7 +171,7 @@ if ($id <= 0) {
     die();
 }
 
-$res = sql_query("SELECT owner, filename, save_as, keywords, image1, image2, image3, image4, image5 FROM torrents WHERE id = $id");
+$res = sql_query("SELECT owner, filename, save_as, keywords, multitracker, image1, image2, image3, image4, image5 FROM torrents WHERE id = $id");
 $row = mysqli_fetch_assoc($res);
 if (!$row) {
     die();
@@ -321,11 +321,39 @@ if ($update_torrent) {
     }
 
     // нормализация announce/private
-    $dict['announce'] = $announce_urls[0];
-    $dict['info']['private'] = 1;
-    $dict['info']['source'] = "[$DEFAULTBASEURL] $SITENAME";
+    $externalTrackers = [];
+    if ((string)$row['multitracker'] === 'yes') {
+        $tiers = $dict['announce-list'] ?? [];
+        if (!$tiers && !empty($dict['announce'])) {
+            $tiers = [[(string)$dict['announce']]];
+            $dict['announce-list'] = $tiers;
+        }
 
-    unset($dict['announce-list'], $dict['nodes'], $dict['azureus_properties']);
+        foreach ((array)$tiers as $tier) {
+            foreach ((array)$tier as $announceUrl) {
+                $url = trim((string)$announceUrl);
+                if ($url === '' || !preg_match('#^(?:udp|https?)://#i', $url)) {
+                    continue;
+                }
+                $host = strtolower((string)(parse_url($url, PHP_URL_HOST) ?? ''));
+                if ($url === 'http://retracker.local/announce' || substr($host, -6) === '.local') {
+                    continue;
+                }
+                $externalTrackers[$url] = $url;
+            }
+        }
+
+        if (!$externalTrackers) {
+            bark("В новом torrent-файле нет доступных внешних трекеров.");
+        }
+    } else {
+        $dict['announce'] = $announce_urls[0];
+        $dict['info']['private'] = 1;
+        $dict['info']['source'] = "[$DEFAULTBASEURL] $SITENAME";
+        unset($dict['announce-list'], $dict['nodes']);
+    }
+
+    unset($dict['azureus_properties']);
     unset($dict['info']['crc32'], $dict['info']['ed2k'], $dict['info']['md5sum'], $dict['info']['sha1'], $dict['info']['tiger']);
 
     $dict = BDecode(BEncode($dict));
@@ -353,10 +381,25 @@ if ($update_torrent) {
     $updateset[] = "size = " . sqlesc((string)$totallen);
     $updateset[] = "type = " . sqlesc($torrent_type);
     $updateset[] = "numfiles = " . count($filelist);
+    $updateset[] = "seeders = 0";
+    $updateset[] = "leechers = 0";
+    $updateset[] = "remote_seeders = 0";
+    $updateset[] = "remote_leechers = 0";
+    $updateset[] = "last_mt_update = NULL";
 
     @sql_query("DELETE FROM files WHERE torrent = $id");
+    @sql_query("DELETE FROM peers WHERE torrent = $id");
     foreach ($filelist as $file) {
         @sql_query("INSERT INTO files (torrent, filename, size) VALUES ($id, " . sqlesc((string)$file[0]) . ", " . (int)$file[1] . ")");
+    }
+
+    sql_query("DELETE FROM torrents_scrape WHERE tid = $id") or sqlerr(__FILE__, __LINE__);
+    foreach ($externalTrackers as $trackerUrl) {
+        sql_query(
+            'INSERT INTO torrents_scrape (tid, info_hash, url) VALUES (' .
+            implode(', ', array_map('sqlesc', [(string)$id, $infohash, $trackerUrl])) .
+            ')'
+        ) or sqlerr(__FILE__, __LINE__);
     }
 }
 

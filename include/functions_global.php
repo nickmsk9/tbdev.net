@@ -441,21 +441,6 @@ function encode_quote_from($text) {
 }
 
 // Format spoiler
-/*function encode_spoiler($text) {
-	$replace = "<div class=\"spoiler-wrap\"><div class=\"spoiler-head folded clickable\">������� �����</div><div class=\"spoiler-body\"><textarea>\\1</textarea></div></div>";
-	$text = preg_replace("#\[hide\](.*?)\[/hide\]#si", $replace, $text);
-	return $text;
-}
-
-// Format spoiler from
-function encode_spoiler_from($text) {
-	$replace = "<div class=\"spoiler-wrap\"><div class=\"spoiler-head folded clickable\">\\1</div><div class=\"spoiler-body\"><textarea>\\2</textarea></div></div>";
-	$text = preg_replace("#\[hide=(.+?)\](.*?)\[/hide\]#si", "".$replace, $text);
-	return $text;
-}*/
-
-// Thanks to Leonid Evstigneev from TorrentsZona for figuring this shit out...
-// Format spoiler
 function encode_spoiler($text) {
 	$text = preg_replace_callback("#\[hide\](.*?)\[/hide\]#si", 'escape1', $text);
 	return $text;
